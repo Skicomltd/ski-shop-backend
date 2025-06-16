@@ -29,6 +29,11 @@ import { ProductsInterceptor } from "./interceptors/products.interceptor"
 import { ProductInterceptor } from "./interceptors/product.interceptor"
 import { IProductsQuery } from "./interfaces/query-filter.interface"
 import { OwnProductGuard } from "./guard/ownProduct.guard"
+import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
+import { AppAbility } from "../services/casl/casl-ability.factory"
+import { Action } from "../services/casl/actions/action"
+import { Product } from "./entities/product.entity"
+import { PoliciesGuard } from "../auth/guard/policies-handler.guard"
 @Controller("products")
 export class ProductsController {
   constructor(
@@ -39,6 +44,8 @@ export class ProductsController {
   ) {}
 
   @Post()
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Product))
   @UseInterceptors(FilesInterceptor("images", 5, { ...memoryUpload, fileFilter: imageFilter }), ProductInterceptor)
   async create(
     @Body(new JoiValidationPipe(createProductSchema)) createProductDto: CreateProductDto,
@@ -77,6 +84,8 @@ export class ProductsController {
   }
 
   @Get(":id")
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Product))
   @UseInterceptors(ProductInterceptor)
   findOne(@Param("id", ParseUUIDPipe) id: string) {
     return this.productsService.findOne({ id: id })
@@ -84,6 +93,8 @@ export class ProductsController {
 
   @Patch(":id")
   @UseGuards(OwnProductGuard)
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Product))
   @UseInterceptors(FilesInterceptor("images", 5, { ...memoryUpload, fileFilter: imageFilter }), ProductInterceptor)
   async update(
     @Param("id", ParseUUIDPipe) id: string,
@@ -107,6 +118,8 @@ export class ProductsController {
   }
 
   @Delete(":id")
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, Product))
   async remove(@Param("id", ParseUUIDPipe) id: string) {
     const product = await this.productsService.findById(id)
     if (!product) throw new NotFoundException("Product does not exist")

@@ -8,6 +8,7 @@ import { FileSystemModule } from "./filesystem/filesystem.module"
 import { fileConfigAsync } from "@/config/filesystems.config"
 import { JwtModule } from "@nestjs/jwt"
 import { jwtConfig } from "@/config/jwt.config"
+import { CaslModule } from "./casl/casl.module"
 
 @Global()
 @Module({
@@ -16,9 +17,10 @@ import { jwtConfig } from "@/config/jwt.config"
     UtilsModule,
     MailModule.registerAsync(mailConfigAsync),
     FileSystemModule.registerAsync(fileConfigAsync),
-    JwtModule.registerAsync(jwtConfig)
+    JwtModule.registerAsync(jwtConfig),
+    CaslModule
   ],
   providers: [PaginationService],
-  exports: [MailModule, PaginationService, UtilsModule, FileSystemModule]
+  exports: [MailModule, PaginationService, UtilsModule, FileSystemModule, CaslModule]
 })
 export class ServicesModule {}
