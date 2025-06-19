@@ -36,8 +36,8 @@ export class UserService implements IService<User> {
     throw new Error("Method not implemented.")
   }
 
-  findById(id: string): Promise<User> {
-    return this.userRepository.findOne({ where: { id: id } })
+  async findById(id: string): Promise<User> {
+    return await this.userRepository.findOne({ where: { id: id } })
   }
 
   async findOne(filter: FindOptionsWhere<User>): Promise<User> {
