@@ -115,14 +115,14 @@ export class AuthController {
 
     const url = await this.fileSystemService.upload(fileDto)
 
-    onboardStoreDto = { ...onboardStoreDto, logo: url }
-
     const business = await this.userService.getUserBusiness({ user: { id: userId } })
     if (!business) throw new NotFoundException("Business does not exist")
 
-    if (await this.storeService.exist({ name: onboardStoreDto.name })) throw new ConflictException("Store name already exist")
+    if (await this.storeService.exists({ name: onboardStoreDto.name })) throw new ConflictException("Store name already exist")
 
-    this.storeService.create(onboardStoreDto, business)
+    onboardStoreDto = { ...onboardStoreDto, logo: url, business }
+
+    this.storeService.create(onboardStoreDto)
 
     const payload = { email: business.user.email, id: business.user.id }
     const { accessToken: token } = await this.authService.login(payload)

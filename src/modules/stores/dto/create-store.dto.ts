@@ -1,3 +1,4 @@
+import Business from "@/modules/users/entity/business.entity"
 import * as Joi from "joi"
 
 export class CreateStoreDto {
@@ -5,6 +6,7 @@ export class CreateStoreDto {
   description: string
   logo: string
   category: string
+  business: Business
 }
 
 export const storeSchema = Joi.object({

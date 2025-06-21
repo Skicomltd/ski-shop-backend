@@ -3,38 +3,46 @@ import { CreateBankDto } from "./dto/create-bank.dto"
 import { UpdateBankDto } from "./dto/update-bank.dto"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Bank } from "./entities/bank.entity"
-import { FindOptionsWhere, Repository } from "typeorm"
+import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
 
 @Injectable()
-export class BankService {
+export class BankService implements IService<Bank> {
   constructor(
     @InjectRepository(Bank)
     private bankRepository: Repository<Bank>
   ) {}
-  async create(createBankDto: CreateBankDto) {
-    const createbank = this.bankRepository.create({ ...createBankDto })
+  async create(createBankDto: CreateBankDto, manager?: EntityManager): Promise<Bank> {
+    const repo = manager ? manager.getRepository<Bank>(Bank) : this.bankRepository
+    const createbank = repo.create({ ...createBankDto })
 
-    return await this.bankRepository.save(createbank)
+    return await repo.save(createbank)
   }
 
-  findAll() {
-    return `This action returns all bank`
+  async find(data?: FindOptionsWhere<Bank>): Promise<[Bank[], number]> {
+    console.log(data)
+    return await this.bankRepository.findAndCount()
   }
 
   async findOne(filter: FindOptionsWhere<Bank>) {
     return this.bankRepository.findOne({ where: filter, relations: ["user"] })
   }
 
-  async exist(filter: FindOptionsWhere<Bank>): Promise<boolean> {
+  async exists(filter: FindOptionsWhere<Bank>): Promise<boolean> {
     return await this.bankRepository.exists({ where: filter })
   }
 
-  update(id: number, updateBankDto: UpdateBankDto) {
-    console.log(updateBankDto)
-    return `This action updates a #${id} bank`
+  async findById(id: string): Promise<Bank> {
+    return await this.bankRepository.findOne({ where: { id: id } })
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} bank`
+  async update(entity: Bank, data: UpdateBankDto, manager?: EntityManager): Promise<Bank> {
+    const repo = manager ? manager.getRepository<Bank>(Bank) : this.bankRepository
+    await repo.update({ id: entity.id }, { ...data })
+    return await this.findOne({ id: entity.id })
+  }
+
+  async remove(filter: FindOptionsWhere<Bank>): Promise<number> {
+    const bank = await this.bankRepository.delete(filter)
+    return bank.affected
   }
 }

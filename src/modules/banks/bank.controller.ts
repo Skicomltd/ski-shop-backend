@@ -14,13 +14,13 @@ export class BankController {
   @Post()
   @UseInterceptors(BankInterceptor)
   async create(@Body(new JoiValidationPipe(bankSchema)) createBankDto: CreateBankDto, @Req() req: Request) {
-    if (await this.bankService.exist({ accountNumber: createBankDto.accountNumber })) throw new ConflictException("Bank credentials already exist")
+    if (await this.bankService.exists({ accountNumber: createBankDto.accountNumber })) throw new ConflictException("Bank credentials already exist")
     return await this.bankService.create({ ...createBankDto, user: req.user })
   }
 
   @Get()
   findAll() {
-    return this.bankService.findAll()
+    return this.bankService.find()
   }
 
   @Get(":id")
@@ -30,12 +30,13 @@ export class BankController {
   }
 
   @Patch(":id")
-  update(@Param("id") id: string, @Body() updateBankDto: UpdateBankDto) {
-    return this.bankService.update(+id, updateBankDto)
+  async update(@Param("id") id: string, @Body() updateBankDto: UpdateBankDto) {
+    const bank = await this.bankService.findOne({ id: id })
+    return this.bankService.update(bank, updateBankDto)
   }
 
   @Delete(":id")
   remove(@Param("id") id: string) {
-    return this.bankService.remove(+id)
+    return this.bankService.remove({ id: id })
   }
 }
