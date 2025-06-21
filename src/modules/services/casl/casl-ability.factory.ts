@@ -17,6 +17,7 @@ export class CaslAbilityFactory {
     if (user.role === UserRoleEnum.Admin) {
       can(Action.Manage, "all")
     }
+
     if (user.role === UserRoleEnum.Vendor) {
       can(Action.Read, Product)
       can(Action.Create, Product)

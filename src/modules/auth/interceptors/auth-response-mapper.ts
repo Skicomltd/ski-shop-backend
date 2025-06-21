@@ -1,4 +1,4 @@
-import { AuthUserBusiness, IAuthResponse } from "./auth-response"
+import { AuthUserBusiness, IAuthResponse } from "../interface/auth-response"
 
 export abstract class AuthResponseMapper implements IInterceptor {
   transform(data: AuthUserBusiness): IAuthResponse {
