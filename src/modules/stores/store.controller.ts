@@ -7,7 +7,7 @@ export class StoreController {
 
   @Get()
   findAll() {
-    return this.storeService.findAll()
+    return this.storeService.find()
   }
 
   @Get(":id")
@@ -16,12 +16,13 @@ export class StoreController {
   }
 
   @Patch(":id")
-  update(@Param("id") id: string, @Body() updateStoreDto: UpdateStoreDto) {
-    return this.storeService.update(+id, updateStoreDto)
+  async update(@Param("id") id: string, @Body() updateStoreDto: UpdateStoreDto) {
+    const store = await this.storeService.findOne({ id: id })
+    return this.storeService.update(store, updateStoreDto)
   }
 
   @Delete(":id")
   remove(@Param("id") id: string) {
-    return this.storeService.remove(+id)
+    return this.storeService.remove({ id: id })
   }
 }
