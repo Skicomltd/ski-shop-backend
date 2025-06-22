@@ -29,4 +29,4 @@ seeder({
     UserModule
   ],
   providers: [UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder]
-}).run([StoreSeeder, BankSeeder, ProductSeeder])
+}).run([UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder])
