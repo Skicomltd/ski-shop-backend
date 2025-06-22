@@ -3,10 +3,15 @@ import { AbilityBuilder, createMongoAbility, ExtractSubjectType, InferSubjects, 
 import { Injectable } from "@nestjs/common"
 import { Action } from "./actions/action"
 import { Product, ProductStatusEnum } from "@/modules/products/entities/product.entity"
+import { Store } from "@/modules/stores/entities/store.entity"
+import Business from "@/modules/users/entity/business.entity"
+import { Bank } from "@/modules/banks/entities/bank.entity"
 
-type Subjects = InferSubjects<typeof User | typeof Product> | "all"
+type Subjects = InferSubjects<typeof User | typeof Product | typeof Business | typeof Store | typeof Bank> | "all"
 
 export type AppAbility = MongoAbility<[Action, Subjects]>
+type Can = AbilityBuilder<MongoAbility>["can"]
+type Cannot = AbilityBuilder<MongoAbility>["cannot"]
 
 @Injectable()
 export class CaslAbilityFactory {
@@ -16,22 +21,64 @@ export class CaslAbilityFactory {
 
     if (user.role === UserRoleEnum.Admin) {
       can(Action.Manage, "all")
+    } else {
+      this.defineRoleForProduct(can, cannot, user)
+      this.defineRoleForBusiness(can, cannot, user)
+      this.defineRoleForStore(can, cannot, user)
+      this.defineRoleForBank(can, cannot, user)
+
+      cannot(Action.Delete, Product, { status: ProductStatusEnum.published }).because("You are not allowed to delete products")
+      // cannot(Action.Delete, Business).because("Only admins can delete businesses")
+      // cannot(Action.Delete, Store).because("Only admins can delete stores")
     }
 
+    return build({
+      detectSubjectType: (item) => item.constructor as ExtractSubjectType<Subjects>
+    }) as AppAbility
+  }
+
+  private defineRoleForProduct(can: Can, cannot: Cannot, user: User) {
     if (user.role === UserRoleEnum.Vendor) {
       can(Action.Read, Product)
       can(Action.Create, Product)
       can(Action.Update, Product, { user: { id: user.id } })
       can(Action.Delete, Product, { user: { id: user.id } })
     } else {
-      cannot(Action.Read, Product)
+      can(Action.Read, Product)
     }
-    if (user.role !== UserRoleEnum.Admin) {
-      cannot(Action.Delete, Product, { status: ProductStatusEnum.published }).because("You are not allowed to delete products")
-    }
+    cannot(Action.Delete, Product, { status: ProductStatusEnum.published }).because("You are not allowed to delete published products")
+  }
 
-    return build({
-      detectSubjectType: (item) => item.constructor as ExtractSubjectType<Subjects>
-    }) as AppAbility
+  private defineRoleForBusiness(can: Can, cannot: Cannot, user: User) {
+    if (user.role === UserRoleEnum.Vendor) {
+      can(Action.Read, Business)
+      can(Action.Create, Business)
+      can(Action.Update, Business, { user: { id: user.id } })
+      can(Action.Delete, Business, { user: { id: user.id } })
+    } else {
+      cannot(Action.Read, Business)
+    }
+  }
+
+  private defineRoleForStore(can: Can, cannot: Cannot, user: User) {
+    if (user.role === UserRoleEnum.Vendor) {
+      can(Action.Read, Store)
+      can(Action.Create, Store)
+      can(Action.Update, Store, { business: { id: user.business.id } })
+      can(Action.Delete, Store, { business: { id: user.business.id } })
+    } else {
+      cannot(Action.Read, Store)
+    }
+  }
+
+  private defineRoleForBank(can: Can, cannot: Cannot, user: User) {
+    if (user.role === UserRoleEnum.Vendor) {
+      can(Action.Read, Bank)
+      can(Action.Create, Bank)
+      can(Action.Update, Bank, { user: { id: user.id } })
+      can(Action.Delete, Bank, { user: { id: user.id } })
+    } else {
+      cannot(Action.Read, Bank)
+    }
   }
 }
