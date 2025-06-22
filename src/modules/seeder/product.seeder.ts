@@ -25,11 +25,13 @@ export class ProductSeeder implements Seeder {
       return
     }
 
+    const storesWithoutNullUser = stores.filter((store) => store.business.user !== null)
+
     // Define product categories
     const productCategories = ["Electronics", "Fashion", "Home & Garden", "Sports", "Beauty"]
 
     // Generate 1–5 products per store
-    const products = stores.flatMap((store) => {
+    const products = storesWithoutNullUser.flatMap((store) => {
       const numProducts = faker.number.int({ min: 1, max: 5 })
       return Array.from({ length: numProducts }, () => ({
         name: faker.commerce.productName(),
@@ -49,7 +51,7 @@ export class ProductSeeder implements Seeder {
       }))
     })
 
-    // Create and save product entities
+    // // Create and save product entities
     const productEntities = this.productRepository.create(products)
     await this.productRepository.save(productEntities)
   }
