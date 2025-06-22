@@ -1,5 +1,4 @@
 import { seeder } from "nestjs-seeder"
-import { userSeeder } from "./modules/seeder/user.seeder"
 import { UserModule } from "./modules/users/user.module"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { User } from "./modules/users/entity/user.entity"
@@ -13,6 +12,11 @@ import Business from "./modules/users/entity/business.entity"
 import { Bank } from "./modules/banks/entities/bank.entity"
 import { Store } from "./modules/stores/entities/store.entity"
 import { Product } from "./modules/products/entities/product.entity"
+import { UserSeeder } from "./modules/seeder/user.seeder"
+import { BusinessSeeder } from "./modules/seeder/business.seeder"
+import { StoreSeeder } from "./modules/seeder/store.seeder"
+import { BankSeeder } from "./modules/seeder/bank.seeder"
+import { ProductSeeder } from "./modules/seeder/product.seeder"
 
 seeder({
   imports: [
@@ -23,5 +27,6 @@ seeder({
     TypeOrmModule.forRootAsync(databaseConfigAsync),
     TypeOrmModule.forFeature([User, Business, Bank, Store, Product]),
     UserModule
-  ]
-}).run([userSeeder])
+  ],
+  providers: [UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder]
+}).run([StoreSeeder, BankSeeder, ProductSeeder])
