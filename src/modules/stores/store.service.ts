@@ -4,14 +4,12 @@ import { UpdateStoreDto } from "./dto/update-store.dto"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Store } from "./entities/store.entity"
 import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
-import { UserService } from "../users/user.service"
 
 @Injectable()
 export class StoreService implements IService<Store> {
   constructor(
     @InjectRepository(Store)
-    private storeRepository: Repository<Store>,
-    private userService: UserService
+    private storeRepository: Repository<Store>
   ) {}
 
   async create(createStoreDto: CreateStoreDto, manager?: EntityManager) {
@@ -23,13 +21,11 @@ export class StoreService implements IService<Store> {
   }
 
   async find(data?: FindOptionsWhere<Store>): Promise<[Store[], number]> {
-    console.log(data)
-    return await this.storeRepository.findAndCount()
+    return await this.storeRepository.findAndCount({ where: data })
   }
 
-  findById(id: string): Promise<Store> {
-    console.log(id)
-    throw new Error("Method not implemented.")
+  async findById(id: string): Promise<Store> {
+    return await this.storeRepository.findOne({ where: { id } })
   }
 
   async findOne(filter: FindOptionsWhere<Store>) {

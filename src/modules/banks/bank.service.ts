@@ -19,8 +19,7 @@ export class BankService implements IService<Bank> {
   }
 
   async find(data?: FindOptionsWhere<Bank>): Promise<[Bank[], number]> {
-    console.log(data)
-    return await this.bankRepository.findAndCount()
+    return await this.bankRepository.findAndCount({ where: data })
   }
 
   async findOne(filter: FindOptionsWhere<Bank>) {

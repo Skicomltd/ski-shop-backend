@@ -17,7 +17,6 @@ type Cannot = AbilityBuilder<MongoAbility>["cannot"]
 export class CaslAbilityFactory {
   createForUser(user: User): AppAbility {
     const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
-    console.log("Creating ability for user:", user)
 
     if (user.role === UserRoleEnum.Admin) {
       can(Action.Manage, "all")
@@ -26,10 +25,6 @@ export class CaslAbilityFactory {
       this.defineRoleForBusiness(can, cannot, user)
       this.defineRoleForStore(can, cannot, user)
       this.defineRoleForBank(can, cannot, user)
-
-      cannot(Action.Delete, Product, { status: ProductStatusEnum.published }).because("You are not allowed to delete products")
-      // cannot(Action.Delete, Business).because("Only admins can delete businesses")
-      // cannot(Action.Delete, Store).because("Only admins can delete stores")
     }
 
     return build({

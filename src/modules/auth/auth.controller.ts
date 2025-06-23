@@ -25,6 +25,7 @@ import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.inte
 import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { StoreService } from "../stores/store.service"
 import { GoogleOAuthGuard } from "./guard/google-oauth.guard"
+import { BusinessService } from "../users/business.service"
 
 @Public()
 @Controller("auth")
@@ -34,6 +35,7 @@ export class AuthController {
     private helperService: HelpersService,
     private mailService: MailService,
     private userService: UserService,
+    private businessService: BusinessService,
     private configService: ConfigService,
     private readonly transactionHelper: TransactionHelper,
     private readonly fileSystemService: FileSystemService,
@@ -85,10 +87,10 @@ export class AuthController {
   async onboardBusiness(@Body(new JoiValidationPipe(onboardBusinessSchema)) userBusinessDto: OnboardBusinessDto, @Req() req: Request) {
     const user = req.user
 
-    const business = await this.userService.findOneBusiness({ user: { id: user.id } })
+    const business = await this.businessService.findOne({ user: { id: user.id } })
     if (business) throw new ConflictException("User already created a business")
 
-    await this.userService.createUserBusiness(userBusinessDto, user)
+    await this.businessService.create({ ...userBusinessDto, user })
 
     const payload = { email: user.email, id: user.id }
 
@@ -115,7 +117,7 @@ export class AuthController {
 
     const url = await this.fileSystemService.upload(fileDto)
 
-    const business = await this.userService.getUserBusiness({ user: { id: userId } })
+    const business = await this.businessService.findOne({ user: { id: userId } })
     if (!business) throw new NotFoundException("Business does not exist")
 
     if (await this.storeService.exists({ name: onboardStoreDto.name })) throw new ConflictException("Store name already exist")

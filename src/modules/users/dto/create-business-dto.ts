@@ -1,4 +1,5 @@
 import * as joi from "joi"
+import { User } from "../entity/user.entity"
 
 export class CreateBusinessDto {
   type: string
@@ -9,6 +10,7 @@ export class CreateBusinessDto {
   state: string
   kycVerificationType: string
   identificationNumber: string
+  user: User
 }
 
 export const createBusinessSchema = joi.object({
