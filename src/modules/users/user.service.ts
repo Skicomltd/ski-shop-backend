@@ -7,8 +7,8 @@ import { BadReqException } from "@/exceptions/badRequest.exception"
 import Business from "./entity/business.entity"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { UpdateUserDto } from "./dto/update-user-dto"
-import { CreateBusinessDto } from "./dto/create-business-dto"
 import { User } from "./entity/user.entity"
+import { IUserQuery } from "./interfaces/users-query.interface"
 
 @Injectable()
 export class UserService implements IService<User> {
@@ -30,10 +30,8 @@ export class UserService implements IService<User> {
     return await repo.save(createUser)
   }
 
-  find(data: FindOptionsWhere<User>): Promise<[User[], number]> {
-    console.log("data", data)
-
-    throw new Error("Method not implemented.")
+  async find(data: IUserQuery): Promise<[User[], number]> {
+    return await this.userRepository.findAndCount({ where: data })
   }
 
   async findById(id: string): Promise<User> {
@@ -58,26 +56,26 @@ export class UserService implements IService<User> {
     return updatedUser
   }
 
-  remove(filter: FindOptionsWhere<User>): Promise<number> {
-    console.log(filter)
+  async remove(filter: FindOptionsWhere<User>): Promise<number> {
+    const result = await this.userRepository.delete(filter)
 
-    throw new Error("")
+    return result.affected
   }
 
-  async createUserBusiness(userBusinessDto: CreateBusinessDto, user: User) {
-    const business = this.businessRepository.create({
-      ...userBusinessDto,
-      user: user
-    })
+  // async createUserBusiness(userBusinessDto: CreateBusinessDto, user: User) {
+  //   const business = this.businessRepository.create({
+  //     ...userBusinessDto,
+  //     user: user
+  //   })
 
-    return await this.businessRepository.save(business)
-  }
+  //   return await this.businessRepository.save(business)
+  // }
 
-  async findOneBusiness(filter: FindOptionsWhere<Business>) {
-    return await this.businessRepository.findOne({ where: filter, relations: ["user", "store"] })
-  }
+  // async findOneBusiness(filter: FindOptionsWhere<Business>) {
+  //   return await this.businessRepository.findOne({ where: filter, relations: ["user", "store"] })
+  // }
 
-  async getUserBusiness(filter: FindOptionsWhere<Business>) {
-    return await this.businessRepository.findOne({ where: filter, relations: ["user", "store"] })
-  }
+  // async getUserBusiness(filter: FindOptionsWhere<Business>) {
+  //   return await this.businessRepository.findOne({ where: filter, relations: ["user", "store"] })
+  // }
 }

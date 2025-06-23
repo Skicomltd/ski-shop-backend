@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, ParseUUIDPipe, Req } from "@nestjs/common"
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, ParseUUIDPipe, Req, UseGuards } from "@nestjs/common"
 import { BankService } from "./bank.service"
 import { bankSchema, CreateBankDto } from "./dto/create-bank.dto"
 import { UpdateBankDto } from "./dto/update-bank.dto"
@@ -6,12 +6,19 @@ import { JoiValidationPipe } from "@/validations/joi.validation"
 import { BankInterceptor } from "./interceptors/bank.interceptor"
 import { ConflictException } from "@/exceptions/conflict.exception"
 import { Request } from "express"
+import { PoliciesGuard } from "../auth/guard/policies-handler.guard"
+import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
+import { Bank } from "./entities/bank.entity"
+import { Action } from "../services/casl/actions/action"
+import { AppAbility } from "../services/casl/casl-ability.factory"
 
 @Controller("bank")
 export class BankController {
   constructor(private readonly bankService: BankService) {}
 
   @Post()
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Bank))
   @UseInterceptors(BankInterceptor)
   async create(@Body(new JoiValidationPipe(bankSchema)) createBankDto: CreateBankDto, @Req() req: Request) {
     if (await this.bankService.exists({ accountNumber: createBankDto.accountNumber })) throw new ConflictException("Bank credentials already exist")
@@ -19,23 +26,31 @@ export class BankController {
   }
 
   @Get()
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Bank))
   findAll() {
     return this.bankService.find()
   }
 
   @Get(":id")
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Bank))
   @UseInterceptors(BankInterceptor)
   findOne(@Param("id", new ParseUUIDPipe()) id: string) {
     return this.bankService.findOne({ id: id })
   }
 
   @Patch(":id")
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Bank))
   async update(@Param("id") id: string, @Body() updateBankDto: UpdateBankDto) {
     const bank = await this.bankService.findOne({ id: id })
     return this.bankService.update(bank, updateBankDto)
   }
 
   @Delete(":id")
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, Bank))
   remove(@Param("id") id: string) {
     return this.bankService.remove({ id: id })
   }
