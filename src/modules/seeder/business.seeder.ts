@@ -26,6 +26,7 @@ export class BusinessSeeder implements Seeder {
     const usersWithoutBusiness = vendorUsers.filter((user) => !user.business)
 
     if (usersWithoutBusiness.length === 0) {
+      // eslint-disable-next-line no-console
       console.warn("No vendor users without a business found. Please seed users with Vendor role or check existing businesses.")
       return
     }

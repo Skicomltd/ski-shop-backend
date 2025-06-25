@@ -20,6 +20,7 @@ export class BankSeeder implements Seeder {
     const users = await this.userRepository.find({ relations: ["bank"] })
 
     if (users.length === 0) {
+      // eslint-disable-next-line no-console
       console.warn("No users without bank accounts found. Please seed users first.")
       return
     }

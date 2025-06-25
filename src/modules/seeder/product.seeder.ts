@@ -21,6 +21,7 @@ export class ProductSeeder implements Seeder {
     })
 
     if (stores.length === 0) {
+      // eslint-disable-next-line no-console
       console.warn("No stores found. Please seed stores first.")
       return
     }

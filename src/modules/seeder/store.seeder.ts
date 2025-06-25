@@ -22,6 +22,7 @@ export class StoreSeeder implements Seeder {
     })
 
     if (businesses.length === 0) {
+      // eslint-disable-next-line no-console
       console.warn("No businesses without a store found. Please seed businesses first.")
       return
     }
