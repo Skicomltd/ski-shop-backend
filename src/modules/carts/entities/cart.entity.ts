@@ -13,7 +13,7 @@ export class Cart {
   @ManyToOne(() => User, (user) => user.cart)
   user: User
 
-  @OneToMany(() => CartItems, (cartItems) => cartItems.cart)
+  @OneToMany(() => CartItems, (cartItems) => cartItems.cart, { cascade: true, onDelete: "CASCADE" })
   cartItems: CartItems[]
 
   @CreateDateColumn()

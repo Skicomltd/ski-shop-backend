@@ -30,7 +30,7 @@ export class CartsService implements IService<Cart> {
   }
 
   async findOne(filter: FindOptionsWhere<Cart>): Promise<Cart> {
-    return await this.cartRepository.findOne({ where: filter, relations: ["cartItems"] })
+    return await this.cartRepository.findOne({ where: filter, relations: ["cartItems", "cartItems.product", "user"] })
   }
 
   async exists(filter: FindOptionsWhere<Cart>): Promise<boolean> {

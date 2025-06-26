@@ -4,14 +4,26 @@ import * as joi from "joi"
 
 export class CreateCartDto {
   user: User
-  cartItems: CartItems[]
+  cartItems: Partial<CartItems>[]
   total: number
-  slug: string
-  quantity: number
+  product: [
+    {
+      slug: string
+      quantity: number
+    }
+  ]
 }
 
 export const createCartSchema = joi.object({
   total: joi.number().required(),
-  quantity: joi.number().default(1),
-  slug: joi.string().required()
+  product: joi
+    .array()
+    .items(
+      joi.object({
+        slug: joi.string().required(),
+        quantity: joi.number().required().default(1)
+      })
+    )
+    .min(1)
+    .required()
 })
