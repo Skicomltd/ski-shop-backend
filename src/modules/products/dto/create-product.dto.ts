@@ -16,6 +16,7 @@ export class CreateProductDto {
   store: Store
   user: User
   images: string[]
+  slug: string
 }
 
 export const createProductSchema = joi.object({

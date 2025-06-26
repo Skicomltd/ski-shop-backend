@@ -70,8 +70,9 @@ export class ProductsController {
         return url
       })
     )
+    const slug = createProductDto.name.toLowerCase().replace(" ", "_")
     // attach the arry of string
-    createProductDto = { ...createProductDto, images: handleImageUploaded }
+    createProductDto = { ...createProductDto, images: handleImageUploaded, slug: slug }
     const user = req.user
 
     return await this.productsService.create({ ...createProductDto, user: user, store: store })
@@ -96,6 +97,12 @@ export class ProductsController {
   @UseInterceptors(ProductInterceptor)
   findOne(@Param("id", ParseUUIDPipe) id: string) {
     return this.productsService.findOne({ id: id })
+  }
+
+  @UseInterceptors(ProductInterceptor)
+  @Get("/slug/:slug")
+  findBySlug(@Param("slug") slug: string) {
+    return this.productsService.findOne({ slug: slug })
   }
 
   @Patch(":id")

@@ -122,7 +122,7 @@ export class AuthController {
 
     if (await this.storeService.exists({ name: onboardStoreDto.name })) throw new ConflictException("Store name already exist")
 
-    onboardStoreDto = { ...onboardStoreDto, logo: url, business }
+    onboardStoreDto = { ...onboardStoreDto, logo: url, business: business }
 
     this.storeService.create(onboardStoreDto)
 

@@ -5,6 +5,7 @@ import { Repository } from "typeorm"
 import { faker } from "@faker-js/faker"
 import { Product, ProductStatusEnum } from "../products/entities/product.entity"
 import { Store } from "../stores/entities/store.entity"
+import {ProductCategoriesEnum} from "../products/entities/product.entity"
 
 @Injectable()
 export class ProductSeeder implements Seeder {
@@ -28,16 +29,14 @@ export class ProductSeeder implements Seeder {
 
     const storesWithoutNullUser = stores.filter((store) => store.business.user !== null)
 
-    // Define product categories
-    const productCategories = ["Electronics", "Fashion", "Home & Garden", "Sports", "Beauty"]
-
     // Generate 1–5 products per store
     const products = storesWithoutNullUser.flatMap((store) => {
       const numProducts = faker.number.int({ min: 1, max: 5 })
       return Array.from({ length: numProducts }, () => ({
         name: faker.commerce.productName(),
-        category: faker.helpers.arrayElement(productCategories),
+        category: faker.helpers.enumValue(ProductCategoriesEnum),
         description: faker.commerce.productDescription(),
+        slug: faker.commerce.productName().toLowerCase().replace(" ", "_"),
         price: parseFloat(faker.commerce.price({ min: 10, max: 1000, dec: 2 })),
         discountPrice: faker.datatype.boolean() ? parseFloat(faker.commerce.price({ min: 5, max: 800, dec: 2 })) : null,
         stockCount: faker.number.int({ min: 0, max: 100 }),

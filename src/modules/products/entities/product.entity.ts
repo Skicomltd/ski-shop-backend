@@ -6,6 +6,18 @@ export enum ProductStatusEnum {
   draft = "draft",
   published = "published"
 }
+
+export enum ProductCategoriesEnum {
+  clothings = "clothings",
+  gadgets = "gadgets",
+  groceries = "groceries",
+  women = "women",
+  bodyCreamAndOil = "body cream and oil",
+  furniture = "furniture",
+  tvAndHomeAppliances = "tv and home ppplicances",
+  watchesAndAccessories = "watches and accessories"
+}
+
 @Entity()
 export class Product {
   @PrimaryGeneratedColumn("uuid")
@@ -40,6 +52,9 @@ export class Product {
 
   @Column()
   userId: string
+
+  @Column()
+  slug: string
 
   @ManyToOne(() => Store, (store) => store.product, { eager: true })
   store: Store
