@@ -77,10 +77,17 @@ export class ProductsController {
     return await this.productsService.create({ ...createProductDto, user: user, store: store })
   }
 
-  @Get()
+  // send only published products
+  @Get("")
   @UseInterceptors(ProductsInterceptor)
   async findAll(@Query() query: IProductsQuery) {
     return await this.productsService.find(query)
+  }
+
+  @Get("stores/:storeId")
+  @UseInterceptors(ProductsInterceptor)
+  async findByStore(@Query() query: IProductsQuery, @Param("storeId", ParseUUIDPipe) storeId: string) {
+    return await this.productsService.find({ ...query, storeId })
   }
 
   @Get(":id")
