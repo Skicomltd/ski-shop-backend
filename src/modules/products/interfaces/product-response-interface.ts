@@ -6,6 +6,7 @@ export interface IProductResponse {
   category: string
   description: string
   price: number
+  slug: string
   discountPrice: number
   stockCount: number
   images: string[]

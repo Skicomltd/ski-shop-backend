@@ -1,7 +1,8 @@
 import { Product } from "@/modules/products/entities/product.entity"
-import { Column, ManyToOne, PrimaryGeneratedColumn } from "typeorm"
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm"
 import { Cart } from "./cart.entity"
 
+@Entity()
 export class CartItems {
   @PrimaryGeneratedColumn("uuid")
   id: string

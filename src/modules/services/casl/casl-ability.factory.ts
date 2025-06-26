@@ -62,7 +62,7 @@ export class CaslAbilityFactory {
       can(Action.Update, Store, { business: { id: user.business.id } })
       can(Action.Delete, Store, { business: { id: user.business.id } })
     } else {
-      cannot(Action.Read, Store)
+      can(Action.Read, Store)
     }
   }
 
