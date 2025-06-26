@@ -25,10 +25,8 @@ export class BankSeeder implements Seeder {
       return
     }
     const name = ["wema", "uba", "first bank", "providus bank", "gt bank"]
-    const usersWithOutBank = users.filter((user) => !user.bank)
-
     // Generate bank data for each user
-    const banks = usersWithOutBank.map((user) => ({
+    const banks = users.map((user) => ({
       bankName: faker.helpers.arrayElement(name),
       accountNumber: faker.finance.accountNumber(10), // 10-digit unique account number
       accountName: `${user.firstName} ${user.lastName}`, // Use user's full name

@@ -70,7 +70,7 @@ export class ProductsService implements IService<Product> {
 
     const update = repo.create({ ...product, ...updateProductDto })
 
-    return repo.save(update)
+    return await repo.save(update)
   }
 
   async remove(filter: FindOptionsWhere<Product>) {

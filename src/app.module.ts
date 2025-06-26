@@ -19,6 +19,7 @@ import { BankModule } from "./modules/banks/bank.module"
 import filesystemsConfig from "./config/filesystems.config"
 import { JwtGuard } from "./modules/auth/guard/jwt-auth.guard"
 import { ProductsModule } from "./modules/products/products.module"
+import { CartsModule } from './modules/carts/carts.module';
 
 @Module({
   imports: [
@@ -33,7 +34,8 @@ import { ProductsModule } from "./modules/products/products.module"
     UtilsModule,
     StoreModule,
     BankModule,
-    ProductsModule
+    ProductsModule,
+    CartsModule
   ],
   controllers: [AppController],
   providers: [
