@@ -1,3 +1,5 @@
-import { PaginationParams } from "@/modules/services/pagination/interfaces/paginationParams.interface";
+import { PaginationParams } from "@/modules/services/pagination/interfaces/paginationParams.interface"
 
-export interface IcartQuery extends PaginationParams {}
+export interface IcartQuery extends PaginationParams {
+  userId: string
+}

@@ -26,8 +26,10 @@ export class CartItemsService implements IService<CartItems> {
     return await this.cartItemsRepository.findOne({ where: filter })
   }
 
-  async find(): Promise<[CartItems[], number]> {
-    return await this.cartItemsRepository.findAndCount()
+  async find(filter: FindOptionsWhere<CartItems>): Promise<[CartItems[], number]> {
+    return await this.cartItemsRepository.findAndCount({
+      where: filter
+    })
   }
 
   async update(cartItem: CartItems, data: UpdateCartItemsDto, manager?: EntityManager): Promise<CartItems> {
