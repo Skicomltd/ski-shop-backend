@@ -5,7 +5,7 @@ import { Repository } from "typeorm"
 import { faker } from "@faker-js/faker"
 import { Product, ProductStatusEnum } from "../products/entities/product.entity"
 import { Store } from "../stores/entities/store.entity"
-import {ProductCategoriesEnum} from "../products/entities/product.entity"
+import { ProductCategoriesEnum } from "../products/entities/product.entity"
 
 @Injectable()
 export class ProductSeeder implements Seeder {
@@ -36,7 +36,7 @@ export class ProductSeeder implements Seeder {
         name: faker.commerce.productName(),
         category: faker.helpers.enumValue(ProductCategoriesEnum),
         description: faker.commerce.productDescription(),
-        slug: faker.commerce.productName().toLowerCase().replace(" ", "_"),
+        slug: faker.commerce.productName().toLowerCase().replace(/ /g, "_"),
         price: parseFloat(faker.commerce.price({ min: 10, max: 1000, dec: 2 })),
         discountPrice: faker.datatype.boolean() ? parseFloat(faker.commerce.price({ min: 5, max: 800, dec: 2 })) : null,
         stockCount: faker.number.int({ min: 0, max: 100 }),

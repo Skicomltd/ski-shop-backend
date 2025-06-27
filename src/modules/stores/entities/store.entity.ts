@@ -2,6 +2,11 @@ import { Product } from "@/modules/products/entities/product.entity"
 import Business from "@/modules/users/entity/business.entity"
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, OneToMany, JoinColumn } from "typeorm"
 
+export enum vendonEnumType {
+  "PREMIUM" = "premium",
+  "SKISHOP" = "skishop",
+  "BASIC" = "basic"
+}
 @Entity()
 export class Store {
   @PrimaryGeneratedColumn("uuid")
@@ -27,6 +32,9 @@ export class Store {
 
   @OneToMany(() => Product, (product) => product.store)
   product: Product[]
+
+  @Column({ type: "enum", enum: vendonEnumType, default: vendonEnumType.BASIC })
+  type: vendonEnumType
 
   @CreateDateColumn()
   createdAt: Date
