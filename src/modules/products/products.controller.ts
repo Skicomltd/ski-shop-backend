@@ -57,7 +57,7 @@ export class ProductsController {
     const store = await this.storeService.findOne({ id: createProductDto.storeId })
     if (!store) throw new NotFoundException("store not found")
 
-    if (store.category !== createProductDto.category) {
+    if (store.categories !== createProductDto.category) {
       throw new BadReqException("Category must match store category")
     }
 

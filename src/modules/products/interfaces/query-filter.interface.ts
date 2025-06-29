@@ -8,4 +8,5 @@ export interface IProductsQuery extends PaginationParams {
   storeId: string
   categories: string
   vendorType: vendonEnumType
+  slug: string
 }

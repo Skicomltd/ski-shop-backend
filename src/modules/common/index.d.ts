@@ -3,7 +3,6 @@ export enum ProductStatusEnum {
   published = "published"
 }
 
-// TODO: MOVE THIS TO STORE OR AN INDEX
 export enum ProductCategoriesEnum {
   clothings = "clothings",
   gadgets = "gadgets",

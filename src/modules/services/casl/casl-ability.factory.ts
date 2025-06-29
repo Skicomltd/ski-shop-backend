@@ -2,10 +2,11 @@ import { User, UserRoleEnum } from "@/modules/users/entity/user.entity"
 import { AbilityBuilder, createMongoAbility, ExtractSubjectType, InferSubjects, MongoAbility } from "@casl/ability"
 import { Injectable } from "@nestjs/common"
 import { Action } from "./actions/action"
-import { Product, ProductStatusEnum } from "@/modules/products/entities/product.entity"
+import { Product } from "@/modules/products/entities/product.entity"
 import { Store } from "@/modules/stores/entities/store.entity"
 import Business from "@/modules/users/entity/business.entity"
 import { Bank } from "@/modules/banks/entities/bank.entity"
+import { ProductStatusEnum } from "@/modules/common"
 
 type Subjects = InferSubjects<typeof User | typeof Product | typeof Business | typeof Store | typeof Bank> | "all"
 
