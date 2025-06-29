@@ -18,7 +18,7 @@ import { TransactionHelper } from "../services/utils/transactions/transactions.s
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { OnboardBusinessDto, onboardBusinessSchema } from "./dto/onboard-business.dto"
 import { FileInterceptor } from "@nestjs/platform-express"
-import { diskUpload, imageFilter } from "@/config/multer.config"
+import { imageFilter, memoryUpload } from "@/config/multer.config"
 import { OnboardStoreDto, onboardStoreSchema } from "./dto/onboard-store.dto"
 import { User } from "../users/decorator/user.decorator"
 import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.interface"
@@ -102,7 +102,7 @@ export class AuthController {
   @ShortTime()
   @Post("/store")
   @UseGuards(JwtShortTimeGuard)
-  @UseInterceptors(FileInterceptor("image", { ...diskUpload, fileFilter: imageFilter }))
+  @UseInterceptors(FileInterceptor("image", { ...memoryUpload, fileFilter: imageFilter }))
   async create(
     @Body(new JoiValidationPipe(onboardStoreSchema)) onboardStoreDto: OnboardStoreDto,
     @UploadedFile() fileUploaded: CustomFile,

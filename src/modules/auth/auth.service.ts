@@ -55,6 +55,8 @@ export class AuthService {
     const user = await this.userService.findOne({ email: loginDto.email })
     if (!user) throw new NotFoundException("Invalid Credentials")
 
+    if (!user.isEmailVerified) throw new BadReqException("Verify Email")
+
     const match = await user.comparePassword(loginDto.password)
 
     if (!match) throw new BadReqException("Invalid Credentials")

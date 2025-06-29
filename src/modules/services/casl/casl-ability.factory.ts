@@ -60,8 +60,8 @@ export class CaslAbilityFactory {
     if (user.role === UserRoleEnum.Vendor) {
       can(Action.Read, Store)
       can(Action.Create, Store)
-      can(Action.Update, Store, { business: { id: user.business.id } })
-      can(Action.Delete, Store, { business: { id: user.business.id } })
+      can(Action.Update, Store)
+      can(Action.Delete, Store)
     } else {
       can(Action.Read, Store)
     }
