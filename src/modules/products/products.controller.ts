@@ -34,7 +34,6 @@ import { AppAbility } from "../services/casl/casl-ability.factory"
 import { Action } from "../services/casl/actions/action"
 import { Product } from "./entities/product.entity"
 import { PoliciesGuard } from "../auth/guard/policies-handler.guard"
-import { BadReqException } from "@/exceptions/badRequest.exception"
 @Controller("products")
 export class ProductsController {
   constructor(
@@ -56,10 +55,6 @@ export class ProductsController {
     // find the store
     const store = await this.storeService.findOne({ id: createProductDto.storeId })
     if (!store) throw new NotFoundException("store not found")
-
-    if (store.category !== createProductDto.category) {
-      throw new BadReqException("Category must match store category")
-    }
 
     // handle multiple image upload
     const handleImageUploaded = await Promise.all(

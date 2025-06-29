@@ -19,8 +19,6 @@ import { ConflictException } from "@/exceptions/conflict.exception"
 import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { BusinessService } from "../users/business.service"
 import { UpdateStoreMapper } from "./interface/update-store-mapper-interface"
-import { CategoriesArray } from "../common"
-import { BadReqException } from "@/exceptions/badRequest.exception"
 @Controller("store")
 export class StoreController {
   constructor(
@@ -41,12 +39,6 @@ export class StoreController {
     if (!business) throw new NotFoundException("Business does not exist")
 
     if (await this.storeService.exists({ name: createStoreDto.name })) throw new ConflictException("Store name already exist")
-
-    const categoryExist = CategoriesArray.some((item) => createStoreDto.categories.includes(item))
-
-    if (!categoryExist) {
-      throw new BadReqException("Category does not exist")
-    }
 
     const fileDto: FileUploadDto = {
       destination: `images/${fileUploaded.originalname}-storelogo.${fileUploaded.extension}`,

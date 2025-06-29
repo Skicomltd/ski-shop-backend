@@ -1,4 +1,3 @@
-import { ProductCategoriesEnum } from "@/modules/common"
 import { Product } from "@/modules/products/entities/product.entity"
 import Business from "@/modules/users/entity/business.entity"
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, OneToMany, JoinColumn } from "typeorm"
@@ -23,11 +22,6 @@ export class Store {
 
   @Column()
   logo: string
-
-  @Column({ type: "enum", enum: ProductCategoriesEnum })
-  // If category becomes managed by the backend, this should be changed to store the category ID instead or take account for the changes.
-  // Currently, we store the category name as provided by the frontend.
-  categories: ProductCategoriesEnum[] // Array of categories enum, TODO: Change from category to categories
 
   @OneToOne(() => Business, (business) => business.store)
   @JoinColumn()

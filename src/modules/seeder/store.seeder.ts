@@ -3,8 +3,9 @@ import { InjectRepository } from "@nestjs/typeorm"
 import { Seeder } from "nestjs-seeder"
 import { Repository } from "typeorm"
 import { faker } from "@faker-js/faker"
-import { Store } from "../stores/entities/store.entity"
+import { Store, vendonEnumType } from "../stores/entities/store.entity"
 import Business from "../users/entity/business.entity"
+import { CreateStoreDto } from "../stores/dto/create-store.dto"
 
 @Injectable()
 export class StoreSeeder implements Seeder {
@@ -29,16 +30,13 @@ export class StoreSeeder implements Seeder {
 
     const businessWIthoutStore = businesses.filter((business) => !business.store)
 
-    // Define store categories
-    const storeCategory = ["Electronics", "Fashion", "Home & Garden", "Sports", "Beauty"]
-
     // Generate store data for each business
-    const stores = businessWIthoutStore.map((business) => ({
+    const stores: CreateStoreDto[] = businessWIthoutStore.map((business) => ({
       name: faker.company.name(),
       description: faker.lorem.sentence(),
       logo: faker.image.url({ width: 200, height: 200 }),
-      category: faker.helpers.arrayElement(storeCategory),
-      business, // Link to the business
+      business,
+      type: faker.helpers.enumValue(vendonEnumType),
       createdAt: faker.date.past(),
       updateAt: faker.date.recent()
     }))
