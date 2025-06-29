@@ -14,7 +14,7 @@ export class BusinessService implements IService<Business> {
 
   async create(data: CreateBusinessDto, manager?: EntityManager): Promise<Business> {
     const repo = manager ? manager.getRepository(Business) : this.businessRepository
-    const entity = repo.create(data)
+    const entity = repo.create({ ...data })
     return await repo.save(entity)
   }
 

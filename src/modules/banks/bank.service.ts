@@ -36,8 +36,8 @@ export class BankService implements IService<Bank> {
 
   async update(entity: Bank, data: UpdateBankDto, manager?: EntityManager): Promise<Bank> {
     const repo = manager ? manager.getRepository<Bank>(Bank) : this.bankRepository
-    await repo.update({ id: entity.id }, { ...data })
-    return await this.findOne({ id: entity.id })
+    const bank = repo.create({ ...entity, ...data })
+    return await repo.save(bank)
   }
 
   async remove(filter: FindOptionsWhere<Bank>): Promise<number> {

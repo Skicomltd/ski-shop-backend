@@ -7,11 +7,12 @@ import { ServicesModule } from "../services/services.module"
 import { UserModule } from "../users/user.module"
 import { jwtConfig } from "@/config/jwt.config"
 import { JwtModule } from "@nestjs/jwt"
+import { UpdateStoreMapper } from "./interface/update-store-mapper-interface"
 
 @Module({
   imports: [TypeOrmModule.forFeature([Store]), UserModule, ServicesModule, JwtModule.registerAsync(jwtConfig)],
   controllers: [StoreController],
-  providers: [StoreService],
+  providers: [StoreService, UpdateStoreMapper],
   exports: [StoreService]
 })
 export class StoreModule {}

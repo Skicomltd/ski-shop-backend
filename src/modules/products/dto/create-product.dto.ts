@@ -1,7 +1,7 @@
 import { Store } from "@/modules/stores/entities/store.entity"
-import { ProductStatusEnum } from "../entities/product.entity"
 import * as joi from "joi"
 import { User } from "@/modules/users/entity/user.entity"
+import { ProductStatusEnum } from "@/modules/common"
 
 export class CreateProductDto {
   name: string

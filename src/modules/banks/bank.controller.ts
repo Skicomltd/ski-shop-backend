@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, ParseUUIDPipe, Req, UseGuards } from "@nestjs/common"
 import { BankService } from "./bank.service"
 import { bankSchema, CreateBankDto } from "./dto/create-bank.dto"
-import { UpdateBankDto } from "./dto/update-bank.dto"
+import { UpdateBankDto, updatebankSchema } from "./dto/update-bank.dto"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { BankInterceptor } from "./interceptors/bank.interceptor"
 import { ConflictException } from "@/exceptions/conflict.exception"
@@ -43,7 +43,7 @@ export class BankController {
   @Patch(":id")
   @UseGuards(PoliciesGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Bank))
-  async update(@Param("id") id: string, @Body() updateBankDto: UpdateBankDto) {
+  async update(@Param("id") id: string, @Body(new JoiValidationPipe(updatebankSchema)) updateBankDto: UpdateBankDto) {
     const bank = await this.bankService.findOne({ id: id })
     return this.bankService.update(bank, updateBankDto)
   }

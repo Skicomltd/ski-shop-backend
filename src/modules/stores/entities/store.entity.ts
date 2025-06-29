@@ -1,7 +1,15 @@
+import { ProductCategoriesEnum } from "@/modules/common"
 import { Product } from "@/modules/products/entities/product.entity"
 import Business from "@/modules/users/entity/business.entity"
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, OneToMany, JoinColumn } from "typeorm"
 
+// TODO: ENDPOINT TO RETURN AN ARRAY OF STORE CATEGORIES ENUM
+
+export enum vendonEnumType {
+  "PREMIUM" = "premium",
+  "SKISHOP" = "skishop",
+  "BASIC" = "basic"
+}
 @Entity()
 export class Store {
   @PrimaryGeneratedColumn("uuid")
@@ -16,10 +24,10 @@ export class Store {
   @Column()
   logo: string
 
-  @Column()
+  @Column({ type: "enum", enum: ProductCategoriesEnum })
   // If category becomes managed by the backend, this should be changed to store the category ID instead or take account for the changes.
   // Currently, we store the category name as provided by the frontend.
-  category: string
+  categories: ProductCategoriesEnum[] // Array of categories enum, TODO: Change from category to categories
 
   @OneToOne(() => Business, (business) => business.store)
   @JoinColumn()
@@ -27,6 +35,9 @@ export class Store {
 
   @OneToMany(() => Product, (product) => product.store)
   product: Product[]
+
+  @Column({ type: "enum", enum: vendonEnumType, default: vendonEnumType.BASIC })
+  type: vendonEnumType
 
   @CreateDateColumn()
   createdAt: Date

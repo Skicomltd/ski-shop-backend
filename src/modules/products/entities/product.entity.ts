@@ -1,23 +1,7 @@
-import { CartItems } from "@/modules/carts/entities/cartItmes.entity"
+import { ProductCategoriesEnum, ProductStatusEnum } from "@/modules/common"
 import { Store } from "@/modules/stores/entities/store.entity"
 import { User } from "@/modules/users/entity/user.entity"
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany } from "typeorm"
-
-export enum ProductStatusEnum {
-  draft = "draft",
-  published = "published"
-}
-
-export enum ProductCategoriesEnum {
-  clothings = "clothings",
-  gadgets = "gadgets",
-  groceries = "groceries",
-  women = "women",
-  bodyCreamAndOil = "body cream and oil",
-  furniture = "furniture",
-  tvAndHomeAppliances = "tv and home ppplicances",
-  watchesAndAccessories = "watches and accessories"
-}
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm"
 
 @Entity()
 export class Product {
@@ -27,8 +11,8 @@ export class Product {
   @Column()
   name: string
 
-  @Column()
-  category: string
+  @Column({ type: "enum", enum: ProductCategoriesEnum })
+  categories: ProductCategoriesEnum[]
 
   @Column()
   description: string

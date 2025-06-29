@@ -2,12 +2,13 @@ import { Injectable } from "@nestjs/common"
 import { CreateProductDto } from "./dto/create-product.dto"
 import { UpdateProductDto } from "./dto/update-product.dto"
 import { Product } from "./entities/product.entity"
-import { FindOptionsWhere, Repository, FindManyOptions, Equal, EntityManager } from "typeorm"
+import { FindOptionsWhere, Repository, FindManyOptions, Equal, EntityManager, In } from "typeorm"
 import { InjectRepository } from "@nestjs/typeorm"
 import { BadReqException } from "@/exceptions/badRequest.exception"
 import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.interface"
 import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { IProductsQuery } from "./interfaces/query-filter.interface"
+import { ProductCategoriesEnum } from "../common"
 
 @Injectable()
 export class ProductsService implements IService<Product> {
@@ -26,7 +27,7 @@ export class ProductsService implements IService<Product> {
     return product
   }
 
-  async find({ page, limit, status, stockCount, storeId, slug }: IProductsQuery) {
+  async find({ page, limit, status, stockCount, storeId, categories, vendorType }: IProductsQuery) {
     const where: FindManyOptions<Product>["where"] = {}
 
     if (storeId) {
@@ -41,8 +42,13 @@ export class ProductsService implements IService<Product> {
       where.stockCount = Equal(stockCount)
     }
 
-    if (slug) {
-      where.slug = slug
+    if (categories) {
+      const cats = categories.split(",")
+      where.categories = In(cats as ProductCategoriesEnum[])
+    }
+
+    if (vendorType) {
+      where.store = { type: vendorType }
     }
 
     return await this.productRepository.findAndCount({
