@@ -9,6 +9,9 @@ import { fileConfigAsync } from "@/config/filesystems.config"
 import { JwtModule } from "@nestjs/jwt"
 import { jwtConfig } from "@/config/jwt.config"
 import { CaslModule } from "./casl/casl.module"
+import { LogModule } from "./log/log.module"
+import { logConfigAsync } from "@/config/log.config"
+import { LogService } from "./log/log.service"
 
 @Global()
 @Module({
@@ -18,9 +21,10 @@ import { CaslModule } from "./casl/casl.module"
     MailModule.registerAsync(mailConfigAsync),
     FileSystemModule.registerAsync(fileConfigAsync),
     JwtModule.registerAsync(jwtConfig),
-    CaslModule
+    CaslModule,
+    LogModule.registerAsync(logConfigAsync)
   ],
-  providers: [PaginationService],
-  exports: [MailModule, PaginationService, UtilsModule, FileSystemModule, CaslModule]
+  providers: [PaginationService, LogService],
+  exports: [MailModule, PaginationService, UtilsModule, FileSystemModule, CaslModule, LogService]
 })
 export class ServicesModule {}

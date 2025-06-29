@@ -19,7 +19,9 @@ import { BankModule } from "./modules/banks/bank.module"
 import filesystemsConfig from "./config/filesystems.config"
 import { JwtGuard } from "./modules/auth/guard/jwt-auth.guard"
 import { ProductsModule } from "./modules/products/products.module"
-import { CartsModule } from './modules/carts/carts.module';
+import { CartsModule } from "./modules/carts/carts.module"
+import logConfig from "./config/log.config"
+import { BullModule } from "@nestjs/bullmq"
 
 @Module({
   imports: [
@@ -27,7 +29,13 @@ import { CartsModule } from './modules/carts/carts.module';
     AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, authConfig, mailConfig, filesystemsConfig]
+      load: [appConfig, authConfig, mailConfig, filesystemsConfig, logConfig]
+    }),
+    BullModule.forRoot({
+      connection: {
+        host: "localhost",
+        port: 6379
+      }
     }),
     TypeOrmModule.forRootAsync(databaseConfigAsync),
     ServicesModule,
