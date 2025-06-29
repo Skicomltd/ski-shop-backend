@@ -9,7 +9,6 @@ import { ProductsService } from "../products/products.service"
 import { CartItemsService } from "./cartItems.service"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { TransactionHelper } from "../services/utils/transactions/transactions.service"
-import { In } from "typeorm"
 import { IcartQuery } from "./interface/cart.interface"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { UpdateCartItemsDto } from "./dto/update-cartItem.dto"
@@ -30,7 +29,7 @@ export class CartsController {
     return this.transactionHelper.runInTransaction(async (manager) => {
       let cart = await this.cartsService.findOne({ user: { id: user.id } })
       const productSlugs = createCartDto.product.map((item) => item.slug)
-      const [products] = await this.productService.find({ slug: In(productSlugs) })
+      const [products] = await this.productService.find({ slug: productSlugs })
 
       if (!cart) {
         cart = await this.cartsService.create({ ...createCartDto, user }, manager)
@@ -82,7 +81,7 @@ export class CartsController {
 
     return this.transactionHelper.runInTransaction(async (manager) => {
       const productSlugs = updateCartDto.product.map((item) => item.slug)
-      const [products] = await this.productService.find({ slug: In(productSlugs) })
+      const [products] = await this.productService.find({ slug: productSlugs })
 
       const productMap = new Map(products.map((p) => [p.slug, p]))
       const [existingCartItems] = await this.cartItemsService.find({ cart: { id: cart.id } })
