@@ -1,13 +1,13 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common"
-import { SesMailOption } from "./interface/config.interface"
-import { IMailMessage, IMailOptionsConfigurator, IMailService } from "./interface/mail.service.interface"
+import { SesMailOption } from "../interface/config.interface"
+import { IMailMessage, IMailOptionsConfigurator, IMailService } from "../interface/mail.service.interface"
 import { SendEmailCommand, SESClient, SendEmailCommandInput } from "@aws-sdk/client-ses"
 import { ApiException } from "@/exceptions/api.exception"
-// import { MailQueueProducer } from "@/modules/queues/mail/mail.producer"
+import { MailQueueProducer } from "../queues/queue-producer.service"
 
 @Injectable()
-export class SesMailService implements IMailService, IMailOptionsConfigurator {
-  //   constructor(private readonly mailQueue: MailQueueProducer) {}
+export class SesMailStrategy implements IMailService, IMailOptionsConfigurator {
+  constructor(private readonly mailQueue: MailQueueProducer) {}
 
   private ses: SESClient
 
@@ -46,9 +46,9 @@ export class SesMailService implements IMailService, IMailOptionsConfigurator {
     }
   }
 
-  //   async queue(message: IMailMessage) {
-  //     await this.mailQueue.ses(message)
-  //   }
+  async queue(message: IMailMessage) {
+    await this.mailQueue.dispatch("ses", message)
+  }
 
   setOptions(options: SesMailOption): IMailService {
     if (!options.accessKeyId || !options.secretAccessKey || !options.region) {

@@ -3,7 +3,7 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException, NotFoundException
 
 @Catch()
 export class GlobalExceptionFilters implements ExceptionFilter {
-  // constructor(private readonly logService: LogService) {}
+  constructor(private readonly logService: LogService) {}
   catch(exception: Error, host: ArgumentsHost) {
     const ctx = host.switchToHttp()
     const response = ctx.getResponse()
