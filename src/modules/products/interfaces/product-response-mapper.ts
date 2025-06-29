@@ -10,6 +10,7 @@ export abstract class ProductResponseMapper implements IInterceptor {
       categories: data.categories,
       description: data.description,
       discountPrice: data.discountPrice,
+      slug: data.slug,
       images: data.images,
       price: data.price,
       stockCount: data.stockCount,
