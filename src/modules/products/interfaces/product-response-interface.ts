@@ -1,11 +1,12 @@
-import { ProductStatusEnum } from "../entities/product.entity"
+import { ProductCategoriesEnum, ProductStatusEnum } from "@/modules/common/types"
 
 export interface IProductResponse {
   id: string
   name: string
-  category: string
+  categories: ProductCategoriesEnum[]
   description: string
   price: number
+  slug: string
   discountPrice: number
   stockCount: number
   images: string[]

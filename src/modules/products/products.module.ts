@@ -9,6 +9,7 @@ import { DtoMapper } from "./interfaces/update-product-mapper.interface"
 @Module({
   imports: [TypeOrmModule.forFeature([Product]), StoreModule],
   controllers: [ProductsController],
-  providers: [ProductsService, DtoMapper]
+  providers: [ProductsService, DtoMapper],
+  exports: [ProductsService]
 })
 export class ProductsModule {}

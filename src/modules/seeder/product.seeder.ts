@@ -3,8 +3,10 @@ import { InjectRepository } from "@nestjs/typeorm"
 import { Seeder } from "nestjs-seeder"
 import { Repository } from "typeorm"
 import { faker } from "@faker-js/faker"
-import { Product, ProductStatusEnum } from "../products/entities/product.entity"
+import { Product } from "../products/entities/product.entity"
 import { Store } from "../stores/entities/store.entity"
+import { CreateProductDto } from "../products/dto/create-product.dto"
+import { CategoriesArray, ProductStatusEnum } from "../common/types"
 
 @Injectable()
 export class ProductSeeder implements Seeder {
@@ -27,17 +29,16 @@ export class ProductSeeder implements Seeder {
     }
 
     const storesWithoutNullUser = stores.filter((store) => store.business.user !== null)
-
-    // Define product categories
-    const productCategories = ["Electronics", "Fashion", "Home & Garden", "Sports", "Beauty"]
+    const randomCategories = await this.getArrayOfCategories()
 
     // Generate 1–5 products per store
-    const products = storesWithoutNullUser.flatMap((store) => {
+    const products: CreateProductDto[] = storesWithoutNullUser.flatMap((store) => {
       const numProducts = faker.number.int({ min: 1, max: 5 })
       return Array.from({ length: numProducts }, () => ({
         name: faker.commerce.productName(),
-        category: faker.helpers.arrayElement(productCategories),
+        categories: randomCategories,
         description: faker.commerce.productDescription(),
+        slug: faker.commerce.productName().toLowerCase().replace(/ /g, "_"),
         price: parseFloat(faker.commerce.price({ min: 10, max: 1000, dec: 2 })),
         discountPrice: faker.datatype.boolean() ? parseFloat(faker.commerce.price({ min: 5, max: 800, dec: 2 })) : null,
         stockCount: faker.number.int({ min: 0, max: 100 }),
@@ -59,5 +60,10 @@ export class ProductSeeder implements Seeder {
 
   async drop(): Promise<any> {
     await this.productRepository.delete({})
+  }
+
+  async getArrayOfCategories() {
+    const randomNumber = Math.floor(Math.random() * CategoriesArray.length)
+    return CategoriesArray.splice(0, randomNumber)
   }
 }
