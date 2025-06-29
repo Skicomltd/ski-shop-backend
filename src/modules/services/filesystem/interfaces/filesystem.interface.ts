@@ -1,14 +1,9 @@
-import { FIleSystemDriverOption } from "./config.interface"
-
 export interface IFileSystemService {
   upload(file: FileUploadDto): Promise<string>
   get(path: string): Promise<Buffer>
+  getMetaData(path: string): Promise<FileMetada>
   update(path: string, file: FileUploadDto): Promise<string>
   delete(path: string): Promise<void>
-}
-
-export interface IFileoptionsConfigurator {
-  setOptions(options: FIleSystemDriverOption): IFileSystemService
 }
 
 export interface FileUploadDto {
@@ -16,4 +11,12 @@ export interface FileUploadDto {
   filePath?: string
   mimetype: string
   destination: string
+}
+
+export interface FileMetada {
+  name: string
+  size: string
+  url: string
+  mimeType: string
+  lastModified: Date
 }
