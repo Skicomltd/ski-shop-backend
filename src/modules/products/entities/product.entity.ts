@@ -1,4 +1,4 @@
-import { ProductCategoriesEnum, ProductStatusEnum } from "@/modules/common"
+import { ProductCategoriesEnum, ProductStatusEnum } from "@/modules/common/types"
 import { Store } from "@/modules/stores/entities/store.entity"
 import { User } from "@/modules/users/entity/user.entity"
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm"
