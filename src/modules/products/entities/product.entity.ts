@@ -1,7 +1,8 @@
+import { CartItems } from "@/modules/carts/entities/cartItmes.entity"
 import { ProductCategoriesEnum, ProductStatusEnum } from "@/modules/common"
 import { Store } from "@/modules/stores/entities/store.entity"
 import { User } from "@/modules/users/entity/user.entity"
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany } from "typeorm"
 
 @Entity()
 export class Product {
