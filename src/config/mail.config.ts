@@ -4,6 +4,10 @@ import { MailModuleAsyncOptions, MailModuleOptions } from "../modules/services/m
 export default registerAs(
   "mail",
   (): MailModuleOptions => ({
+    from: {
+      address: process.env.MAIL_FROM_ADDRESS,
+      name: process.env.MAIL_FROM_NAME
+    },
     queue: true,
     default: process.env.DEFAULT_MAIL_CLIENT || "smtp",
     clients: {

@@ -12,6 +12,7 @@ import { CaslModule } from "./casl/casl.module"
 import { LogModule } from "./log/log.module"
 import { logConfigAsync } from "@/config/log.config"
 import { LogService } from "./log/log.service"
+import { MailService } from "./mail/mail.service"
 
 @Global()
 @Module({
@@ -24,7 +25,7 @@ import { LogService } from "./log/log.service"
     CaslModule,
     LogModule.registerAsync(logConfigAsync)
   ],
-  providers: [PaginationService, LogService],
-  exports: [MailModule, PaginationService, UtilsModule, FileSystemModule, CaslModule, LogService]
+  providers: [PaginationService, LogService, MailService],
+  exports: [MailService, PaginationService, UtilsModule, FileSystemModule, CaslModule, LogService]
 })
 export class ServicesModule {}

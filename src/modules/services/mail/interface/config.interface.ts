@@ -3,6 +3,7 @@ import { ModuleMetadata } from "@nestjs/common"
 import { JobsOptions } from "bullmq"
 
 export interface MailModuleOptions {
+  from: { address: string; name: string }
   clients: IMailClients
   default: keyof IMailClients
   queue: boolean
