@@ -8,7 +8,7 @@ import { BadReqException } from "@/exceptions/badRequest.exception"
 import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.interface"
 import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { IProductsQuery } from "./interfaces/query-filter.interface"
-import { ProductCategoriesEnum } from "../common"
+import { ProductCategoriesEnum } from "../common/types"
 
 @Injectable()
 export class ProductsService implements IService<Product> {
@@ -52,7 +52,7 @@ export class ProductsService implements IService<Product> {
     }
 
     if (slug) {
-      where.slug = slug
+      where.slug = In(Array.isArray(slug) ? slug : [slug])
     }
 
     return await this.productRepository.findAndCount({

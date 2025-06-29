@@ -26,8 +26,6 @@ import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { StoreService } from "../stores/store.service"
 import { GoogleOAuthGuard } from "./guard/google-oauth.guard"
 import { BusinessService } from "../users/business.service"
-import { CategoriesArray } from "../common"
-import { BadReqException } from "@/exceptions/badRequest.exception"
 
 @Public()
 @Controller("auth")
@@ -114,12 +112,6 @@ export class AuthController {
     if (!business) throw new NotFoundException("Business does not exist")
 
     if (await this.storeService.exists({ name: onboardStoreDto.name })) throw new ConflictException("Store name already exist")
-
-    const categoryExist = CategoriesArray.some((item) => onboardStoreDto.categories.includes(item))
-
-    if (!categoryExist) {
-      throw new BadReqException("Category does not exist")
-    }
 
     const fileDto: FileUploadDto = {
       destination: `images/${fileUploaded.originalname}-storelogo.${fileUploaded.extension}`,

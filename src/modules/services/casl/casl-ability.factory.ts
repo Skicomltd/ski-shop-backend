@@ -6,7 +6,7 @@ import { Product } from "@/modules/products/entities/product.entity"
 import { Store } from "@/modules/stores/entities/store.entity"
 import Business from "@/modules/users/entity/business.entity"
 import { Bank } from "@/modules/banks/entities/bank.entity"
-import { ProductStatusEnum } from "@/modules/common"
+import { ProductStatusEnum } from "@/modules/common/types"
 
 type Subjects = InferSubjects<typeof User | typeof Product | typeof Business | typeof Store | typeof Bank> | "all"
 
