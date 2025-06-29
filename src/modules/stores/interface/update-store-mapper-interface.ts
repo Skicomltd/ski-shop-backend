@@ -7,7 +7,6 @@ export class UpdateStoreMapper {
   async prepareUpdateStoreMapper(updateStoreDto: UpdateStoreDto, store: Store): Promise<UpdateStoreDto> {
     return {
       business: updateStoreDto.business ?? store.business,
-      category: updateStoreDto.category ?? store.category,
       description: updateStoreDto.description ?? store.description,
       logo: updateStoreDto.logo ?? store.logo,
       name: updateStoreDto.name ?? store.name,
