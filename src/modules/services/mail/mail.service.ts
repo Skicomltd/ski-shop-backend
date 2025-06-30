@@ -1,21 +1,30 @@
 import * as fs from "fs"
 import * as path from "path"
 import handlebars from "handlebars"
-import { Inject, Injectable } from "@nestjs/common"
+import { HttpException, Inject, Injectable } from "@nestjs/common"
 
-import { IMailMessage, IMailOptionsConfigurator, IMailService } from "./interface/mail.service.interface"
 import { IMailClients, MailModuleOptions, MailTransporter } from "./interface/config.interface"
+import { IMailMessage, IMailOptionsConfigurator, IMailService, MailAddress } from "./interface/mail.service.interface"
 
 import { CONFIG_OPTIONS } from "./entities/config"
-import { ApiException } from "@/exceptions/api.exception"
-import { MailQueueProducer } from "./queues/queue-producer.service"
 import { MAIL_STRATEGY } from "./entities/strategies"
+
 import { SesMailStrategy } from "./strategies/ses.service"
-import { MailgunMailStrategy } from "./strategies/mailgun.service"
 import { SmtpMailStrategy } from "./strategies/smtp.service"
+import { MailgunMailStrategy } from "./strategies/mailgun.service"
+import { MailQueueProducer } from "./queues/queue-producer.service"
 
 @Injectable()
 export class MailService implements IMailService {
+  public from: MailAddress
+  private default: keyof IMailClients
+  private clients: IMailClients
+  private strategyMap: Record<MailTransporter, IMailService & IMailOptionsConfigurator> = {
+    smtp: this.smtpMailService,
+    ses: this.sesMailService,
+    mailgun: this.mailgunMailService
+  }
+
   constructor(
     @Inject(CONFIG_OPTIONS)
     protected options: MailModuleOptions,
@@ -28,20 +37,10 @@ export class MailService implements IMailService {
     private readonly smtpMailService: SmtpMailStrategy
   ) {
     if (!options.default || !options.clients[options.default]) {
-      throw new ApiException(`Invalid default transporter: ${options.default}`, 500)
+      throw new HttpException(`Invalid default transporter: ${options.default}`, 500)
     }
     this.default = options.default
     this.clients = options.clients
-  }
-
-  private default: keyof IMailClients
-
-  private clients: IMailClients
-
-  private strategyMap: Record<MailTransporter, IMailService & IMailOptionsConfigurator> = {
-    smtp: this.smtpMailService,
-    ses: this.sesMailService,
-    mailgun: this.mailgunMailService
   }
 
   async send(message: IMailMessage) {
@@ -58,7 +57,7 @@ export class MailService implements IMailService {
 
   getTransporter(transporter: MailTransporter): IMailService {
     const strategy = this.strategyMap[transporter]
-    if (!strategy) throw new ApiException("Invalid mail strategy", 500)
+    if (!strategy) throw new HttpException("Invalid mail strategy", 500)
     return strategy.setOptions(this.clients[transporter])
   }
 

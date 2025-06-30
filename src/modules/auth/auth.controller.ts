@@ -52,7 +52,7 @@ export class AuthController {
 
       const otp = await this.authService.saveOtp({ code, email }, manager)
 
-      this.mailService.send({
+      this.mailService.queue({
         to: registerDto.email,
         subject: "Email Validation",
         text: `Validate with your otp code: ${otp.code}. Your code expires in 10mins`

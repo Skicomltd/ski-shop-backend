@@ -1,9 +1,10 @@
 // import { RegisterQueueOptions } from "@nestjs/bullmq"
 import { ModuleMetadata } from "@nestjs/common"
 import { JobsOptions } from "bullmq"
+import { MailAddress } from "./mail.service.interface"
 
 export interface MailModuleOptions {
-  from: { address: string; name: string }
+  from: MailAddress
   clients: IMailClients
   default: keyof IMailClients
   queue: boolean

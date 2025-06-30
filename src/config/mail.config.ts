@@ -9,7 +9,7 @@ export default registerAs(
       name: process.env.MAIL_FROM_NAME
     },
     queue: true,
-    default: process.env.DEFAULT_MAIL_CLIENT || "smtp",
+    default: process.env.DEFAULT_MAILER || "smtp",
     clients: {
       smtp: {
         transport: "smtp",

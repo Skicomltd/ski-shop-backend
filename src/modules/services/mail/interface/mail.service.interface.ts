@@ -1,6 +1,12 @@
 import { MailTransporterOption } from "./config.interface"
 
+export interface MailAddress {
+  address: string
+  name: string
+}
+
 export interface IMailService {
+  from: MailAddress
   send(message: IMailMessage): Promise<void>
 }
 

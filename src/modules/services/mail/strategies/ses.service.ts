@@ -1,19 +1,27 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common"
-import { SesMailOption } from "../interface/config.interface"
-import { IMailMessage, IMailOptionsConfigurator, IMailService } from "../interface/mail.service.interface"
 import { SendEmailCommand, SESClient, SendEmailCommandInput } from "@aws-sdk/client-ses"
-import { ApiException } from "@/exceptions/api.exception"
+import { HttpException, Inject, Injectable, InternalServerErrorException } from "@nestjs/common"
+
+import { CONFIG_OPTIONS } from "../entities/config"
+import { MailModuleOptions, SesMailOption } from "../interface/config.interface"
+import { IMailMessage, IMailOptionsConfigurator, IMailService, MailAddress } from "../interface/mail.service.interface"
+
 import { MailQueueProducer } from "../queues/queue-producer.service"
 
 @Injectable()
 export class SesMailStrategy implements IMailService, IMailOptionsConfigurator {
-  constructor(private readonly mailQueue: MailQueueProducer) {}
-
   private ses: SESClient
+  public from: MailAddress
+
+  constructor(
+    private readonly mailQueue: MailQueueProducer,
+    @Inject(CONFIG_OPTIONS) protected options: MailModuleOptions
+  ) {
+    this.from = options.from
+  }
 
   async send(message: IMailMessage) {
     if (!this.ses) {
-      throw new Error("SES configuration not set")
+      throw new HttpException("SES configuration not set", 500)
     }
 
     const params: SendEmailCommandInput = {
@@ -31,7 +39,7 @@ export class SesMailStrategy implements IMailService, IMailOptionsConfigurator {
           Html: message.html ? { Data: message.html, Charset: "UTF-8" } : undefined
         }
       },
-      Source: message.from
+      Source: message.from || `${this.from?.name} <${this.from?.address}>`
     }
 
     if (message.attachments?.length) {
@@ -52,7 +60,7 @@ export class SesMailStrategy implements IMailService, IMailOptionsConfigurator {
 
   setOptions(options: SesMailOption): IMailService {
     if (!options.accessKeyId || !options.secretAccessKey || !options.region) {
-      throw new ApiException("Invalid SES configuration", 500)
+      throw new HttpException("Invalid SES configuration", 500)
     }
 
     this.ses = new SESClient({

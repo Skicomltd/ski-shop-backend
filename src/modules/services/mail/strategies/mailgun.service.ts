@@ -1,17 +1,18 @@
 import Mailgun from "mailgun.js"
 import formData = require("form-data")
-import { Inject, Injectable } from "@nestjs/common"
-import { MailgunMailOptions, MailModuleOptions } from "../interface/config.interface"
-import { IMailMessage, IMailOptionsConfigurator, IMailService } from "../interface/mail.service.interface"
-import { ApiException } from "@/exceptions/api.exception"
-import { MailQueueProducer } from "../queues/queue-producer.service"
+import { HttpException, Inject, Injectable } from "@nestjs/common"
+
 import { CONFIG_OPTIONS } from "../entities/config"
+import { MailgunMailOptions, MailModuleOptions } from "../interface/config.interface"
+import { IMailMessage, IMailOptionsConfigurator, IMailService, MailAddress } from "../interface/mail.service.interface"
+
+import { MailQueueProducer } from "../queues/queue-producer.service"
 
 @Injectable()
 export class MailgunMailStrategy implements IMailService, IMailOptionsConfigurator {
   private mailgun: ReturnType<Mailgun["client"]>
   private domain: string
-  private from: { address: string; name: string }
+  public from: MailAddress
 
   constructor(
     private readonly mailQueue: MailQueueProducer,
@@ -23,7 +24,7 @@ export class MailgunMailStrategy implements IMailService, IMailOptionsConfigurat
 
   setOptions(options: MailgunMailOptions): IMailService {
     if (!options.apiKey || !options.domain) {
-      throw new ApiException("Invalid Mailgun Configuration", 500)
+      throw new HttpException("Invalid Mailgun Configuration", 500)
     }
 
     this.domain = options.domain
@@ -39,12 +40,12 @@ export class MailgunMailStrategy implements IMailService, IMailOptionsConfigurat
 
   async send(message: IMailMessage): Promise<void> {
     if (!this.mailgun) {
-      throw new ApiException("Mailgun not initialized. Did you forget to call setOptions?", 500)
+      throw new HttpException("Mailgun not initialized. Did you forget to call setOptions?", 500)
     }
 
     try {
       await this.mailgun.messages.create(this.domain, {
-        from: message.from || this.from.address,
+        from: message.from || `${this.from.name} <${this.from.address}>`,
         to: message.to,
         subject: message.subject,
         text: message.text,
