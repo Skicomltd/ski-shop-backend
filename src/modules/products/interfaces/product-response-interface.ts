@@ -3,7 +3,7 @@ import { ProductCategoriesEnum, ProductStatusEnum } from "@/modules/common/types
 export interface IProductResponse {
   id: string
   name: string
-  categories: ProductCategoriesEnum[]
+  category: ProductCategoriesEnum
   description: string
   price: number
   slug: string

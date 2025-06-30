@@ -36,7 +36,7 @@ export class ProductSeeder implements Seeder {
       const numProducts = faker.number.int({ min: 1, max: 5 })
       return Array.from({ length: numProducts }, () => ({
         name: faker.commerce.productName(),
-        categories: randomCategories,
+        category: randomCategories[0],
         description: faker.commerce.productDescription(),
         slug: faker.commerce.productName().toLowerCase().replace(/ /g, "_"),
         price: parseFloat(faker.commerce.price({ min: 10, max: 1000, dec: 2 })),

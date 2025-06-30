@@ -6,7 +6,7 @@ import { ProductCategoriesEnum, ProductStatusEnum } from "@/modules/common/types
 export class CreateProductDto {
   name: string
   price: number
-  categories: ProductCategoriesEnum[]
+  category: ProductCategoriesEnum
   description: string
   discountPrice?: number
   stockCount: number
@@ -22,11 +22,9 @@ export class CreateProductDto {
 export const createProductSchema = joi.object({
   name: joi.string().required(),
   price: joi.number().required(),
-  categories: joi
-    .array()
-    .items(
-      joi.string().valid("clothings", "gadgets", "groceries", "women", "bodyCreamAndOil", "furniture", "tvAndHomeAppliances", "watchesAndAccessories")
-    )
+  category: joi
+    .string()
+    .valid("clothings", "gadgets", "groceries", "women", "bodyCreamAndOil", "furniture", "tvAndHomeAppliances", "watchesAndAccessories")
     .required(),
   description: joi.string().required(),
   discountPrice: joi.number().optional(),

@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Patch, Param, Delete, UseGuards, UseInterceptors, Post, UploadedFile } from "@nestjs/common"
+import { Controller, Get, Body, Patch, Param, Delete, UseGuards, UseInterceptors, Post, UploadedFile, Req } from "@nestjs/common"
 import { StoreService } from "./store.service"
 import { UpdateStoreDto, updateStoreSchema } from "./dto/update-store.dto"
 import { PoliciesGuard } from "../auth/guard/policies-handler.guard"
@@ -19,7 +19,8 @@ import { ConflictException } from "@/exceptions/conflict.exception"
 import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { BusinessService } from "../users/business.service"
 import { UpdateStoreMapper } from "./interface/update-store-mapper-interface"
-@Controller("store")
+import { Request } from "express"
+@Controller("stores")
 export class StoreController {
   constructor(
     private readonly storeService: StoreService,
@@ -60,6 +61,12 @@ export class StoreController {
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Store))
   findAll() {
     return this.storeService.find()
+  }
+
+  @Get("current")
+  @UseInterceptors(StoreInterceptor)
+  findCurrent(@Req() req: Request) {
+    return req.user.business.store
   }
 
   @Get(":id")

@@ -44,7 +44,7 @@ export class ProductsService implements IService<Product> {
 
     if (categories) {
       const cats = categories.split(",")
-      where.categories = In(cats as ProductCategoriesEnum[])
+      where.category = In(cats as ProductCategoriesEnum[])
     }
 
     if (vendorType) {

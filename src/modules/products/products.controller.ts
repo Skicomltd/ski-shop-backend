@@ -60,7 +60,7 @@ export class ProductsController {
     const handleImageUploaded = await Promise.all(
       filesUploaded.map(async (image) => {
         const fileDto: FileUploadDto = {
-          destination: `images/logo/${image.originalname}${image.extension}`,
+          destination: `images/products/${image.originalname}.${image.extension}`,
           mimetype: image.mimetype,
           buffer: image.buffer,
           filePath: image.path

@@ -41,6 +41,6 @@ export default class Business {
   @JoinColumn()
   user: User
 
-  @OneToOne(() => Store, (store) => store.business)
+  @OneToOne(() => Store, (store) => store.business, { eager: true })
   store: Store
 }

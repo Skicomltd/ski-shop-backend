@@ -6,7 +6,7 @@ import { Product } from "../entities/product.entity"
 export class DtoMapper {
   prepareUpdateProductDto(dto: UpdateProductDto, product: Product, images: string[]): UpdateProductDto {
     return {
-      categories: dto.categories ?? product.categories,
+      category: dto.category ?? product.category,
       description: dto.description ?? product.description,
       discountPrice: dto.discountPrice ?? product.discountPrice,
       name: dto.name ?? product.name,

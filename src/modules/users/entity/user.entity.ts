@@ -51,7 +51,7 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date
 
-  @OneToOne(() => Business, (business) => business.user)
+  @OneToOne(() => Business, (business) => business.user, { eager: true })
   business: Business
 
   @OneToMany(() => Bank, (bank) => bank.user)

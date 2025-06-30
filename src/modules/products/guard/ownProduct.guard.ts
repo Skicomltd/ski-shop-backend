@@ -9,7 +9,6 @@ export class OwnProductGuard implements CanActivate {
     const request = context.switchToHttp().getRequest()
     const user = request.user
     const productId = request.params.product
-    console.log("User from request:", user)
 
     const productData = await this.productsService.findOne({ id: productId })
     if (!productData) {

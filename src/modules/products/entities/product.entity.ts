@@ -13,7 +13,7 @@ export class Product {
   name: string
 
   @Column({ type: "enum", enum: ProductCategoriesEnum })
-  categories: ProductCategoriesEnum[]
+  category: ProductCategoriesEnum
 
   @Column()
   description: string
