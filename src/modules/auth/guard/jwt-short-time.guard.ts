@@ -1,7 +1,8 @@
 import { IAuth } from "@/config/auth.config"
 import { UnAuthorizedException } from "@/exceptions/unAuthorized.exception"
+import { UserRoleEnum } from "@/modules/users/entity/user.entity"
 import { UserService } from "@/modules/users/user.service"
-import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common"
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
 import { JwtService } from "@nestjs/jwt"
 import { Request } from "express"
@@ -28,6 +29,9 @@ export default class JwtShortTimeGuard implements CanActivate {
       const user = await this.userService.findById(payload.id)
 
       if (!user) throw new UnAuthorizedException()
+
+      // customers cant use this token
+      if (user.role === UserRoleEnum.Customer) throw new ForbiddenException()
 
       request.user = user
     } catch (error) {
