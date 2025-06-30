@@ -1,7 +1,20 @@
 import { Request } from "express"
 import { AuthService } from "./auth.service"
 import { Public } from "./decorators/public.decorator"
-import { Controller, Post, Body, HttpCode, Patch, UseGuards, Req, UseInterceptors, ConflictException, UploadedFile, Get } from "@nestjs/common"
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  Patch,
+  UseGuards,
+  Req,
+  UseInterceptors,
+  ConflictException,
+  UploadedFile,
+  Get,
+  HttpStatus
+} from "@nestjs/common"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { AuthDto, registerSchema, ResendOtpDto, resendOtpSchema, VerifyEmailDto, verifyEmailSchema } from "./dto/auth.dto"
 import JwtShortTimeGuard from "./guard/jwt-short-time.guard"
@@ -26,6 +39,10 @@ import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { StoreService } from "../stores/store.service"
 import { GoogleOAuthGuard } from "./guard/google-oauth.guard"
 import { BusinessService } from "../users/business.service"
+import { ForgotPasswordDto, forgotPasswordSchema } from "./dto/forgot-password.dto"
+import { IApp } from "@/config/app.config"
+import { ResetPasswordDto, resetPasswordSchema } from "./dto/reset-password.dto"
+import { RefreshDto, refreshSchema } from "./dto/refresh.dto"
 
 @Public()
 @Controller("auth")
@@ -177,5 +194,52 @@ export class AuthController {
     const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
 
     return { user: req.user, tokens }
+  }
+
+  @Public()
+  @Post("/forgotpassword")
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body(new JoiValidationPipe(forgotPasswordSchema)) { email }: ForgotPasswordDto) {
+    const user = await this.userService.findOne({ email })
+
+    if (!user) return new NotFoundException("user not found!")
+
+    const token = await this.authService.forgotPassword(user)
+
+    const link = this.configService.get<IApp>("app").clientUrl + `?token=${token}`
+
+    await this.mailService.send({
+      to: email,
+      subject: "Password Reset Link",
+      text: `see attached ${link} and it expires in 1 hour`
+    })
+
+    return "Password link sent successfully"
+  }
+
+  @Public()
+  @Post("/resetpassword")
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body(new JoiValidationPipe(resetPasswordSchema)) { password, token }: ResetPasswordDto) {
+    const userId = await this.authService.validateResetToken(token)
+
+    const user = await this.userService.findById(userId)
+
+    await this.userService.update(user, { password })
+
+    return "Password successfully reset"
+  }
+
+  @Public()
+  @Post("/refresh")
+  @HttpCode(HttpStatus.OK)
+  async refresh(@Body(new JoiValidationPipe(refreshSchema)) { refreshToken }: RefreshDto) {
+    const userId = await this.authService.validateRefreshToken(refreshToken)
+
+    const user = await this.userService.findById(userId)
+
+    if (!user) throw new NotFoundException("user not found")
+
+    return await this.authService.login(user)
   }
 }

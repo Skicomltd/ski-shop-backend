@@ -1,4 +1,15 @@
-import { BeforeInsert, BeforeUpdate, Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
+import {
+  AfterLoad,
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  OneToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn
+} from "typeorm"
 import * as bcrypt from "bcryptjs"
 import Business from "./business.entity"
 import { Bank } from "@/modules/banks/entities/bank.entity"
@@ -52,13 +63,20 @@ export class User {
   @OneToMany(() => Cart, (cart) => cart.user)
   cart: Cart[]
 
-  @BeforeInsert()
+  private _previousPassword?: string
+
+  @AfterLoad()
+  loadPassword() {
+    this._previousPassword = this.password
+  }
+
   @BeforeUpdate()
+  @BeforeInsert()
   async hashPassword() {
-    if (this.password) {
-      const salt = await bcrypt.genSalt()
-      this.password = await bcrypt.hash(this.password, salt)
-    }
+    if (!this.password || this.password === this._previousPassword) return
+
+    const salt = await bcrypt.genSalt()
+    this.password = await bcrypt.hash(this.password, salt)
   }
 
   async comparePassword(password: string) {

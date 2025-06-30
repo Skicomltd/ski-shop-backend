@@ -11,6 +11,9 @@ import { Otp } from "./entities/otp.entity"
 import { EntityManager, FindOptionsWhere, MoreThan, Repository } from "typeorm"
 import { DateService } from "../services/utils/date/date.service"
 import { SaveOtpDto } from "./dto/save-otp.dto"
+import { User } from "../users/entity/user.entity"
+import { JwtService } from "@nestjs/jwt"
+import { UnAuthorizedException } from "@/exceptions/unAuthorized.exception"
 
 @Injectable()
 export class AuthService {
@@ -19,6 +22,7 @@ export class AuthService {
     private helperService: HelpersService,
     private dateService: DateService,
     private configService: ConfigService,
+    private jwtService: JwtService,
 
     @InjectRepository(Otp)
     private otpRepository: Repository<Otp>
@@ -69,5 +73,31 @@ export class AuthService {
     const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").jwtSecret, "1d")
     const refreshToken = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").refreshSecret, "30d")
     return { accessToken: token, refreshToken }
+  }
+
+  async forgotPassword(user: User) {
+    const payload = { email: user.email, id: user.id }
+
+    return await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").resetSecret, "1h")
+  }
+
+  async validateResetToken(token: string): Promise<string> {
+    try {
+      const payload = await this.jwtService.verifyAsync(token, { secret: this.configService.get<IAuth>("auth").resetSecret })
+
+      return payload.sub
+    } catch (error) {
+      throw new UnAuthorizedException()
+    }
+  }
+
+  async validateRefreshToken(token: string): Promise<string> {
+    try {
+      const payload = await this.jwtService.verifyAsync(token, { secret: this.configService.get<IAuth>("auth").refreshSecret })
+
+      return payload.sub
+    } catch (error) {
+      throw new UnAuthorizedException()
+    }
   }
 }
