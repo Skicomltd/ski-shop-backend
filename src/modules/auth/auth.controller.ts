@@ -102,7 +102,7 @@ export class AuthController {
   @ShortTime()
   @Post("/store")
   @UseGuards(JwtShortTimeGuard)
-  @UseInterceptors(FileInterceptor("image", { ...memoryUpload, fileFilter: imageFilter }))
+  @UseInterceptors(FileInterceptor("logo", { ...memoryUpload, fileFilter: imageFilter }))
   async create(
     @Body(new JoiValidationPipe(onboardStoreSchema)) onboardStoreDto: OnboardStoreDto,
     @UploadedFile() fileUploaded: CustomFile,
@@ -124,7 +124,7 @@ export class AuthController {
 
     onboardStoreDto = { ...onboardStoreDto, logo: url, business: business }
 
-    this.storeService.create(onboardStoreDto)
+    await this.storeService.create(onboardStoreDto)
 
     const payload = { email: business.user.email, id: business.user.id }
     const { accessToken: token } = await this.authService.login(payload)
