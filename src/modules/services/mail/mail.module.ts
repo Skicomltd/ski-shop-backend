@@ -1,37 +1,76 @@
 import { DynamicModule, Module } from "@nestjs/common"
+import { ConfigModule } from "@nestjs/config"
+import { BullModule } from "@nestjs/bullmq"
+
 import { MailModuleAsyncOptions, MailModuleOptions } from "./interface/config.interface"
 import { CONFIG_OPTIONS } from "./entities/config"
 import { MailService } from "./mail.service"
+import { MailQueueProducer } from "./queues/queue-producer.service"
+import { MAIL_STRATEGY } from "./entities/strategies"
+import { SmtpMailStrategy } from "./strategies/smtp.service"
+import { SesMailStrategy } from "./strategies/ses.service"
+import { MailgunMailStrategy } from "./strategies/mailgun.service"
+import { AppQueues } from "@/constants"
+import { MailQueueConsumer } from "./queues/queue-consumer.service"
 
 @Module({})
 export class MailModule {
   static register(options: MailModuleOptions): DynamicModule {
     return {
       module: MailModule,
+      imports: [ConfigModule, BullModule.registerQueue({ name: AppQueues.MAIL })],
       providers: [
         {
           provide: CONFIG_OPTIONS,
           useValue: options
         },
-        MailService
+        {
+          provide: MAIL_STRATEGY.smtp,
+          useClass: SmtpMailStrategy
+        },
+        {
+          provide: MAIL_STRATEGY.ses,
+          useClass: SesMailStrategy
+        },
+        {
+          provide: MAIL_STRATEGY.mailgun,
+          useClass: MailgunMailStrategy
+        },
+        MailService,
+        MailQueueProducer,
+        MailQueueConsumer
       ],
-      exports: [MailService]
+      exports: [MailService, MailQueueProducer, CONFIG_OPTIONS, MAIL_STRATEGY.smtp, MAIL_STRATEGY.ses, MAIL_STRATEGY.mailgun]
     }
   }
 
   static registerAsync(options: MailModuleAsyncOptions): DynamicModule {
     return {
       module: MailModule,
-      imports: [...(options.imports || [])],
+      imports: [...(options.imports || []), BullModule.registerQueue({ name: AppQueues.MAIL })],
       providers: [
         {
           provide: CONFIG_OPTIONS,
           useFactory: options.useFactory,
           inject: options.inject || []
         },
-        MailService
+        {
+          provide: MAIL_STRATEGY.smtp,
+          useClass: SmtpMailStrategy
+        },
+        {
+          provide: MAIL_STRATEGY.ses,
+          useClass: SesMailStrategy
+        },
+        {
+          provide: MAIL_STRATEGY.mailgun,
+          useClass: MailgunMailStrategy
+        },
+        MailService,
+        MailQueueProducer,
+        MailQueueConsumer
       ],
-      exports: [MailService]
+      exports: [MailService, MailQueueProducer, CONFIG_OPTIONS, MAIL_STRATEGY.smtp, MAIL_STRATEGY.ses, MAIL_STRATEGY.mailgun]
     }
   }
 }

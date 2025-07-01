@@ -1,89 +1,64 @@
 import * as fs from "fs"
 import * as path from "path"
 import handlebars from "handlebars"
-import { Inject, Injectable } from "@nestjs/common"
+import { HttpException, Inject, Injectable } from "@nestjs/common"
 
-import { IMailMessage, IMailService } from "./interface/mail.service.interface"
-import { IMailClients, MailModuleOptions, MailTransporter, SmtpMailOptions, SesMailOption, MailgunMailOptions } from "./interface/config.interface"
+import { IMailClients, MailModuleOptions, MailTransporter } from "./interface/config.interface"
+import { IMailMessage, IMailOptionsConfigurator, IMailService, MailAddress } from "./interface/mail.service.interface"
 
-import { SesMailService } from "./ses.service"
-import { SmtpMailService } from "./smtp.service"
 import { CONFIG_OPTIONS } from "./entities/config"
-import { MailgunMailService } from "./mailgun.service"
-import { ApiException } from "@/exceptions/api.exception"
+import { MAIL_STRATEGY } from "./entities/strategies"
+
+import { SesMailStrategy } from "./strategies/ses.service"
+import { SmtpMailStrategy } from "./strategies/smtp.service"
+import { MailgunMailStrategy } from "./strategies/mailgun.service"
+import { MailQueueProducer } from "./queues/queue-producer.service"
 
 @Injectable()
 export class MailService implements IMailService {
-  private sesMailService: SesMailService
-  private mailgunMailService: MailgunMailService
-  private smtpMailService: SmtpMailService
+  public from: MailAddress
+  private default: keyof IMailClients
+  private clients: IMailClients
+  private strategyMap: Record<MailTransporter, IMailService & IMailOptionsConfigurator> = {
+    smtp: this.smtpMailService,
+    ses: this.sesMailService,
+    mailgun: this.mailgunMailService
+  }
 
   constructor(
-    @Inject(CONFIG_OPTIONS) protected options: MailModuleOptions //   private readonly mailQueue: MailQueueProducer
+    @Inject(CONFIG_OPTIONS)
+    protected options: MailModuleOptions,
+    private readonly mailQueue: MailQueueProducer,
+    @Inject(MAIL_STRATEGY.ses)
+    private readonly sesMailService: SesMailStrategy,
+    @Inject(MAIL_STRATEGY.mailgun)
+    private readonly mailgunMailService: MailgunMailStrategy,
+    @Inject(MAIL_STRATEGY.smtp)
+    private readonly smtpMailService: SmtpMailStrategy
   ) {
     if (!options.default || !options.clients[options.default]) {
-      throw new ApiException(`Invalid default transporter: ${options.default}`, 500)
+      throw new HttpException(`Invalid default transporter: ${options.default}`, 500)
     }
     this.default = options.default
     this.clients = options.clients
-
-    this.sesMailService = new SesMailService()
-    this.mailgunMailService = new MailgunMailService()
-    this.smtpMailService = new SmtpMailService()
-    //  this.sesMailService = new SesMailService(mailQueue)
-    //  this.mailgunMailService = new MailgunMailService(mailQueue)
-    //  this.smtpMailService = new SmtpMailService(mailQueue)
   }
 
-  private default: MailTransporter
-
-  private clients: IMailClients
-
   async send(message: IMailMessage) {
-    const transporter = this.getTransporter(this.default)
+    const client = this.clients[this.default]
+    const transporter = this.getTransporter(client.transport)
 
     await transporter.send(message)
   }
 
-  //   async queue(message: IMailMessage): Promise<void> {
-  //     switch (this.default) {
-  //       case "smtp":
-  //         await this.mailQueue.smtp(message)
-  //         break
-
-  //       case "ses":
-  //         await this.mailQueue.ses(message)
-  //         break
-
-  //       case "mailgun":
-  //         await this.mailQueue.mailgun(message)
-  //         break
-
-  //       default:
-  //         throw new ApiException("invalid transporter", 500)
-  //     }
-  //   }
+  async queue(message: IMailMessage): Promise<void> {
+    const options = this.clients[this.default]
+    await this.mailQueue.dispatch(options.transport, message, options.queueOptions)
+  }
 
   getTransporter(transporter: MailTransporter): IMailService {
-    const options = this.clients[transporter]
-
-    if (!options) {
-      throw new ApiException(`Transporter ${transporter} not configured`, 500)
-    }
-
-    switch (transporter) {
-      case "smtp":
-        return this.smtpMailService.setOptions(options as SmtpMailOptions)
-
-      case "ses":
-        return this.sesMailService.setOptions(options as SesMailOption)
-
-      case "mailgun":
-        return this.mailgunMailService.setOptions(options as MailgunMailOptions)
-
-      default:
-        throw new ApiException("invalid transporter", 500)
-    }
+    const strategy = this.strategyMap[transporter]
+    if (!strategy) throw new HttpException("Invalid mail strategy", 500)
+    return strategy.setOptions(this.clients[transporter])
   }
 
   static parseHtml(templateName: string, data: Record<string, any>): string {

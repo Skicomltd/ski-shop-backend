@@ -8,7 +8,12 @@ export class UpdateProductDto extends PartialType(CreateProductDto) {}
 export const updateProductSchema = joi.object({
   name: joi.string().optional(),
   price: joi.number().optional(),
-  category: joi.string().optional(),
+  categories: joi
+    .array()
+    .items(
+      joi.string().valid("clothings", "gadgets", "groceries", "women", "bodyCreamAndOil", "furniture", "tvAndHomeAppliances", "watchesAndAccessories")
+    )
+    .optional(),
   description: joi.string().optional(),
   discountPrice: joi.number().optional(),
   stockCount: joi.number().optional(),

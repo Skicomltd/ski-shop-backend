@@ -1,4 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFiles, UseInterceptors, Req, ParseUUIDPipe, Query } from "@nestjs/common"
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UploadedFiles,
+  UseInterceptors,
+  Req,
+  ParseUUIDPipe,
+  Query,
+  UseGuards
+} from "@nestjs/common"
 import { ProductsService } from "./products.service"
 import { CreateProductDto, createProductSchema } from "./dto/create-product.dto"
 import { UpdateProductDto, updateProductSchema } from "./dto/update-product.dto"
@@ -13,8 +27,15 @@ import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.inte
 import { DtoMapper } from "./interfaces/update-product-mapper.interface"
 import { ProductsInterceptor } from "./interceptors/products.interceptor"
 import { ProductInterceptor } from "./interceptors/product.interceptor"
-import { UnAuthorizedException } from "@/exceptions/unAuthorized.exception"
 import { IProductsQuery } from "./interfaces/query-filter.interface"
+import { OwnProductGuard } from "./guard/ownProduct.guard"
+import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
+import { AppAbility } from "../services/casl/casl-ability.factory"
+import { Action } from "../services/casl/actions/action"
+import { Product } from "./entities/product.entity"
+import { PoliciesGuard } from "../auth/guard/policies-handler.guard"
+import { Public } from "../auth/decorators/public.decorator"
+import { ProductCategoriesEnum } from "../common/types"
 @Controller("products")
 export class ProductsController {
   constructor(
@@ -25,6 +46,8 @@ export class ProductsController {
   ) {}
 
   @Post()
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Product))
   @UseInterceptors(FilesInterceptor("images", 5, { ...memoryUpload, fileFilter: imageFilter }), ProductInterceptor)
   async create(
     @Body(new JoiValidationPipe(createProductSchema)) createProductDto: CreateProductDto,
@@ -39,7 +62,7 @@ export class ProductsController {
     const handleImageUploaded = await Promise.all(
       filesUploaded.map(async (image) => {
         const fileDto: FileUploadDto = {
-          destination: `images/logo/${image.originalname}${image.extension}`,
+          destination: `images/products/${image.originalname}.${image.extension}`,
           mimetype: image.mimetype,
           buffer: image.buffer,
           filePath: image.path
@@ -49,26 +72,38 @@ export class ProductsController {
         return url
       })
     )
+    const slug = createProductDto.name.toLowerCase().replace(/ /g, "_")
     // attach the arry of string
-    createProductDto = { ...createProductDto, images: handleImageUploaded }
+    createProductDto = { ...createProductDto, images: handleImageUploaded, slug: slug }
     const user = req.user
 
     return await this.productsService.create({ ...createProductDto, user: user, store: store })
   }
 
-  @Get()
+  @Get("")
+  @Public()
   @UseInterceptors(ProductsInterceptor)
   async findAll(@Query() query: IProductsQuery) {
     return await this.productsService.find(query)
   }
 
+  @Get("/categories")
+  @Public()
+  async categories() {
+    return Object.values(ProductCategoriesEnum)
+  }
+
   @Get(":id")
+  @Public()
   @UseInterceptors(ProductInterceptor)
   findOne(@Param("id", ParseUUIDPipe) id: string) {
     return this.productsService.findOne({ id: id })
   }
 
   @Patch(":id")
+  @UseGuards(OwnProductGuard)
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Product))
   @UseInterceptors(FilesInterceptor("images", 5, { ...memoryUpload, fileFilter: imageFilter }), ProductInterceptor)
   async update(
     @Param("id", ParseUUIDPipe) id: string,
@@ -76,18 +111,9 @@ export class ProductsController {
     @Req() req: Request,
     @UploadedFiles() uploadedFiles: Array<CustomFile>
   ) {
-    const user = req.user
-
     const product = await this.productsService.findOne({ id: id })
 
-    if (!product) throw new NotFoundException("Product does not exist")
-
-    // check if user owns product
-    const ownsProduct = product.user.id === user.id
-
-    if (!ownsProduct) throw new UnAuthorizedException("You are not allowed to edit this product")
-
-    const images = await this.productsService.handleImageUploads(uploadedFiles, product.images, updateProductDto.images)
+    const images = await this.productsService.handleImageUploads(uploadedFiles, product.images, updateProductDto.images || [])
 
     const updateProduct: UpdateProductDto = {
       ...updateProductDto,
@@ -101,6 +127,8 @@ export class ProductsController {
   }
 
   @Delete(":id")
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, Product))
   async remove(@Param("id", ParseUUIDPipe) id: string) {
     const product = await this.productsService.findById(id)
     if (!product) throw new NotFoundException("Product does not exist")

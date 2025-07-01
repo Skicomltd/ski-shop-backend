@@ -1,11 +1,8 @@
+import { ProductCategoriesEnum, ProductStatusEnum } from "@/modules/common/types"
 import { Store } from "@/modules/stores/entities/store.entity"
 import { User } from "@/modules/users/entity/user.entity"
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm"
 
-export enum ProductStatusEnum {
-  draft = "draft",
-  published = "published"
-}
 @Entity()
 export class Product {
   @PrimaryGeneratedColumn("uuid")
@@ -14,8 +11,8 @@ export class Product {
   @Column()
   name: string
 
-  @Column()
-  category: string
+  @Column({ type: "enum", enum: ProductCategoriesEnum })
+  category: ProductCategoriesEnum
 
   @Column()
   description: string

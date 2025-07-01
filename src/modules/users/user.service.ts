@@ -4,19 +4,15 @@ import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
 import { CreateUserDto } from "./dto/create-user-dto"
 import { ConflictException } from "@/exceptions/conflict.exception"
 import { BadReqException } from "@/exceptions/badRequest.exception"
-import Business from "./entity/business.entity"
-import { NotFoundException } from "@/exceptions/notfound.exception"
 import { UpdateUserDto } from "./dto/update-user-dto"
-import { CreateBusinessDto } from "./dto/create-business-dto"
 import { User } from "./entity/user.entity"
+import { IUserQuery } from "./interfaces/users-query.interface"
 
 @Injectable()
 export class UserService implements IService<User> {
   constructor(
     @InjectRepository(User)
-    private userRepository: Repository<User>,
-    @InjectRepository(Business)
-    private businessRepository: Repository<Business>
+    private userRepository: Repository<User>
   ) {}
 
   async create(data: CreateUserDto, manager?: EntityManager): Promise<User> {
@@ -30,14 +26,12 @@ export class UserService implements IService<User> {
     return await repo.save(createUser)
   }
 
-  find(data: FindOptionsWhere<User>): Promise<[User[], number]> {
-    console.log("data", data)
-
-    throw new Error("Method not implemented.")
+  async find(data: IUserQuery): Promise<[User[], number]> {
+    return await this.userRepository.findAndCount({ where: data })
   }
 
-  findById(id: string): Promise<User> {
-    return this.userRepository.findOne({ where: { id: id } })
+  async findById(id: string): Promise<User> {
+    return await this.userRepository.findOne({ where: { id: id } })
   }
 
   async findOne(filter: FindOptionsWhere<User>): Promise<User> {
@@ -52,32 +46,13 @@ export class UserService implements IService<User> {
 
   async update(entity: User, data: UpdateUserDto, manager?: EntityManager): Promise<User> {
     const repo = manager ? manager.getRepository<User>(User) : this.userRepository
-    await repo.update({ id: entity.id }, { ...data })
-    const updatedUser = await repo.findOne({ where: { id: entity.id } })
-    if (!updatedUser) throw new NotFoundException("User not found after update")
-    return updatedUser
+    const merged = repo.merge(entity, data)
+    return repo.save(merged)
   }
 
-  remove(filter: FindOptionsWhere<User>): Promise<number> {
-    console.log(filter)
+  async remove(filter: FindOptionsWhere<User>): Promise<number> {
+    const result = await this.userRepository.delete(filter)
 
-    throw new Error("")
-  }
-
-  async createUserBusiness(userBusinessDto: CreateBusinessDto, user: User) {
-    const business = this.businessRepository.create({
-      ...userBusinessDto,
-      user: user
-    })
-
-    return await this.businessRepository.save(business)
-  }
-
-  async findOneBusiness(filter: FindOptionsWhere<Business>) {
-    return await this.businessRepository.findOne({ where: filter, relations: ["user", "store"] })
-  }
-
-  async getUserBusiness(filter: FindOptionsWhere<Business>) {
-    return await this.businessRepository.findOne({ where: filter, relations: ["user", "store"] })
+    return result.affected
   }
 }

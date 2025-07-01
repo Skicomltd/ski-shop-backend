@@ -1,34 +1,36 @@
 import * as fs from "fs"
 import { Inject, Injectable } from "@nestjs/common"
 import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client, ObjectCannedACL } from "@aws-sdk/client-s3"
-import { FileUploadDto, IFileoptionsConfigurator, IFileSystemService } from "../interfaces/filesystem.interface"
+import { FileMetada, FileUploadDto, IFileSystemService } from "../interfaces/filesystem.interface"
 import { ApiException } from "@/exceptions/api.exception"
 import { DOSpacesOptions, FileSystemModuleOptions } from "../interfaces/config.interface"
 import { CONFIG_OPTIONS } from "../entities/config"
 
 @Injectable()
-export class DigitalOceanStrategy implements IFileSystemService, IFileoptionsConfigurator {
+export class DigitalOceanStrategy implements IFileSystemService {
   private config: DOSpacesOptions
   private client: S3Client
   private endpoint: string
-  private cdnEndPoint: string
 
   constructor(@Inject(CONFIG_OPTIONS) protected fsOptions: FileSystemModuleOptions) {
     this.config = fsOptions.clients.spaces
-    this.endpoint = `https://${fsOptions.clients.spaces.region}.digitaloceanspaces.com/${fsOptions.clients.spaces.bucket}`
-    this.cdnEndPoint = `https://${fsOptions.clients.spaces.region}.cdn.digitaloceanspaces.com/${fsOptions.clients.spaces.bucket}`
+
+    this.endpoint = `https://${fsOptions.clients.spaces.bucket}.${fsOptions.clients.spaces.region}.digitaloceanspaces.com/${fsOptions.clients.spaces.bucket}`
     this.client = new S3Client({
       credentials: {
         accessKeyId: fsOptions.clients.spaces.key,
         secretAccessKey: fsOptions.clients.spaces.secret
       },
-      endpoint: `https://${fsOptions.clients.spaces.region}.digitaloceanspaces.com/${fsOptions.clients.spaces.bucket}`,
+      endpoint: `https://${fsOptions.clients.spaces.bucket}.${fsOptions.clients.spaces.region}.digitaloceanspaces.com/${fsOptions.clients.spaces.bucket}`,
       region: fsOptions.clients.spaces.region,
       forcePathStyle: true
     })
   }
 
   async upload(file: FileUploadDto): Promise<string> {
+    const error = this.checkConfig(this.config)
+    if (error) throw new ApiException(error, 500)
+
     if (!file.filePath && !file.buffer) {
       throw new ApiException("valid file required", 500)
     }
@@ -61,6 +63,9 @@ export class DigitalOceanStrategy implements IFileSystemService, IFileoptionsCon
   }
 
   async get(path: string): Promise<Buffer> {
+    const error = this.checkConfig(this.config)
+    if (error) throw new ApiException(error, 500)
+
     const response = await this.client.send(
       new GetObjectCommand({
         Bucket: this.config.bucket,
@@ -71,42 +76,44 @@ export class DigitalOceanStrategy implements IFileSystemService, IFileoptionsCon
     return Buffer.from(await response.Body.transformToByteArray())
   }
 
+  async getMetaData(path: string): Promise<FileMetada> {
+    const error = this.checkConfig(this.config)
+    if (error) throw new ApiException(error, 500)
+
+    const response = await this.client.send(
+      new GetObjectCommand({
+        Bucket: this.config.bucket,
+        Key: path
+      })
+    )
+
+    return {
+      name: path,
+      mimeType: response.ContentType,
+      size: response.ContentLength.toString(),
+      lastModified: response.LastModified,
+      url: path.replace(this.endpoint, "")
+    }
+  }
+
   async update(path: string, file: FileUploadDto): Promise<string> {
+    const error = this.checkConfig(this.config)
+    if (error) throw new ApiException(error, 500)
+
     await this.delete(path)
     return this.upload(file)
   }
 
   async delete(path: string): Promise<void> {
+    const error = this.checkConfig(this.config)
+    if (error) throw new ApiException(error, 500)
+
     await this.client.send(
       new DeleteObjectCommand({
         Bucket: this.config.bucket,
         Key: path
       })
     )
-  }
-
-  setOptions(config: DOSpacesOptions): IFileSystemService {
-    const error = this.checkConfig(config)
-    if (error) throw new ApiException(error, 500)
-
-    const endpoint = `https://${config.region}.digitaloceanspaces.com/${config.bucket}`
-
-    this.config = config
-    this.endpoint = `https://${config.region}.digitaloceanspaces.com/${config.bucket}`
-    this.cdnEndPoint = `https://${config.region}.cdn.digitaloceanspaces.com/${config.bucket}` || this.cdnEndPoint
-
-    this.client = new S3Client({
-      credentials: {
-        accessKeyId: config.key,
-        secretAccessKey: config.secret
-      },
-
-      endpoint: endpoint,
-      forcePathStyle: true,
-      region: config.region
-    })
-
-    return this
   }
 
   private checkConfig(options: DOSpacesOptions) {

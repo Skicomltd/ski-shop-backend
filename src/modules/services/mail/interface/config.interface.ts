@@ -1,38 +1,41 @@
+// import { RegisterQueueOptions } from "@nestjs/bullmq"
 import { ModuleMetadata } from "@nestjs/common"
+import { JobsOptions } from "bullmq"
+import { MailAddress } from "./mail.service.interface"
 
 export interface MailModuleOptions {
+  from: MailAddress
   clients: IMailClients
-  default: MailTransporter
+  default: keyof IMailClients
+  queue: boolean
 }
 
-export type IMailClients = {
-  smtp: SmtpMailOptions
-  ses: SesMailOption
-  mailgun: MailgunMailOptions
+export interface IQueueOptions {
+  queueOptions?: JobsOptions
 }
 
-export type SmtpMailOptions = {
+export type IMailClients = Record<string, SmtpMailOptions | SesMailOption | MailgunMailOptions>
+
+export type SmtpMailOptions = IQueueOptions & {
   transport: "smtp"
   host: string
   port: number
   url?: string
   encryption?: string
-  secure?: boolean
-  service?: string
   auth: {
     user: string
     pass: string
   }
 }
 
-export type SesMailOption = {
+export type SesMailOption = IQueueOptions & {
   transport: "ses"
   region: string
   accessKeyId: string
   secretAccessKey: string
 }
 
-export type MailgunMailOptions = {
+export type MailgunMailOptions = IQueueOptions & {
   transport: "mailgun"
   apiKey: string
   domain: string
@@ -46,3 +49,5 @@ export interface MailModuleAsyncOptions extends Pick<ModuleMetadata, "imports"> 
   useFactory?: (...args: any[]) => Promise<MailModuleOptions> | MailModuleOptions
   inject?: any[]
 }
+
+// export interface RegisterQueueOptions {}

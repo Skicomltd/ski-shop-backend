@@ -1,10 +1,7 @@
-import * as fs from "fs"
-import handlebars from "handlebars"
-import puppeteer, { PDFOptions } from "puppeteer"
 import { Inject, Injectable } from "@nestjs/common"
 
 import { CONFIG_OPTIONS } from "./entities/config"
-import { FileUploadDto, IFileoptionsConfigurator, IFileSystemService } from "./interfaces/filesystem.interface"
+import { FileMetada, FileUploadDto, IFileSystemService } from "./interfaces/filesystem.interface"
 import { FileSystemDefault, FileSystemDriver, FileSystemModuleOptions, IFileSystemClients } from "./interfaces/config.interface"
 
 import { ApiException } from "@/exceptions/api.exception"
@@ -48,7 +45,7 @@ export class FileSystemService implements IFileSystemService {
     this.clients = options.clients
   }
 
-  private strategyMap: Record<FileSystemDriver, IFileSystemService & IFileoptionsConfigurator> = {
+  private strategyMap: Record<FileSystemDriver, IFileSystemService> = {
     s3: this.s3,
     google: this.google,
     local: this.local,
@@ -66,6 +63,12 @@ export class FileSystemService implements IFileSystemService {
     const options = this.clients[this.default]
     const service = this.getFileSystem(options.driver)
     return service.get(path)
+  }
+
+  async getMetaData(path: string): Promise<FileMetada> {
+    const options = this.clients[this.default]
+    const service = this.getFileSystem(options.driver)
+    return service.getMetaData(path)
   }
 
   async update(path: string, file: FileUploadDto): Promise<string> {
@@ -90,35 +93,6 @@ export class FileSystemService implements IFileSystemService {
     const strategy = this.strategyMap[driver]
     if (!strategy) throw new ApiException(`Invalid filesystem`, 500)
 
-    return strategy.setOptions(this.clients[driver])
-  }
-
-  async generatePDF(path: string, data: Record<string, any>, options: PDFOptions) {
-    const templateHtml = fs.readFileSync(path, "utf8")
-
-    const template = handlebars.compile(templateHtml)
-
-    const html = template(data) //will need this when it's dynamice
-    const browser = await puppeteer.launch({
-      headless: true,
-      args: ["--no-sandbox", "--disabled-setupid-sandbox"]
-    })
-
-    const page = await browser.newPage()
-    await page.addStyleTag({
-      content: `
-      table {
-        page-break-inside: avoid;
-        page-break-before: always;
-      }
-    `
-    })
-
-    await page.goto(`data:text/html;charset=UTF-8,${html}`, {
-      waitUntil: "networkidle0"
-    })
-
-    await page.pdf(options)
-    await browser.close()
+    return strategy
   }
 }

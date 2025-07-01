@@ -3,43 +3,47 @@ import { CreateStoreDto } from "./dto/create-store.dto"
 import { UpdateStoreDto } from "./dto/update-store.dto"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Store } from "./entities/store.entity"
-import { FindOptionsWhere, Repository } from "typeorm"
-import { UserService } from "../users/user.service"
-import Business from "../users/entity/business.entity"
+import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
 
 @Injectable()
-export class StoreService {
+export class StoreService implements IService<Store> {
   constructor(
     @InjectRepository(Store)
-    private storeRepository: Repository<Store>,
-    private userService: UserService
+    private storeRepository: Repository<Store>
   ) {}
-  async create(createStoreDto: CreateStoreDto, business: Business) {
-    const store = this.storeRepository.create({
-      ...createStoreDto,
-      business: business
+
+  async create(createStoreDto: CreateStoreDto, manager?: EntityManager) {
+    const repo = manager ? manager.getRepository<Store>(Store) : this.storeRepository
+    const store = repo.create({
+      ...createStoreDto
     })
-    return await this.storeRepository.save(store)
+    return await repo.save(store)
   }
 
-  findAll() {
-    return `This action returns all store`
+  async find(data?: FindOptionsWhere<Store>): Promise<[Store[], number]> {
+    return await this.storeRepository.findAndCount({ where: data })
+  }
+
+  async findById(id: string): Promise<Store> {
+    return await this.storeRepository.findOne({ where: { id } })
   }
 
   async findOne(filter: FindOptionsWhere<Store>) {
     return await this.storeRepository.findOne({ where: filter })
   }
 
-  async exist(filter: FindOptionsWhere<Store>): Promise<boolean> {
+  async exists(filter: FindOptionsWhere<Store>): Promise<boolean> {
     return this.storeRepository.exists({ where: filter })
   }
 
-  update(id: number, updateStoreDto: UpdateStoreDto) {
-    console.log(updateStoreDto)
-    return `This action updates a #${id} store`
+  async update(entity: Store, data: UpdateStoreDto, manager?: EntityManager): Promise<Store> {
+    const repo = manager ? manager.getRepository<Store>(Store) : this.storeRepository
+    await repo.update({ id: entity.id }, { ...data })
+    return this.findOne({ id: entity.id })
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} store`
+  async remove(filter: FindOptionsWhere<Store>): Promise<number> {
+    const store = await this.storeRepository.delete(filter)
+    return store.raw
   }
 }

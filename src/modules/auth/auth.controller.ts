@@ -1,7 +1,20 @@
 import { Request } from "express"
 import { AuthService } from "./auth.service"
 import { Public } from "./decorators/public.decorator"
-import { Controller, Post, Body, HttpCode, Patch, UseGuards, Req, UseInterceptors, ConflictException, UploadedFile, Get } from "@nestjs/common"
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  Patch,
+  UseGuards,
+  Req,
+  UseInterceptors,
+  ConflictException,
+  UploadedFile,
+  Get,
+  HttpStatus
+} from "@nestjs/common"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { AuthDto, registerSchema, ResendOtpDto, resendOtpSchema, VerifyEmailDto, verifyEmailSchema } from "./dto/auth.dto"
 import JwtShortTimeGuard from "./guard/jwt-short-time.guard"
@@ -18,13 +31,18 @@ import { TransactionHelper } from "../services/utils/transactions/transactions.s
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { OnboardBusinessDto, onboardBusinessSchema } from "./dto/onboard-business.dto"
 import { FileInterceptor } from "@nestjs/platform-express"
-import { diskUpload, imageFilter } from "@/config/multer.config"
+import { imageFilter, memoryUpload } from "@/config/multer.config"
 import { OnboardStoreDto, onboardStoreSchema } from "./dto/onboard-store.dto"
 import { User } from "../users/decorator/user.decorator"
 import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.interface"
 import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { StoreService } from "../stores/store.service"
 import { GoogleOAuthGuard } from "./guard/google-oauth.guard"
+import { BusinessService } from "../users/business.service"
+import { ForgotPasswordDto, forgotPasswordSchema } from "./dto/forgot-password.dto"
+import { IApp } from "@/config/app.config"
+import { ResetPasswordDto, resetPasswordSchema } from "./dto/reset-password.dto"
+import { RefreshDto, refreshSchema } from "./dto/refresh.dto"
 
 @Public()
 @Controller("auth")
@@ -34,6 +52,7 @@ export class AuthController {
     private helperService: HelpersService,
     private mailService: MailService,
     private userService: UserService,
+    private businessService: BusinessService,
     private configService: ConfigService,
     private readonly transactionHelper: TransactionHelper,
     private readonly fileSystemService: FileSystemService,
@@ -50,7 +69,7 @@ export class AuthController {
 
       const otp = await this.authService.saveOtp({ code, email }, manager)
 
-      this.mailService.send({
+      this.mailService.queue({
         to: registerDto.email,
         subject: "Email Validation",
         text: `Validate with your otp code: ${otp.code}. Your code expires in 10mins`
@@ -85,10 +104,10 @@ export class AuthController {
   async onboardBusiness(@Body(new JoiValidationPipe(onboardBusinessSchema)) userBusinessDto: OnboardBusinessDto, @Req() req: Request) {
     const user = req.user
 
-    const business = await this.userService.findOneBusiness({ user: { id: user.id } })
+    const business = await this.businessService.findOne({ user: { id: user.id } })
     if (business) throw new ConflictException("User already created a business")
 
-    await this.userService.createUserBusiness(userBusinessDto, user)
+    await this.businessService.create({ ...userBusinessDto, user })
 
     const payload = { email: user.email, id: user.id }
 
@@ -100,12 +119,17 @@ export class AuthController {
   @ShortTime()
   @Post("/store")
   @UseGuards(JwtShortTimeGuard)
-  @UseInterceptors(FileInterceptor("image", { ...diskUpload, fileFilter: imageFilter }))
+  @UseInterceptors(FileInterceptor("logo", { ...memoryUpload, fileFilter: imageFilter }))
   async create(
     @Body(new JoiValidationPipe(onboardStoreSchema)) onboardStoreDto: OnboardStoreDto,
     @UploadedFile() fileUploaded: CustomFile,
     @User("id") userId: string
   ) {
+    const business = await this.businessService.findOne({ user: { id: userId } })
+    if (!business) throw new NotFoundException("Business does not exist")
+
+    if (await this.storeService.exists({ name: onboardStoreDto.name })) throw new ConflictException("Store name already exist")
+
     const fileDto: FileUploadDto = {
       destination: `images/${fileUploaded.originalname}-storelogo.${fileUploaded.extension}`,
       mimetype: fileUploaded.mimetype,
@@ -115,14 +139,9 @@ export class AuthController {
 
     const url = await this.fileSystemService.upload(fileDto)
 
-    onboardStoreDto = { ...onboardStoreDto, logo: url }
+    onboardStoreDto = { ...onboardStoreDto, logo: url, business: business }
 
-    const business = await this.userService.getUserBusiness({ user: { id: userId } })
-    if (!business) throw new NotFoundException("Business does not exist")
-
-    if (await this.storeService.exist({ name: onboardStoreDto.name })) throw new ConflictException("Store name already exist")
-
-    this.storeService.create(onboardStoreDto, business)
+    await this.storeService.create(onboardStoreDto)
 
     const payload = { email: business.user.email, id: business.user.id }
     const { accessToken: token } = await this.authService.login(payload)
@@ -175,5 +194,52 @@ export class AuthController {
     const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
 
     return { user: req.user, tokens }
+  }
+
+  @Public()
+  @Post("/forgotpassword")
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(@Body(new JoiValidationPipe(forgotPasswordSchema)) { email }: ForgotPasswordDto) {
+    const user = await this.userService.findOne({ email })
+
+    if (!user) return new NotFoundException("user not found!")
+
+    const token = await this.authService.forgotPassword(user)
+
+    const link = this.configService.get<IApp>("app").clientUrl + `?token=${token}`
+
+    await this.mailService.send({
+      to: email,
+      subject: "Password Reset Link",
+      text: `see attached ${link} and it expires in 1 hour`
+    })
+
+    return "Password link sent successfully"
+  }
+
+  @Public()
+  @Post("/resetpassword")
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(@Body(new JoiValidationPipe(resetPasswordSchema)) { password, token }: ResetPasswordDto) {
+    const userId = await this.authService.validateResetToken(token)
+
+    const user = await this.userService.findById(userId)
+
+    await this.userService.update(user, { password })
+
+    return "Password successfully reset"
+  }
+
+  @Public()
+  @Post("/refresh")
+  @HttpCode(HttpStatus.OK)
+  async refresh(@Body(new JoiValidationPipe(refreshSchema)) { refreshToken }: RefreshDto) {
+    const userId = await this.authService.validateRefreshToken(refreshToken)
+
+    const user = await this.userService.findById(userId)
+
+    if (!user) throw new NotFoundException("user not found")
+
+    return await this.authService.login(user)
   }
 }
