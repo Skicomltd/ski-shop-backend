@@ -15,7 +15,7 @@ export class Bank {
   @Column()
   accountName: string
 
-  @ManyToOne(() => User, (user) => user.bank)
+  @ManyToOne(() => User, (user) => user.bank, { eager: true })
   user: User
 
   @CreateDateColumn()

@@ -11,8 +11,9 @@ import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { Bank } from "./entities/bank.entity"
 import { Action } from "../services/casl/actions/action"
 import { AppAbility } from "../services/casl/casl-ability.factory"
+import { BanksInterceptor } from "./interceptors/banks.interceptor"
 
-@Controller("bank")
+@Controller("banks")
 export class BankController {
   constructor(private readonly bankService: BankService) {}
 
@@ -25,11 +26,13 @@ export class BankController {
     return await this.bankService.create({ ...createBankDto, user: req.user })
   }
 
-  @Get()
+  @Get("")
   @UseGuards(PoliciesGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Bank))
-  findAll() {
-    return this.bankService.find()
+  @UseInterceptors(BanksInterceptor)
+  async findAll(@Req() req: Request) {
+    const user = req.user
+    return await this.bankService.find({ user: { id: user.id } })
   }
 
   @Get(":id")

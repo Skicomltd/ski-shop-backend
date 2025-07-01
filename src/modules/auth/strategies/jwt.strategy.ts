@@ -28,7 +28,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
     }
 
     req.user = user
-    console.log("User from JWT Strategy:", req.user)
     return user
   }
 }
