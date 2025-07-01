@@ -35,6 +35,7 @@ import { Action } from "../services/casl/actions/action"
 import { Product } from "./entities/product.entity"
 import { PoliciesGuard } from "../auth/guard/policies-handler.guard"
 import { Public } from "../auth/decorators/public.decorator"
+import { ProductCategoriesEnum } from "../common/types"
 @Controller("products")
 export class ProductsController {
   constructor(
@@ -79,7 +80,6 @@ export class ProductsController {
     return await this.productsService.create({ ...createProductDto, user: user, store: store })
   }
 
-  // send only published products
   @Get("")
   @Public()
   @UseInterceptors(ProductsInterceptor)
@@ -87,9 +87,14 @@ export class ProductsController {
     return await this.productsService.find(query)
   }
 
+  @Get("/categories")
+  @Public()
+  async categories() {
+    return Object.values(ProductCategoriesEnum)
+  }
+
   @Get(":id")
-  @UseGuards(PoliciesGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Product))
+  @Public()
   @UseInterceptors(ProductInterceptor)
   findOne(@Param("id", ParseUUIDPipe) id: string) {
     return this.productsService.findOne({ id: id })
