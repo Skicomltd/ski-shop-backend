@@ -80,11 +80,11 @@ jobs:
          - name: Run Migrations 🔄
            run: npm run migration:migrate --prefix $DEPLOY_PATH
 
-         - name: Seed Database 🔄
-           run: npm run seed --prefix $DEPLOY_PATH
-
          - name: Build Application 💻
            run: npm run build --prefix $DEPLOY_PATH
+
+         - name: Seed Database 🔄
+           run: npm run seed --prefix $DEPLOY_PATH
 
          - name: Restart App 💻
            run: pm2 restart skicom-shop-server-dev
