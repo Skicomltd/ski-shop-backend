@@ -17,15 +17,17 @@ import { BusinessSeeder } from "./modules/seeder/business.seeder"
 import { StoreSeeder } from "./modules/seeder/store.seeder"
 import { BankSeeder } from "./modules/seeder/bank.seeder"
 import { ProductSeeder } from "./modules/seeder/product.seeder"
+import { Cart } from "./modules/carts/entities/cart.entity"
+import logConfig from "./config/log.config"
 
 seeder({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, authConfig, mailConfig, filesystemsConfig]
+      load: [appConfig, authConfig, mailConfig, filesystemsConfig, logConfig]
     }),
     TypeOrmModule.forRootAsync(databaseConfigAsync),
-    TypeOrmModule.forFeature([User, Business, Bank, Store, Product]),
+    TypeOrmModule.forFeature([User, Business, Bank, Store, Product, Cart]),
     UserModule
   ],
   providers: [UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder]

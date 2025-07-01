@@ -61,7 +61,7 @@ export class User {
   product: Product[]
 
   @OneToMany(() => Cart, (cart) => cart.user)
-  cart: Cart[]
+  carts: Cart[]
 
   private _previousPassword?: string
 

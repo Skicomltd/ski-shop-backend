@@ -1,5 +1,5 @@
 import { User } from "@/modules/users/entity/user.entity"
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from "typeorm"
 import { Product } from "@/modules/products/entities/product.entity"
 
 @Entity()
@@ -7,7 +7,8 @@ export class Cart {
   @PrimaryGeneratedColumn("uuid")
   id: string
 
-  @ManyToOne(() => User, (user) => user.cart)
+  @ManyToOne(() => User, (user) => user.carts)
+  @JoinColumn()
   user: User
 
   @ManyToOne(() => Product, { eager: true })
