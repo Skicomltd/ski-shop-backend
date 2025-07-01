@@ -5,14 +5,5 @@ import * as joi from "joi"
 export class UpdateCartDto extends PartialType(CreateCartDto) {}
 
 export const updateCartSchema = joi.object({
-  total: joi.number().optional(),
-  product: joi
-    .array()
-    .items(
-      joi.object({
-        slug: joi.string().optional(),
-        quantity: joi.number().optional()
-      })
-    )
-    .optional()
+  quantity: joi.number().required().min(1)
 })

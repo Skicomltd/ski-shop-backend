@@ -1,20 +1,20 @@
 import { User } from "@/modules/users/entity/user.entity"
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany } from "typeorm"
-import { CartItems } from "./cartItmes.entity"
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm"
+import { Product } from "@/modules/products/entities/product.entity"
 
 @Entity()
 export class Cart {
   @PrimaryGeneratedColumn("uuid")
   id: string
 
-  @Column()
-  total: number
-
   @ManyToOne(() => User, (user) => user.cart)
   user: User
 
-  @OneToMany(() => CartItems, (cartItems) => cartItems.cart, { cascade: true, onDelete: "CASCADE" })
-  cartItems: CartItems[]
+  @ManyToOne(() => Product, { eager: true })
+  product: Product
+
+  @Column({ type: "int" })
+  quantity: number
 
   @CreateDateColumn()
   createdAt: Date

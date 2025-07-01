@@ -1,34 +1,27 @@
 import { Injectable } from "@nestjs/common"
-import { CreateCartDto } from "./dto/create-cart.dto"
 import { UpdateCartDto } from "./dto/update-cart.dto"
 import { Cart } from "./entities/cart.entity"
 import { EntityManager, FindManyOptions, FindOptionsWhere, Repository } from "typeorm"
 import { InjectRepository } from "@nestjs/typeorm"
-import { IcartQuery } from "./interface/cart.interface"
+import { IcartQuery } from "./interfaces/cart.interface"
 
 @Injectable()
 export class CartsService implements IService<Cart> {
   constructor(@InjectRepository(Cart) private cartRepository: Repository<Cart>) {}
 
-  async create(data: CreateCartDto, manager?: EntityManager): Promise<Cart> {
+  async create(data: Partial<Cart>, manager?: EntityManager): Promise<Cart> {
     const repo = manager ? manager.getRepository(Cart) : this.cartRepository
-    const createCart = repo.create({
-      ...data
-    })
-    return await repo.save(createCart)
+    const cart = repo.create(data)
+    return await repo.save(cart)
   }
 
-  async find({ limit, page, userId }: IcartQuery): Promise<[Cart[], number]> {
-    const where: FindManyOptions<Cart>["where"] = {}
+  async find({ limit = 10, page = 1, ...query }: IcartQuery): Promise<[Cart[], number]> {
+    const where: FindManyOptions<Cart>["where"] = { ...query }
 
-    if (userId) {
-      where.user = { id: userId }
-    }
     return await this.cartRepository.findAndCount({
       where,
       take: limit,
-      skip: page ? page - 1 : undefined,
-      relations: ["cartItems", "cartItems.product", "user"]
+      skip: page ? page - 1 : undefined
     })
   }
 
@@ -37,7 +30,7 @@ export class CartsService implements IService<Cart> {
   }
 
   async findOne(filter: FindOptionsWhere<Cart>): Promise<Cart> {
-    return await this.cartRepository.findOne({ where: filter, relations: ["cartItems", "cartItems.product", "user"] })
+    return await this.cartRepository.findOne({ where: filter })
   }
 
   async exists(filter: FindOptionsWhere<Cart>): Promise<boolean> {
