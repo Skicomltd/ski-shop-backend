@@ -39,9 +39,6 @@ export class Product {
   @Column()
   userId: string
 
-  @Column({ type: "varchar", nullable: true })
-  slug: string
-
   @OneToMany(() => CartItems, (cartItems) => cartItems.product)
   cartItems: CartItems[]
 

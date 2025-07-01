@@ -34,6 +34,7 @@ import { AppAbility } from "../services/casl/casl-ability.factory"
 import { Action } from "../services/casl/actions/action"
 import { Product } from "./entities/product.entity"
 import { PoliciesGuard } from "../auth/guard/policies-handler.guard"
+import { Public } from "../auth/decorators/public.decorator"
 @Controller("products")
 export class ProductsController {
   constructor(
@@ -80,15 +81,10 @@ export class ProductsController {
 
   // send only published products
   @Get("")
+  @Public()
   @UseInterceptors(ProductsInterceptor)
   async findAll(@Query() query: IProductsQuery) {
     return await this.productsService.find(query)
-  }
-
-  @Get("stores/:storeId")
-  @UseInterceptors(ProductsInterceptor)
-  async findByStore(@Query() query: IProductsQuery, @Param("storeId", ParseUUIDPipe) storeId: string) {
-    return await this.productsService.find({ ...query, storeId })
   }
 
   @Get(":id")
@@ -97,12 +93,6 @@ export class ProductsController {
   @UseInterceptors(ProductInterceptor)
   findOne(@Param("id", ParseUUIDPipe) id: string) {
     return this.productsService.findOne({ id: id })
-  }
-
-  @UseInterceptors(ProductInterceptor)
-  @Get("/slug/:slug")
-  findBySlug(@Param("slug") slug: string) {
-    return this.productsService.findOne({ slug: slug })
   }
 
   @Patch(":id")

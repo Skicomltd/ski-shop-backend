@@ -27,7 +27,7 @@ export class ProductsService implements IService<Product> {
     return product
   }
 
-  async find({ page, limit, status, stockCount, storeId, categories, vendorType, slug }: IProductsQuery) {
+  async find({ page, limit, status, stockCount, storeId, categories, vendor }: IProductsQuery) {
     const where: FindManyOptions<Product>["where"] = {}
 
     if (storeId) {
@@ -47,13 +47,13 @@ export class ProductsService implements IService<Product> {
       where.category = In(cats as ProductCategoriesEnum[])
     }
 
-    if (vendorType) {
-      where.store = { type: vendorType }
+    if (vendor) {
+      where.store = { type: vendor }
     }
 
-    if (slug) {
-      where.slug = In(Array.isArray(slug) ? slug : [slug])
-    }
+    // if (slug) {
+    //   where.slug = In(Array.isArray(slug) ? slug : [slug])
+    // }
 
     return await this.productRepository.findAndCount({
       where,

@@ -1,12 +1,9 @@
-import { ProductStatusEnum } from "@/modules/common/types"
 import { PaginationParams } from "@/modules/services/pagination/interfaces/paginationParams.interface"
 import { vendonEnumType } from "@/modules/stores/entities/store.entity"
+import { Product } from "../entities/product.entity"
+import { FindOptionsWhere } from "typeorm"
 
-export interface IProductsQuery extends PaginationParams {
-  status?: ProductStatusEnum
-  stockCount?: number
-  storeId?: string
+export interface IProductsQuery extends PaginationParams, FindOptionsWhere<Product> {
   categories?: string
-  vendorType?: vendonEnumType
-  slug?: string | string[]
+  vendor?: vendonEnumType
 }
