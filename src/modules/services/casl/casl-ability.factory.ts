@@ -96,6 +96,8 @@ export class CaslAbilityFactory {
       this.defineRoleForUserVerified(can, cannot, user)
       this.defineRoleForUserHasBusiness(can, cannot, user)
       this.defineRoleForUserHasStore(can, cannot, user)
+    } else if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, "all")
     } else {
       cannot(Action.Create, User)
       cannot(Action.Read, User)
@@ -135,8 +137,9 @@ export class CaslAbilityFactory {
       cannot(Action.Delete, User)
     }
   }
+
   private defineRoleForUserHasStore(can: Can, cannot: Cannot, user: User) {
-    if (user.business.store) {
+    if (user.business?.store) {
       can(Action.Create, User, { id: user.id })
       can(Action.Read, User, { id: user.id })
       can(Action.Update, User, { id: user.id })
