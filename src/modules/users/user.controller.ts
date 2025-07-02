@@ -10,15 +10,6 @@ import { CreateBusinessDto, createBusinessSchema } from "./dto/create-business-d
 import { Request } from "express"
 import { UpdateBusinessDto, updateBusinessSchema } from "./dto/update-business-dto"
 import { IBusinessQuery } from "./interfaces/businesses-query.interface"
-import { UpdateProfileDto, updateProfileSchema } from "../vendors/dto/update-profile.dto"
-import { StoreService } from "../stores/store.service"
-import { TransactionHelper } from "../services/utils/transactions/transactions.service"
-import { BadReqException } from "@/exceptions/badRequest.exception"
-import { PoliciesGuard } from "../auth/guard/policies-handler.guard"
-import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
-import { AppAbility } from "../services/casl/casl-ability.factory"
-import { User } from "./entity/user.entity"
-import { Action } from "../services/casl/actions/action"
 
 @Controller("user")
 export class UserController {
