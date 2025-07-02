@@ -42,6 +42,9 @@ export class User {
   @Column()
   email: string
 
+  @Column({ type: "text", default: "" })
+  phone: string
+
   @Column({ default: false })
   isEmailVerified: boolean
 

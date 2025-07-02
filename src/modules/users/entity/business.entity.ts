@@ -10,6 +10,9 @@ export default class Business {
   @Column()
   type: string
 
+  @Column({ type: "text", default: "" })
+  name: string
+
   @Column({ type: "text", nullable: true, unique: true })
   businessRegNumber: string
 

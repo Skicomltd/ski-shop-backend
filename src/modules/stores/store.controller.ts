@@ -10,7 +10,7 @@ import { StoreInterceptor } from "./interceptors/store.interceptor"
 import { StoresInterceptor } from "./interceptors/stores.interceptor"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { FileInterceptor } from "@nestjs/platform-express"
-import { diskUpload, imageFilter } from "@/config/multer.config"
+import { memoryUpload, imageFilter } from "@/config/multer.config"
 import { User } from "../users/decorator/user.decorator"
 import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.interface"
 import { CreateStoreDto, createStoreSchema } from "./dto/create-store.dto"
@@ -30,7 +30,7 @@ export class StoreController {
   ) {}
 
   @Post("")
-  @UseInterceptors(FileInterceptor("image", { ...diskUpload, fileFilter: imageFilter }))
+  @UseInterceptors(FileInterceptor("image", { ...memoryUpload, fileFilter: imageFilter }))
   async create(
     @Body(new JoiValidationPipe(createStoreSchema)) createStoreDto: CreateStoreDto,
     @UploadedFile() fileUploaded: CustomFile,
@@ -78,7 +78,7 @@ export class StoreController {
   }
 
   @Patch(":id")
-  @UseInterceptors(FileInterceptor("image", { ...diskUpload, fileFilter: imageFilter }))
+  @UseInterceptors(FileInterceptor("image", { ...memoryUpload, fileFilter: imageFilter }))
   @UseGuards(PoliciesGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Store))
   @UseInterceptors(StoreInterceptor)

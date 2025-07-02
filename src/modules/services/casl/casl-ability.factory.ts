@@ -26,6 +26,7 @@ export class CaslAbilityFactory {
       this.defineRoleForBusiness(can, cannot, user)
       this.defineRoleForStore(can, cannot, user)
       this.defineRoleForBank(can, cannot, user)
+      this.defineRoleForUserProfile(can, cannot, user)
     }
 
     return build({
@@ -76,5 +77,15 @@ export class CaslAbilityFactory {
     } else {
       cannot(Action.Read, Bank)
     }
+  }
+
+  private defineRoleForUserProfile(can: Can, cannot: Cannot, user: User) {
+    if (user.role === UserRoleEnum.Vendor) {
+      can(Action.Read, User, { id: user.id })
+      can(Action.Update, User, { id: user.id })
+      can(Action.Delete, User, { id: user.id })
+    }
+
+    cannot(Action.Delete, User)
   }
 }
