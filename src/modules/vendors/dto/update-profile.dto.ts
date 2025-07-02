@@ -4,8 +4,7 @@ export class UpdateProfileDto {
   user: {
     firstName: string
     lastName: string
-    email: string
-    phone: string
+    phoneNumber: string
   }
   store: {
     name: string
@@ -27,8 +26,7 @@ export const updateProfileSchema = joi.object({
     .object({
       firstName: joi.string().optional(),
       lastName: joi.string().optional(),
-      email: joi.string().email().optional(),
-      phone: joi.string().optional()
+      phoneNumber: joi.string().optional()
     })
     .optional(),
   store: joi

@@ -17,7 +17,7 @@ import { imageFilter, memoryUpload } from "@/config/multer.config"
 import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.interface"
 
-@Controller("vendor")
+@Controller("vendors")
 export class VendorController {
   constructor(
     private storeService: StoreService,
@@ -47,8 +47,6 @@ export class VendorController {
     if (!store) throw new BadReqException("User currently has no store")
 
     return this.transactionHelper.runInTransaction(async (manager) => {
-      let url: string
-
       if (fileUploaded) {
         const fileDto: FileUploadDto = {
           destination: `images/${fileUploaded.originalname}-storelogo.${fileUploaded.extension}`,
@@ -57,10 +55,8 @@ export class VendorController {
           filePath: fileUploaded.path
         }
 
-        url = await this.fileSystemService.upload(fileDto)
+        updateUserProfile.store.logo = await this.fileSystemService.upload(fileDto)
       }
-
-      updateUserProfile.store.logo = url
 
       await this.userService.update(user, updateUserProfile.user, manager)
       await this.bussinessService.update(business, updateUserProfile.business, manager)

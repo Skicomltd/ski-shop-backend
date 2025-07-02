@@ -27,11 +27,11 @@ export class UserService implements IService<User> {
   }
 
   async find(data: IUserQuery): Promise<[User[], number]> {
-    return await this.userRepository.findAndCount({ where: data })
+    return await this.userRepository.findAndCount({ where: data, relations: ["business", "business.store"] })
   }
 
   async findById(id: string): Promise<User> {
-    return await this.userRepository.findOne({ where: { id: id } })
+    return await this.userRepository.findOne({ where: { id: id }, relations: ["business", "business.store"] })
   }
 
   async findOne(filter: FindOptionsWhere<User>): Promise<User> {
