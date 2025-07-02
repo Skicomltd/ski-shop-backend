@@ -13,6 +13,8 @@ import { LogModule } from "./log/log.module"
 import { logConfigAsync } from "@/config/log.config"
 import { LogService } from "./log/log.service"
 import { MailService } from "./mail/mail.service"
+import { PaymentsService } from "./payments/payments.service"
+import { PaymentsModule } from "./payments/payments.module"
 
 @Global()
 @Module({
@@ -23,9 +25,10 @@ import { MailService } from "./mail/mail.service"
     FileSystemModule.registerAsync(fileConfigAsync),
     JwtModule.registerAsync(jwtConfig),
     CaslModule,
-    LogModule.registerAsync(logConfigAsync)
+    LogModule.registerAsync(logConfigAsync),
+    PaymentsModule
   ],
-  providers: [PaginationService, LogService, MailService],
-  exports: [MailService, PaginationService, UtilsModule, FileSystemModule, CaslModule, LogService]
+  providers: [PaginationService, LogService, MailService, PaymentsService],
+  exports: [MailService, PaginationService, UtilsModule, FileSystemModule, CaslModule, LogService, PaymentsService]
 })
 export class ServicesModule {}
