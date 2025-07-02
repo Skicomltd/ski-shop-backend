@@ -38,11 +38,11 @@ import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.inte
 import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { StoreService } from "../stores/store.service"
 import { GoogleOAuthGuard } from "./guard/google-oauth.guard"
-import { BusinessService } from "../users/business.service"
 import { ForgotPasswordDto, forgotPasswordSchema } from "./dto/forgot-password.dto"
 import { IApp } from "@/config/app.config"
 import { ResetPasswordDto, resetPasswordSchema } from "./dto/reset-password.dto"
 import { RefreshDto, refreshSchema } from "./dto/refresh.dto"
+import { BusinessService } from "../business/business.service"
 
 @Public()
 @Controller("auth")

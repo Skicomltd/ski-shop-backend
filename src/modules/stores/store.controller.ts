@@ -17,9 +17,9 @@ import { CreateStoreDto, createStoreSchema } from "./dto/create-store.dto"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { ConflictException } from "@/exceptions/conflict.exception"
 import { FileSystemService } from "../services/filesystem/filesystem.service"
-import { BusinessService } from "../users/business.service"
 import { UpdateStoreMapper } from "./interface/update-store-mapper-interface"
 import { Request } from "express"
+import { BusinessService } from "../business/business.service"
 @Controller("stores")
 export class StoreController {
   constructor(

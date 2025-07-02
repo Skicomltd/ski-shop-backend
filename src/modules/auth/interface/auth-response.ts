@@ -1,4 +1,4 @@
-import Business from "@/modules/users/entity/business.entity"
+import Business from "@/modules/business/entities/business.entity"
 import { User } from "@/modules/users/entity/user.entity"
 
 export interface IAuthResponse {

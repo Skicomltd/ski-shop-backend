@@ -1,4 +1,4 @@
-import Business from "@/modules/users/entity/business.entity"
+import Business from "@/modules/business/entities/business.entity"
 import { vendonEnumType } from "../entities/store.entity"
 
 export interface StoreResponse {

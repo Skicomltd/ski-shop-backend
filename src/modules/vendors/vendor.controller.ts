@@ -7,7 +7,6 @@ import { Action } from "../services/casl/actions/action"
 import { User } from "../users/entity/user.entity"
 import { Request } from "express"
 import { JoiValidationPipe } from "@/validations/joi.validation"
-import { BusinessService } from "../users/business.service"
 import { UserService } from "../users/user.service"
 import { BadReqException } from "@/exceptions/badRequest.exception"
 import { UpdateProfileDto, updateProfileSchema } from "./dto/update-profile.dto"
@@ -16,6 +15,7 @@ import { imageFilter, memoryUpload } from "@/config/multer.config"
 import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.interface"
 import { PoliciesVerifyUserEmailBusinessAndStoreGuard } from "../auth/guard/policies-handler-verify-user.guard"
+import { BusinessService } from "../business/business.service"
 
 @Controller("vendors")
 export class VendorController {

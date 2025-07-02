@@ -11,10 +11,10 @@ import {
   UpdateDateColumn
 } from "typeorm"
 import * as bcrypt from "bcryptjs"
-import Business from "./business.entity"
 import { Bank } from "@/modules/banks/entities/bank.entity"
 import { Product } from "@/modules/products/entities/product.entity"
 import { Cart } from "@/modules/carts/entities/cart.entity"
+import Business from "@/modules/business/entities/business.entity"
 
 export enum UserRoleEnum {
   "Customer" = "customer",

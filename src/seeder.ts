@@ -8,7 +8,6 @@ import appConfig from "./config/app.config"
 import mailConfig from "./config/mail.config"
 import filesystemsConfig from "./config/filesystems.config"
 import authConfig from "./config/auth.config"
-import Business from "./modules/users/entity/business.entity"
 import { Bank } from "./modules/banks/entities/bank.entity"
 import { Store } from "./modules/stores/entities/store.entity"
 import { Product } from "./modules/products/entities/product.entity"
@@ -19,6 +18,7 @@ import { BankSeeder } from "./modules/seeder/bank.seeder"
 import { ProductSeeder } from "./modules/seeder/product.seeder"
 import { Cart } from "./modules/carts/entities/cart.entity"
 import logConfig from "./config/log.config"
+import Business from "./modules/business/entities/business.entity"
 
 seeder({
   imports: [

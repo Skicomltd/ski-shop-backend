@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from "typeorm"
 import { Store } from "@/modules/stores/entities/store.entity"
-import { User } from "./user.entity"
+import { User } from "@/modules/users/entity/user.entity"
+
 
 @Entity()
 export default class Business {
