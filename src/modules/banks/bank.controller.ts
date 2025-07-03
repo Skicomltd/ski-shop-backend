@@ -12,12 +12,14 @@ import { Bank } from "./entities/bank.entity"
 import { Action } from "../services/casl/actions/action"
 import { AppAbility } from "../services/casl/casl-ability.factory"
 import { BanksInterceptor } from "./interceptors/banks.interceptor"
+import { ShortTime } from "../auth/decorators/short-time.decorator"
 
 @Controller("banks")
 export class BankController {
   constructor(private readonly bankService: BankService) {}
 
   @Post()
+  @ShortTime()
   @UseGuards(PoliciesGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Bank))
   @UseInterceptors(BankInterceptor)
