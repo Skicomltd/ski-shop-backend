@@ -5,7 +5,7 @@ import { PolicyHandler } from "../interface/policies-interface"
 import { CHECK_POLICIES_KEY } from "../decorators/policies-handler.decorator"
 
 @Injectable()
-export class PoliciesVerifyUserEmailBusinessAndStoreGuard implements CanActivate {
+export class PoliciesHasBusinessGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private caslAbilityFactory: CaslAbilityFactory
@@ -15,7 +15,7 @@ export class PoliciesVerifyUserEmailBusinessAndStoreGuard implements CanActivate
     const policyHandlers = this.reflector.get<PolicyHandler[]>(CHECK_POLICIES_KEY, context.getHandler()) || []
 
     const { user } = context.switchToHttp().getRequest()
-    const ability = this.caslAbilityFactory.CheckIfUserIsVerifiedHasBusinessAndStore(user)
+    const ability = this.caslAbilityFactory.createAbilityForUserWithBusiness(user)
     return policyHandlers.every((handler) => this.execPolicyHandler(handler, ability))
   }
 
