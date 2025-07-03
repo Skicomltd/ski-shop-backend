@@ -20,8 +20,8 @@ export class BankController {
 
   @Post()
   @ShortTime()
-  @UseGuards(PoliciesGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Bank))
+  // @UseGuards(PoliciesGuard)
+  // @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Bank))
   @UseInterceptors(BankInterceptor)
   async create(@Body(new JoiValidationPipe(bankSchema)) createBankDto: CreateBankDto, @Req() req: Request) {
     if (await this.bankService.exists({ accountNumber: createBankDto.accountNumber })) throw new ConflictException("Bank credentials already exist")
