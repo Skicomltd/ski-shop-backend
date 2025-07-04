@@ -1,5 +1,5 @@
+import Business from "@/modules/business/entities/business.entity"
 import { vendonEnumType } from "@/modules/stores/entities/store.entity"
-import Business from "@/modules/users/entity/business.entity"
 import * as Joi from "joi"
 
 export class OnboardStoreDto {

@@ -4,9 +4,9 @@ import { Injectable } from "@nestjs/common"
 import { Action } from "./actions/action"
 import { Product } from "@/modules/products/entities/product.entity"
 import { Store } from "@/modules/stores/entities/store.entity"
-import Business from "@/modules/users/entity/business.entity"
 import { Bank } from "@/modules/banks/entities/bank.entity"
 import { ProductStatusEnum } from "@/modules/common/types"
+import Business from "@/modules/business/entities/business.entity"
 
 type Subjects = InferSubjects<typeof User | typeof Product | typeof Business | typeof Store | typeof Bank> | "all"
 
@@ -26,6 +26,7 @@ export class CaslAbilityFactory {
       this.defineRoleForBusiness(can, cannot, user)
       this.defineRoleForStore(can, cannot, user)
       this.defineRoleForBank(can, cannot, user)
+      this.defineRoleForUserProfile(can, cannot, user)
     }
 
     return build({
@@ -76,5 +77,63 @@ export class CaslAbilityFactory {
     } else {
       cannot(Action.Read, Bank)
     }
+  }
+
+  private defineRoleForUserProfile(can: Can, cannot: Cannot, user: User) {
+    if (user.role === UserRoleEnum.Vendor) {
+      can(Action.Read, User, { id: user.id })
+      can(Action.Update, User, { id: user.id })
+      can(Action.Delete, User, { id: user.id })
+    }
+
+    cannot(Action.Delete, User)
+  }
+
+  createAbilityForVerifiedUser(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+    if (user.isEmailVerified) {
+      can(Action.Create, User, { id: user.id })
+      can(Action.Read, User, { id: user.id })
+      can(Action.Update, User, { id: user.id })
+      can(Action.Delete, User, { id: user.id })
+    } else {
+      cannot(Action.Create, User)
+      cannot(Action.Read, User)
+      cannot(Action.Update, User)
+      cannot(Action.Delete, User)
+    }
+    return build({ detectSubjectType: (item) => item.constructor as ExtractSubjectType<Subjects> }) as AppAbility
+  }
+
+  createAbilityForUserWithBusiness(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+    if (user.business) {
+      can(Action.Create, User, { id: user.id })
+      can(Action.Read, User, { id: user.id })
+      can(Action.Update, User, { id: user.id })
+      can(Action.Delete, User, { id: user.id })
+    } else {
+      cannot(Action.Create, User)
+      cannot(Action.Read, User)
+      cannot(Action.Update, User)
+      cannot(Action.Delete, User)
+    }
+    return build({ detectSubjectType: (item) => item.constructor as ExtractSubjectType<Subjects> }) as AppAbility
+  }
+
+  createAbilityForUserWithStore(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+    if (user.business?.store) {
+      can(Action.Create, User, { id: user.id })
+      can(Action.Read, User, { id: user.id })
+      can(Action.Update, User, { id: user.id })
+      can(Action.Delete, User, { id: user.id })
+    } else {
+      cannot(Action.Create, User)
+      cannot(Action.Read, User)
+      cannot(Action.Update, User)
+      cannot(Action.Delete, User)
+    }
+    return build({ detectSubjectType: (item) => item.constructor as ExtractSubjectType<Subjects> }) as AppAbility
   }
 }

@@ -4,7 +4,7 @@ import { Seeder } from "nestjs-seeder"
 import { Repository } from "typeorm"
 import { faker } from "@faker-js/faker"
 import { User, UserRoleEnum } from "../users/entity/user.entity"
-import Business from "../users/entity/business.entity"
+import Business from "../business/entities/business.entity"
 
 @Injectable()
 export class BusinessSeeder implements Seeder {

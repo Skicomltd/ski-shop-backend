@@ -6,6 +6,7 @@ import { ApiException } from "@/exceptions/api.exception"
 import { FileMetada, FileUploadDto, IFileSystemService } from "../interfaces/filesystem.interface"
 import { FileSystemModuleOptions } from "../interfaces/config.interface"
 import { CONFIG_OPTIONS } from "../entities/config"
+import * as streamifier from "streamifier"
 
 export type CloudinaryType = UploadApiErrorResponse | UploadApiResponse
 
@@ -24,16 +25,29 @@ export class CloudinaryStrategy implements IFileSystemService {
 
   async upload(file: FileUploadDto): Promise<string> {
     try {
-      if (!fs.existsSync(file.filePath)) {
-        throw new Error(`File does not exist ${file.filePath}`)
+      if (file.filePath) {
+        if (!fs.existsSync(file.filePath)) {
+          throw new Error(`File does not exist ${file.filePath}`)
+        }
+        const result = await cloudinary.uploader.upload(file.filePath, {
+          resource_type: file.mimetype.startsWith("video") ? "video" : file.mimetype.startsWith("image") ? "image" : "raw"
+        })
+
+        fs.unlinkSync(file.filePath)
+        return result.secure_url
+      } else if (file.buffer) {
+        return new Promise<string>((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream((error, result) => {
+            if (error) return reject(error)
+            if (result && result.secure_url) {
+              resolve(result.secure_url)
+            } else {
+              reject(new Error("No secure_url returned from Cloudinary"))
+            }
+          })
+          streamifier.createReadStream(file.buffer).pipe(uploadStream)
+        })
       }
-
-      const result = await cloudinary.uploader.upload(file.filePath, {
-        resource_type: file.mimetype.startsWith("video") ? "video" : file.mimetype.startsWith("image") ? "image" : "raw"
-      })
-
-      fs.unlinkSync(file.filePath)
-      return result.secure_url
     } catch (error) {
       throw new ApiException(`Failed to upload file to Cloudinary: ${error.message}`, 500)
     }

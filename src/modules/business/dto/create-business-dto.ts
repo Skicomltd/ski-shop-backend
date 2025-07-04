@@ -1,5 +1,5 @@
+import { User } from "@/modules/users/entity/user.entity"
 import * as joi from "joi"
-import { User } from "../entity/user.entity"
 
 export class CreateBusinessDto {
   type: string
