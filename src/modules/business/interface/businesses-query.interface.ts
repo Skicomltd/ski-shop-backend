@@ -1,5 +1,5 @@
 import { PaginationParams } from "@/modules/services/pagination/interfaces/paginationParams.interface"
 import { FindOptionsWhere } from "typeorm"
-import Business from "../entity/business.entity"
+import Business from "../entities/business.entity"
 
 export interface IBusinessQuery extends PaginationParams, FindOptionsWhere<Business> {}

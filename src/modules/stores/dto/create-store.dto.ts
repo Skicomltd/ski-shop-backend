@@ -1,6 +1,6 @@
-import Business from "@/modules/users/entity/business.entity"
 import * as Joi from "joi"
 import { vendonEnumType } from "../entities/store.entity"
+import Business from "@/modules/business/entities/business.entity"
 
 export class CreateStoreDto {
   name: string

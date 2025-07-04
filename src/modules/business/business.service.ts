@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common"
-import Business from "./entity/business.entity"
+import Business from "./entities/business.entity"
 import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
 import { InjectRepository } from "@nestjs/typeorm"
-import { IBusinessQuery } from "./interfaces/businesses-query.interface"
 import { CreateBusinessDto } from "./dto/create-business-dto"
+import { IBusinessQuery } from "./interface/businesses-query.interface"
 
 @Injectable()
 export class BusinessService implements IService<Business> {

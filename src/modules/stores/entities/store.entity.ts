@@ -1,5 +1,5 @@
+import Business from "@/modules/business/entities/business.entity"
 import { Product } from "@/modules/products/entities/product.entity"
-import Business from "@/modules/users/entity/business.entity"
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, OneToMany, JoinColumn } from "typeorm"
 
 // TODO: ENDPOINT TO RETURN AN ARRAY OF STORE CATEGORIES ENUM

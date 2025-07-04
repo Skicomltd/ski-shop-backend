@@ -10,16 +10,16 @@ import { StoreInterceptor } from "./interceptors/store.interceptor"
 import { StoresInterceptor } from "./interceptors/stores.interceptor"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { FileInterceptor } from "@nestjs/platform-express"
-import { diskUpload, imageFilter } from "@/config/multer.config"
+import { memoryUpload, imageFilter } from "@/config/multer.config"
 import { User } from "../users/decorator/user.decorator"
 import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.interface"
 import { CreateStoreDto, createStoreSchema } from "./dto/create-store.dto"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { ConflictException } from "@/exceptions/conflict.exception"
 import { FileSystemService } from "../services/filesystem/filesystem.service"
-import { BusinessService } from "../users/business.service"
 import { UpdateStoreMapper } from "./interface/update-store-mapper-interface"
 import { Request } from "express"
+import { BusinessService } from "../business/business.service"
 @Controller("stores")
 export class StoreController {
   constructor(
@@ -30,7 +30,7 @@ export class StoreController {
   ) {}
 
   @Post("")
-  @UseInterceptors(FileInterceptor("image", { ...diskUpload, fileFilter: imageFilter }))
+  @UseInterceptors(FileInterceptor("image", { ...memoryUpload, fileFilter: imageFilter }))
   async create(
     @Body(new JoiValidationPipe(createStoreSchema)) createStoreDto: CreateStoreDto,
     @UploadedFile() fileUploaded: CustomFile,
@@ -70,15 +70,17 @@ export class StoreController {
   }
 
   @Get(":id")
-  @UseGuards(PoliciesGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Store))
   @UseInterceptors(StoreInterceptor)
-  findOne(@Param("id") id: string) {
-    return this.storeService.findOne({ id: id })
+  async findOne(@Param("id") id: string) {
+    const store = await this.storeService.findOne({ id: id })
+
+    if (!store) throw new NotFoundException("Store does not exist")
+
+    return store
   }
 
   @Patch(":id")
-  @UseInterceptors(FileInterceptor("image", { ...diskUpload, fileFilter: imageFilter }))
+  @UseInterceptors(FileInterceptor("image", { ...memoryUpload, fileFilter: imageFilter }))
   @UseGuards(PoliciesGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Store))
   @UseInterceptors(StoreInterceptor)
@@ -88,7 +90,7 @@ export class StoreController {
     @UploadedFile() fileUploaded: CustomFile
   ) {
     const store = await this.storeService.findOne({ id: id })
-    let logo: string = store.logo
+
     if (fileUploaded) {
       const fileDto: FileUploadDto = {
         destination: `images/${fileUploaded.originalname}-storelogo.${fileUploaded.extension}`,
@@ -97,9 +99,9 @@ export class StoreController {
         filePath: fileUploaded.path
       }
 
-      logo = await this.fileSystemService.upload(fileDto)
+      updateStoreDto.logo = await this.fileSystemService.upload(fileDto)
     }
-    updateStoreDto.logo = logo
+
     const updateStore = await this.storeUpdateMapper.prepareUpdateStoreMapper(updateStoreDto, store)
     return this.storeService.update(store, updateStore)
   }

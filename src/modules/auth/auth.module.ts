@@ -9,9 +9,11 @@ import { TypeOrmModule } from "@nestjs/typeorm"
 import { JwtService } from "@nestjs/jwt"
 import { StoreModule } from "../stores/store.module"
 import { GoogleStrategy } from "./strategies/google.strategy"
+import { BusinessModule } from "../business/business.module"
+import { BankModule } from "../banks/bank.module"
 
 @Module({
-  imports: [UserModule, StoreModule, TypeOrmModule.forFeature([Otp])],
+  imports: [UserModule, StoreModule, TypeOrmModule.forFeature([Otp]), BusinessModule, BankModule],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, PasswordStrategy, GoogleStrategy, JwtService]
 })

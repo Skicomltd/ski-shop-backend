@@ -57,9 +57,8 @@ export class AuthService {
 
   async validateUser(loginDto: LoginDto) {
     const user = await this.userService.findOne({ email: loginDto.email })
-    if (!user) throw new NotFoundException("Invalid Credentials")
 
-    if (!user.isEmailVerified) throw new BadReqException("Verify Email")
+    if (!user) throw new NotFoundException("Invalid Credentials")
 
     const match = await user.comparePassword(loginDto.password)
 

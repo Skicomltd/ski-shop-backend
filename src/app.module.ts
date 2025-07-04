@@ -22,6 +22,8 @@ import { ProductsModule } from "./modules/products/products.module"
 import { CartsModule } from "./modules/carts/carts.module"
 import logConfig from "./config/log.config"
 import { BullModule } from "@nestjs/bullmq"
+import { VendorModule } from "./modules/vendors/vendor.module"
+import { BusinessModule } from "./modules/business/business.module"
 
 @Module({
   imports: [
@@ -43,7 +45,9 @@ import { BullModule } from "@nestjs/bullmq"
     StoreModule,
     BankModule,
     ProductsModule,
-    CartsModule
+    CartsModule,
+    VendorModule,
+    BusinessModule
   ],
   controllers: [AppController],
   providers: [
