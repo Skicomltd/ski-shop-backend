@@ -70,15 +70,12 @@ export class StoreController {
   }
 
   @Get(":id")
-  @UseGuards(PoliciesGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Store))
   @UseInterceptors(StoreInterceptor)
   async findOne(@Param("id") id: string) {
     const store = await this.storeService.findOne({ id: id })
 
-    if (!store) {
-      throw new NotFoundException("Store does not exist")
-    }
+    if (!store) throw new NotFoundException("Store does not exist")
+
     return store
   }
 

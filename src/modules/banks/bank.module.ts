@@ -10,6 +10,7 @@ import { jwtConfig } from "@/config/jwt.config"
 @Module({
   imports: [TypeOrmModule.forFeature([Bank]), UserModule, JwtModule.registerAsync(jwtConfig)],
   controllers: [BankController],
-  providers: [BankService]
+  providers: [BankService],
+  exports: [BankService]
 })
 export class BankModule {}
