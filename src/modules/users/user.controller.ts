@@ -5,19 +5,19 @@ import { UpdateUserDto, updateUserSchema } from "./dto/update-user-dto"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { IUserQuery } from "./interfaces/users-query.interface"
-
+import { CreateBusinessDto, createBusinessSchema } from "./dto/create-business-dto"
+import { Request } from "express"
+import { UpdateBusinessDto, updateBusinessSchema } from "./dto/update-business-dto"
+import { IBusinessQuery } from "./interfaces/businesses-query.interface"
 
 @Controller("user")
 export class UserController {
-  constructor(
-    private readonly userService: UserService,
-  ) {}
+  constructor(private readonly userService: UserService) {}
 
   @Post("")
   async create(@Body(new JoiValidationPipe(createUserSchema)) createUser: CreateUserDto) {
     return await this.userService.create(createUser)
   }
-
 
   @Patch("/:id")
   async update(@Param("id", ParseUUIDPipe) id: string, @Body(new JoiValidationPipe(updateUserSchema)) updateUser: UpdateUserDto) {
@@ -37,19 +37,15 @@ export class UserController {
     return await this.userService.update(user, prepareUserUpdate)
   }
 
-
-
   @Get()
   async findAll(@Query() query: IUserQuery) {
     return await this.userService.find(query)
   }
 
-
   @Get("/:id")
   async findOne(@Param("id", ParseUUIDPipe) id: string) {
     return await this.userService.findOne({ id })
   }
-  
 
   @Delete("/:id")
   async remove(@Param("id", ParseUUIDPipe) id: string) {

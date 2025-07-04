@@ -89,28 +89,8 @@ export class CaslAbilityFactory {
     cannot(Action.Delete, User)
   }
 
-  CheckIfUserIsVerifiedHasBusinessAndStore(user: User): AppAbility {
+  createAbilityForVerifiedUser(user: User): AppAbility {
     const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
-
-    if (user.role === UserRoleEnum.Vendor) {
-      this.defineRoleForUserVerified(can, cannot, user)
-      this.defineRoleForUserHasBusiness(can, cannot, user)
-      this.defineRoleForUserHasStore(can, cannot, user)
-    } else if (user.role === UserRoleEnum.Admin) {
-      can(Action.Manage, "all")
-    } else {
-      cannot(Action.Create, User)
-      cannot(Action.Read, User)
-      cannot(Action.Update, User)
-      cannot(Action.Delete, User)
-    }
-
-    return build({
-      detectSubjectType: (item) => item.constructor as ExtractSubjectType<Subjects>
-    }) as AppAbility
-  }
-
-  private defineRoleForUserVerified(can: Can, cannot: Cannot, user: User) {
     if (user.isEmailVerified) {
       can(Action.Create, User, { id: user.id })
       can(Action.Read, User, { id: user.id })
@@ -122,9 +102,11 @@ export class CaslAbilityFactory {
       cannot(Action.Update, User)
       cannot(Action.Delete, User)
     }
+    return build({ detectSubjectType: (item) => item.constructor as ExtractSubjectType<Subjects> }) as AppAbility
   }
 
-  private defineRoleForUserHasBusiness(can: Can, cannot: Cannot, user: User) {
+  createAbilityForUserWithBusiness(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
     if (user.business) {
       can(Action.Create, User, { id: user.id })
       can(Action.Read, User, { id: user.id })
@@ -136,9 +118,11 @@ export class CaslAbilityFactory {
       cannot(Action.Update, User)
       cannot(Action.Delete, User)
     }
+    return build({ detectSubjectType: (item) => item.constructor as ExtractSubjectType<Subjects> }) as AppAbility
   }
 
-  private defineRoleForUserHasStore(can: Can, cannot: Cannot, user: User) {
+  createAbilityForUserWithStore(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
     if (user.business?.store) {
       can(Action.Create, User, { id: user.id })
       can(Action.Read, User, { id: user.id })
@@ -150,5 +134,6 @@ export class CaslAbilityFactory {
       cannot(Action.Update, User)
       cannot(Action.Delete, User)
     }
+    return build({ detectSubjectType: (item) => item.constructor as ExtractSubjectType<Subjects> }) as AppAbility
   }
 }

@@ -14,8 +14,9 @@ import { FileInterceptor } from "@nestjs/platform-express"
 import { imageFilter, memoryUpload } from "@/config/multer.config"
 import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.interface"
-import { PoliciesVerifyUserEmailBusinessAndStoreGuard } from "../auth/guard/policies-handler-verify-user.guard"
-import { BusinessService } from "../business/business.service"
+import { PoliciesVerifiedUserGuard } from "../auth/guard/policies-handler-verifed-user.guard"
+import { PoliciesHasBusinessGuard } from "../auth/guard/policy-has-business.guard"
+import { PoliciesHasStoreGuard } from "../auth/guard/policy-has-store.guard"
 
 @Controller("vendors")
 export class VendorController {
@@ -28,7 +29,7 @@ export class VendorController {
   ) {}
 
   @Post("/profile")
-  @UseGuards(PoliciesVerifyUserEmailBusinessAndStoreGuard)
+  @UseGuards(PoliciesVerifiedUserGuard, PoliciesHasBusinessGuard, PoliciesHasStoreGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, User))
   @UseInterceptors(FileInterceptor("logo", { ...memoryUpload, fileFilter: imageFilter }))
   async updateUserProfile(

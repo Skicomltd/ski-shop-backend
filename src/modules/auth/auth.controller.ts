@@ -43,6 +43,8 @@ import { IApp } from "@/config/app.config"
 import { ResetPasswordDto, resetPasswordSchema } from "./dto/reset-password.dto"
 import { RefreshDto, refreshSchema } from "./dto/refresh.dto"
 import { BusinessService } from "../business/business.service"
+import { OnboardBankDto } from "./dto/onboard-bank.dto"
+import { BankService } from "../banks/bank.service"
 
 @Public()
 @Controller("auth")
@@ -56,7 +58,8 @@ export class AuthController {
     private configService: ConfigService,
     private readonly transactionHelper: TransactionHelper,
     private readonly fileSystemService: FileSystemService,
-    private readonly storeService: StoreService
+    private readonly storeService: StoreService,
+    private readonly bankService: BankService
   ) {}
 
   @Post("/register")
@@ -145,6 +148,24 @@ export class AuthController {
 
     const payload = { email: business.user.email, id: business.user.id }
     const { accessToken: token } = await this.authService.login(payload)
+
+    return { token }
+  }
+
+  @ShortTime()
+  @UseGuards(JwtShortTimeGuard)
+  @Post("/bank")
+  async onboardBank(@Body(new JoiValidationPipe(onboardBusinessSchema)) onboardBankDto: OnboardBankDto, @Req() req: Request) {
+    const user = req.user
+
+    const bank = await this.bankService.findOne({ user: { id: user.id } })
+    if (bank) throw new ConflictException("User already created a business")
+
+    await this.bankService.create({ ...onboardBankDto, user })
+
+    const payload = { email: user.email, id: user.id }
+
+    const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
 
     return { token }
   }

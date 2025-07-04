@@ -73,8 +73,13 @@ export class StoreController {
   @UseGuards(PoliciesGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Store))
   @UseInterceptors(StoreInterceptor)
-  findOne(@Param("id") id: string) {
-    return this.storeService.findOne({ id: id })
+  async findOne(@Param("id") id: string) {
+    const store = await this.storeService.findOne({ id: id })
+
+    if (!store) {
+      throw new NotFoundException("Store does not exist")
+    }
+    return store
   }
 
   @Patch(":id")
@@ -88,7 +93,7 @@ export class StoreController {
     @UploadedFile() fileUploaded: CustomFile
   ) {
     const store = await this.storeService.findOne({ id: id })
-    let logo: string = store.logo
+
     if (fileUploaded) {
       const fileDto: FileUploadDto = {
         destination: `images/${fileUploaded.originalname}-storelogo.${fileUploaded.extension}`,
@@ -97,9 +102,9 @@ export class StoreController {
         filePath: fileUploaded.path
       }
 
-      logo = await this.fileSystemService.upload(fileDto)
+      updateStoreDto.logo = await this.fileSystemService.upload(fileDto)
     }
-    updateStoreDto.logo = logo
+
     const updateStore = await this.storeUpdateMapper.prepareUpdateStoreMapper(updateStoreDto, store)
     return this.storeService.update(store, updateStore)
   }
