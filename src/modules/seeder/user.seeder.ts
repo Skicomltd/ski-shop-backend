@@ -15,6 +15,7 @@ export class UserSeeder implements Seeder {
       lastName: faker.person.lastName(),
       password: "password1234",
       role: faker.helpers.arrayElement(Object.values(UserRoleEnum)),
+      phoneNumber: faker.phone.number(),
       email: faker.internet.email(),
       isEmailVerified: faker.datatype.boolean(),
       createdAt: faker.date.past(),

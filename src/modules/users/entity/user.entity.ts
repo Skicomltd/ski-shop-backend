@@ -43,7 +43,7 @@ export class User {
   email: string
 
   @Column({ type: "text", default: "" })
-  phone: string
+  phoneNumber: string
 
   @Column({ default: false })
   isEmailVerified: boolean
