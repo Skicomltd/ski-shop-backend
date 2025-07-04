@@ -2,7 +2,6 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateCol
 import { Store } from "@/modules/stores/entities/store.entity"
 import { User } from "@/modules/users/entity/user.entity"
 
-
 @Entity()
 export default class Business {
   @PrimaryGeneratedColumn("uuid")

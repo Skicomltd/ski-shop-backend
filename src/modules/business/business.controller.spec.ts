@@ -1,20 +1,20 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { BusinessController } from './business.controller';
-import { BusinessService } from './business.service';
+import { Test, TestingModule } from "@nestjs/testing"
+import { BusinessController } from "./business.controller"
+import { BusinessService } from "./business.service"
 
-describe('BusinessController', () => {
-  let controller: BusinessController;
+describe("BusinessController", () => {
+  let controller: BusinessController
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [BusinessController],
-      providers: [BusinessService],
-    }).compile();
+      providers: [BusinessService]
+    }).compile()
 
-    controller = module.get<BusinessController>(BusinessController);
-  });
+    controller = module.get<BusinessController>(BusinessController)
+  })
 
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-});
+  it("should be defined", () => {
+    expect(controller).toBeDefined()
+  })
+})
