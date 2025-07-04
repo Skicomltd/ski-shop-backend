@@ -1,14 +1,10 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, Req, UseGuards } from "@nestjs/common"
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query } from "@nestjs/common"
 import { UserService } from "./user.service"
 import { CreateUserDto, createUserSchema } from "./dto/create-user-dto"
 import { UpdateUserDto, updateUserSchema } from "./dto/update-user-dto"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { IUserQuery } from "./interfaces/users-query.interface"
-import { CreateBusinessDto, createBusinessSchema } from "./dto/create-business-dto"
-import { Request } from "express"
-import { UpdateBusinessDto, updateBusinessSchema } from "./dto/update-business-dto"
-import { IBusinessQuery } from "./interfaces/businesses-query.interface"
 
 @Controller("user")
 export class UserController {

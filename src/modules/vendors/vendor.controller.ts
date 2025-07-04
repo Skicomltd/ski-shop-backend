@@ -17,6 +17,7 @@ import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.inte
 import { PoliciesVerifiedUserGuard } from "../auth/guard/policies-handler-verifed-user.guard"
 import { PoliciesHasBusinessGuard } from "../auth/guard/policy-has-business.guard"
 import { PoliciesHasStoreGuard } from "../auth/guard/policy-has-store.guard"
+import { BusinessService } from "../business/business.service"
 
 @Controller("vendors")
 export class VendorController {
