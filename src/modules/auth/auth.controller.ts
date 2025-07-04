@@ -45,6 +45,7 @@ import { RefreshDto, refreshSchema } from "./dto/refresh.dto"
 import { BusinessService } from "../business/business.service"
 import { OnboardBankDto } from "./dto/onboard-bank.dto"
 import { BankService } from "../banks/bank.service"
+import { bankSchema } from "../banks/dto/create-bank.dto"
 
 @Public()
 @Controller("auth")
@@ -155,7 +156,7 @@ export class AuthController {
   @ShortTime()
   @UseGuards(JwtShortTimeGuard)
   @Post("/bank")
-  async onboardBank(@Body(new JoiValidationPipe(onboardBusinessSchema)) onboardBankDto: OnboardBankDto, @Req() req: Request) {
+  async onboardBank(@Body(new JoiValidationPipe(bankSchema)) onboardBankDto: OnboardBankDto, @Req() req: Request) {
     const user = req.user
 
     const bank = await this.bankService.findOne({ user: { id: user.id } })
