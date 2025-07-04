@@ -148,7 +148,7 @@ export class AuthController {
     await this.storeService.create(onboardStoreDto)
 
     const payload = { email: business.user.email, id: business.user.id }
-    const { accessToken: token } = await this.authService.login(payload)
+    const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
 
     return { token }
   }
@@ -166,8 +166,7 @@ export class AuthController {
 
     const payload = { email: user.email, id: user.id }
 
-    const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
-
+    const { accessToken: token } = await this.authService.login(payload)
     return { token }
   }
 
