@@ -42,8 +42,31 @@ export class CartsService implements IService<Cart> {
     const updateCart = repo.create({ ...cart, ...data })
     return await repo.save(updateCart)
   }
+
   async remove(filter: FindOptionsWhere<Cart>): Promise<number> {
     const cart = await this.cartRepository.delete(filter)
     return cart.affected
+  }
+
+  async getTotalPrice(userId: string): Promise<number> {
+    const result = await this.cartRepository
+      .createQueryBuilder("cart")
+      .innerJoin("cart.product", "product")
+      .select(
+        `
+      SUM(
+        cart.quantity *
+        CASE
+          WHEN product."discountPrice" IS NOT NULL AND product."discountPrice" > 0
+          THEN product."discountPrice"
+          ELSE product.price
+        END
+      )`,
+        "total"
+      )
+      .where("cart.userId = :userId", { userId })
+      .getRawOne()
+
+    return parseFloat(result.total) || 0
   }
 }

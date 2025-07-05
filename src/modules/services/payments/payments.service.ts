@@ -3,7 +3,7 @@ import { InitiatePayment, InitiatePaymentResponse, IPayment } from "./interfaces
 
 @Injectable()
 export class PaymentsService implements IPayment {
-  async initiatePayment({}: InitiatePayment): Promise<InitiatePaymentResponse> {
+  async initiatePayment({ currency = "NGN", ...payload }: InitiatePayment): Promise<InitiatePaymentResponse> {
     return {
       paymentLink: "",
       reference: ""
