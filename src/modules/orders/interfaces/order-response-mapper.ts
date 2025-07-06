@@ -7,8 +7,8 @@ export abstract class OrderResponseMapper implements IInterceptor {
       id: data.id,
       status: data.status,
       buyer: {
-        id: data.user.id,
-        name: data.user.getFullName()
+        id: data.buyer.id,
+        name: data.buyer.getFullName()
       },
       items: data.items.map((item) => ({
         name: item.product.name,

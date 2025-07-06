@@ -44,7 +44,7 @@ export class CartsController {
 
     const [carts] = await this.cartsService.find({ user: { id: user.id } })
 
-    const amount = await this.cartsService.getTotalPrice(user.id)
+    const amount = await this.cartsService.calculateTotalPrice(user.id)
 
     const order = await this.ordersService.create({
       buyerId: user.id,

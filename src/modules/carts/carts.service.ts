@@ -48,7 +48,7 @@ export class CartsService implements IService<Cart> {
     return cart.affected
   }
 
-  async getTotalPrice(userId: string): Promise<number> {
+  async calculateTotalPrice(userId: string): Promise<number> {
     const result = await this.cartRepository
       .createQueryBuilder("cart")
       .innerJoin("cart.product", "product")

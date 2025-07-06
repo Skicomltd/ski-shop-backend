@@ -9,7 +9,7 @@ export class Otp {
   email: string
 
   @Column()
-  code: number
+  code: string
 
   @Column("timestamptz")
   expireAt: Date
