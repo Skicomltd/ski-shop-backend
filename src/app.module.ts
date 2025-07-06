@@ -24,6 +24,8 @@ import logConfig from "./config/log.config"
 import { BullModule } from "@nestjs/bullmq"
 import { VendorModule } from "./modules/vendors/vendor.module"
 import { BusinessModule } from "./modules/business/business.module"
+import { WebhooksModule } from "./modules/webhooks/webhooks.module"
+import { OrdersModule } from "./modules/orders/orders.module"
 
 @Module({
   imports: [
@@ -47,7 +49,9 @@ import { BusinessModule } from "./modules/business/business.module"
     ProductsModule,
     CartsModule,
     VendorModule,
-    BusinessModule
+    BusinessModule,
+    WebhooksModule,
+    OrdersModule
   ],
   controllers: [AppController],
   providers: [

@@ -1,7 +1,8 @@
 import { ProductCategoriesEnum, ProductStatusEnum } from "@/modules/common/types"
 import { Store } from "@/modules/stores/entities/store.entity"
 import { User } from "@/modules/users/entity/user.entity"
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany } from "typeorm"
+import { SavedProduct } from "./saved-product.entity"
 
 @Entity()
 export class Product {
@@ -43,6 +44,9 @@ export class Product {
 
   @ManyToOne(() => User, (user) => user.product, { eager: true })
   user: User
+
+  @OneToMany(() => SavedProduct, (saved) => saved.product)
+  savedBy: SavedProduct[]
 
   @CreateDateColumn()
   createdAt: Date

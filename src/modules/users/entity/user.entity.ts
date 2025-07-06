@@ -15,6 +15,8 @@ import { Bank } from "@/modules/banks/entities/bank.entity"
 import { Product } from "@/modules/products/entities/product.entity"
 import { Cart } from "@/modules/carts/entities/cart.entity"
 import Business from "@/modules/business/entities/business.entity"
+import { SavedProduct } from "@/modules/products/entities/saved-product.entity"
+import { Order } from "@/modules/orders/entities/order.entity"
 
 export enum UserRoleEnum {
   "Customer" = "customer",
@@ -65,6 +67,12 @@ export class User {
 
   @OneToMany(() => Cart, (cart) => cart.user)
   carts: Cart[]
+
+  @OneToMany(() => SavedProduct, (saved) => saved.user)
+  savedProducts: SavedProduct[]
+
+  @OneToMany(() => Order, (order) => order.buyer)
+  orders: Order[]
 
   private _previousPassword?: string
 

@@ -10,12 +10,18 @@ import { ProductStatusEnum } from "../common/types"
 import { CartInterceptor } from "./interceptors/cart.interceptor"
 import { ConflictException } from "@/exceptions/conflict.exception"
 import { CartsInterceptor } from "./interceptors/carts.interceptor"
+import { CheckoutDto, checkoutSchema } from "./dto/checkout.dto"
+import { PaymentsService } from "../services/payments/payments.service"
+import { InitiatePayment } from "../services/payments/interfaces/strategy.interface"
+import { OrdersService } from "../orders/orders.service"
 
 @Controller("carts")
 export class CartsController {
   constructor(
     private readonly cartsService: CartsService,
-    private productService: ProductsService
+    private productService: ProductsService,
+    private readonly paymentsService: PaymentsService,
+    private readonly ordersService: OrdersService
   ) {}
 
   @Post()
@@ -30,6 +36,32 @@ export class CartsController {
     if (exists) throw new ConflictException("duplicate product in cart, increase quantity instead")
 
     return await this.cartsService.create({ user, product, quantity: createCartDto.quantity })
+  }
+
+  @Post("checkout")
+  async checkout(@Body(new JoiValidationPipe(checkoutSchema)) createCartDto: CheckoutDto, @Req() req: Request) {
+    const user = req.user
+
+    const [carts] = await this.cartsService.find({ user: { id: user.id } })
+
+    const amount = await this.cartsService.calculateTotalPrice(user.id)
+
+    const order = await this.ordersService.create({
+      buyerId: user.id,
+      items: carts.map((cart) => ({
+        quantity: cart.quantity,
+        unitPrice: cart.product.discountPrice ?? cart.product.price,
+        productId: cart.product.id
+      }))
+    })
+
+    const payload: InitiatePayment = {
+      amount,
+      email: user.email,
+      reference: order.id
+    }
+
+    return await this.paymentsService.initiatePayment(payload)
   }
 
   @Get()

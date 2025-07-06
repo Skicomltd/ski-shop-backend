@@ -11,7 +11,7 @@ export class AuthDto {
 }
 
 export class VerifyEmailDto {
-  code: number
+  code: string
 }
 
 export class ResendOtpDto {
