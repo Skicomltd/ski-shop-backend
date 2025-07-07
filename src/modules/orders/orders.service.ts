@@ -19,8 +19,20 @@ export class OrdersService implements IService<Order> {
     return await repo.save(order)
   }
 
-  async find({ page, limit }: IOrdersQuery): Promise<[Order[], number]> {
+  async find({ page, limit, buyerId, paymentStatus, status }: IOrdersQuery): Promise<[Order[], number]> {
     const where: FindManyOptions<Order>["where"] = {}
+
+    if (buyerId) {
+      where.buyerId = buyerId
+    }
+
+    if (paymentStatus) {
+      where.paymentStatus = paymentStatus
+    }
+
+    if (status) {
+      where.status = status
+    }
 
     const [orders, count] = await this.orderRepository.findAndCount({
       where,

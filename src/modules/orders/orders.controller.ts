@@ -1,5 +1,7 @@
-import { Controller } from "@nestjs/common"
+import { Controller, Get, Query, UseInterceptors } from "@nestjs/common"
 import { OrdersService } from "./orders.service"
+import { IOrdersQuery } from "./interfaces/query-filter.interface"
+import { OrdersInterceptor } from "./interceptors/orders.interceptor"
 
 @Controller("orders")
 export class OrdersController {
@@ -10,10 +12,11 @@ export class OrdersController {
   //   return this.ordersService.create(createOrderDto)
   // }
 
-  // @Get()
-  // findAll() {
-  //   return this.ordersService.findAll()
-  // }
+  @UseInterceptors(OrdersInterceptor)
+  @Get("/")
+  findAll(@Query() query: IOrdersQuery) {
+    return this.ordersService.find(query)
+  }
 
   // @Get(":id")
   // findOne(@Param("id") id: string) {

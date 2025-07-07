@@ -43,4 +43,9 @@ declare global {
   export interface CustomFile extends Express.Multer.File {
     extension?: string
   }
+
+  export enum PaystackEventEnum {
+    "success" = "success",
+    "failed" = "failed"
+  }
 }

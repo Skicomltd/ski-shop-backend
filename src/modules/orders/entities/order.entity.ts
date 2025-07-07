@@ -11,6 +11,9 @@ export class Order {
   @Column({ type: "enum", default: "unpaid", enum: ORDER_STATUS })
   status: OrderStatus
 
+  @Column({ type: "enum", default: "unpaid", enum: ORDER_STATUS })
+  paymentStatus: OrderStatus
+
   @Column()
   buyerId: string
 
