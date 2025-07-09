@@ -7,8 +7,9 @@ import { Store } from "@/modules/stores/entities/store.entity"
 import { Bank } from "@/modules/banks/entities/bank.entity"
 import { ProductStatusEnum } from "@/modules/common/types"
 import Business from "@/modules/business/entities/business.entity"
+import { Order } from "@/modules/orders/entities/order.entity"
 
-type Subjects = InferSubjects<typeof User | typeof Product | typeof Business | typeof Store | typeof Bank> | "all"
+type Subjects = InferSubjects<typeof User | typeof Product | typeof Business | typeof Store | typeof Bank | typeof Order> | "all"
 
 export type AppAbility = MongoAbility<[Action, Subjects]>
 type Can = AbilityBuilder<MongoAbility>["can"]
@@ -135,5 +136,27 @@ export class CaslAbilityFactory {
       cannot(Action.Delete, User)
     }
     return build({ detectSubjectType: (item) => item.constructor as ExtractSubjectType<Subjects> }) as AppAbility
+  }
+
+  createAbilityForUserOrders(user: User): AppAbility {
+    const { can, build } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Vendor) {
+      can(Action.Read, Order)
+      can(Action.Create, Order)
+      can(Action.Update, Order, { items: { storeId: user.business?.store?.id } })
+      can(Action.Delete, Order, { buyerId: user.id })
+    } else if (user.role === UserRoleEnum.Customer) {
+      can(Action.Read, Order, { buyerId: user.id })
+      can(Action.Create, Order)
+      can(Action.Update, Order, { buyerId: user.id })
+      can(Action.Delete, Order, { buyerId: user.id })
+    } else if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, "Order")
+    }
+
+    return build({
+      detectSubjectType: (item) => item.constructor as ExtractSubjectType<Subjects>
+    }) as AppAbility
   }
 }

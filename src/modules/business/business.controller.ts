@@ -10,7 +10,7 @@ import { PoliciesHasBusinessGuard } from "../auth/guard/policy-has-business.guar
 import { AppAbility } from "../services/casl/casl-ability.factory"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { Action } from "../services/casl/actions/action"
-import { User } from "../users/entity/user.entity"
+import Business from "./entities/business.entity"
 
 @Controller("business")
 export class BusinessController {
@@ -31,7 +31,7 @@ export class BusinessController {
   }
 
   @UseGuards(PoliciesHasBusinessGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, User))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Business))
   @Get("/user")
   async findUserBusiness(@Req() req: Request) {
     const user = req.user
