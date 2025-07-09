@@ -1,11 +1,13 @@
 import * as fs from "fs"
-import { Inject, Injectable } from "@nestjs/common"
-import { DeleteObjectCommand, GetObjectCommand, ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3"
+import * as archiver from "archiver"
+import { WritableStreamBuffer } from "stream-buffers"
+import { HttpException, Inject, Injectable } from "@nestjs/common"
+import { DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command, ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3"
 
+import { CONFIG_OPTIONS } from "../entities/config"
 import { ApiException } from "@/exceptions/api.exception"
 import { FileSystemModuleOptions, S3Options } from "../interfaces/config.interface"
 import { FileMetada, FileUploadDto, IFileSystemService } from "../interfaces/filesystem.interface"
-import { CONFIG_OPTIONS } from "../entities/config"
 
 @Injectable()
 export class S3Strategy implements IFileSystemService {
@@ -98,6 +100,45 @@ export class S3Strategy implements IFileSystemService {
       lastModified: response.LastModified,
       url: path.replace(this.endpoint, "")
     }
+  }
+
+  async zipFolder(prefix: string): Promise<Buffer> {
+    const error = this.checkConfig(this.config)
+    if (error) throw new HttpException(error, 500)
+
+    const command = new ListObjectsV2Command({
+      Bucket: this.config.bucket,
+      Prefix: prefix
+    })
+
+    const result = await this.client.send(command)
+
+    if (!result.Contents || result.Contents.length === 0) {
+      throw new HttpException("No files found in the folder", 404)
+    }
+
+    const files = result.Contents.filter((file) => file.Key && file.Size > 0).map((file) => file.Key)
+
+    const output = new WritableStreamBuffer()
+
+    const archive = archiver("zip", { zlib: { level: 9 } })
+    archive.pipe(output)
+
+    for (const key of files) {
+      const buffer = await this.get(`${this.endpoint}/${this.config.bucket}/${key}`)
+      const filename = key.replace(`${prefix}/`, "")
+      archive.append(buffer, { name: filename })
+    }
+
+    await archive.finalize()
+
+    const content = output.getContents()
+
+    if (!content) {
+      throw new HttpException("internal server error", 500)
+    }
+
+    return content
   }
 
   async update(path: string, file: FileUploadDto): Promise<string> {

@@ -1,9 +1,11 @@
 import * as fs from "fs"
-import { Inject, Injectable } from "@nestjs/common"
+import * as archiver from "archiver"
+import { WritableStreamBuffer } from "stream-buffers"
 import { Storage, Bucket } from "@google-cloud/storage"
-import { FileMetada, FileUploadDto, IFileSystemService } from "../interfaces/filesystem.interface"
-import { ApiException } from "@/exceptions/api.exception"
+import { HttpException, Inject, Injectable } from "@nestjs/common"
+
 import { CONFIG_OPTIONS } from "../entities/config"
+import { FileMetada, FileUploadDto, IFileSystemService } from "../interfaces/filesystem.interface"
 import { FileSystemModuleOptions, GoogleStorageOptions } from "../interfaces/config.interface"
 
 @Injectable()
@@ -32,10 +34,10 @@ export class GoogleStorageStrategy implements IFileSystemService {
 
   async upload(file: FileUploadDto): Promise<string> {
     const error = this.checkConfig(this.config)
-    if (error) throw new ApiException(error, 500)
+    if (error) throw new HttpException(error, 500)
 
     if (!file.filePath && !file.buffer) {
-      throw new ApiException("No filePath or buffer provided", 400)
+      throw new HttpException("No filePath or buffer provided", 400)
     }
 
     try {
@@ -52,7 +54,7 @@ export class GoogleStorageStrategy implements IFileSystemService {
       return new Promise((resolve, reject) => {
         stream.on("error", (error) => {
           console.error("Google upload error:", error)
-          reject(new ApiException(`Failed to upload file to Google`, 500))
+          reject(new HttpException(`Failed to upload file to Google`, 500))
         })
 
         stream.on("finish", async () => {
@@ -70,25 +72,25 @@ export class GoogleStorageStrategy implements IFileSystemService {
         }
       })
     } catch (error: any) {
-      throw new ApiException(`Failed to upload to Google: ${error.message}`, 500)
+      throw new HttpException(`Failed to upload to Google: ${error.message}`, 500)
     }
   }
 
   async get(path: string): Promise<Buffer> {
     const error = this.checkConfig(this.config)
-    if (error) throw new ApiException(error, 500)
+    if (error) throw new HttpException(error, 500)
 
     try {
       const [fileContent] = await this.bucket.file(path).download()
       return fileContent
     } catch (error: any) {
-      throw new ApiException(`Failed to download file from Google Storage: ${error.message}`, 500)
+      throw new HttpException(`Failed to download file from Google Storage: ${error.message}`, 500)
     }
   }
 
   async getMetaData(path: string): Promise<FileMetada> {
     const error = this.checkConfig(this.config)
-    if (error) throw new ApiException(error, 500)
+    if (error) throw new HttpException(error, 500)
 
     const [metadata] = await this.bucket.file(path).getMetadata()
 
@@ -101,9 +103,70 @@ export class GoogleStorageStrategy implements IFileSystemService {
     }
   }
 
+  async zipFolder(folderPath: string): Promise<Buffer> {
+    const error = this.checkConfig(this.config)
+    if (error) throw new HttpException(error, 500)
+
+    const output = new WritableStreamBuffer({
+      initialSize: 1000 * 1024,
+      incrementAmount: 1000 * 1024
+    })
+
+    const archive = archiver("zip", { zlib: { level: 9 } })
+
+    return new Promise<Buffer>((resolve, reject) => {
+      archive.pipe(output)
+
+      archive.on("error", (err) => {
+        console.error("Archiver error:", err)
+        reject(new HttpException("Failed to zip folder", 500))
+      })
+
+      output.on("finish", () => {
+        const buffer = output.getContents()
+        if (!buffer) {
+          return reject(new HttpException("Failed to generate zip buffer", 500))
+        }
+        resolve(buffer)
+      })
+
+      output.on("error", (err) => {
+        console.error("Output buffer error:", err)
+        reject(new HttpException("Failed to create zip", 500))
+      })
+
+      const fileStream = this.bucket.getFilesStream({ prefix: folderPath })
+
+      fileStream.on("data", async (file) => {
+        try {
+          if (!file.name.endsWith("/")) {
+            const fileBuffer = await this.get(file.name)
+            const filename = file.name.replace(`${folderPath}/`, "")
+            archive.append(fileBuffer, { name: filename })
+          }
+        } catch (err) {
+          console.error(`Failed to fetch ${file.name}`, err)
+        }
+      })
+
+      fileStream.on("end", async () => {
+        try {
+          await archive.finalize()
+        } catch (err) {
+          reject(new HttpException("Error finalizing archive", 500))
+        }
+      })
+
+      fileStream.on("error", (err) => {
+        console.error("Google file stream error:", err)
+        reject(new HttpException("Failed to read files from folder", 500))
+      })
+    })
+  }
+
   async update(path: string, file: FileUploadDto): Promise<string> {
     const error = this.checkConfig(this.config)
-    if (error) throw new ApiException(error, 500)
+    if (error) throw new HttpException(error, 500)
 
     await this.delete(path)
     return this.upload(file)
@@ -111,12 +174,12 @@ export class GoogleStorageStrategy implements IFileSystemService {
 
   async delete(path: string): Promise<void> {
     const error = this.checkConfig(this.config)
-    if (error) throw new ApiException(error, 500)
+    if (error) throw new HttpException(error, 500)
 
     try {
       await this.bucket.file(path).delete()
     } catch (error: any) {
-      throw new ApiException(`Failed to delete file from Google Storage: ${error.message}`, 500)
+      throw new HttpException(`Failed to delete file from Google Storage: ${error.message}`, 500)
     }
   }
 

@@ -1,10 +1,9 @@
-import { Inject, Injectable } from "@nestjs/common"
+import { HttpException, Inject, Injectable } from "@nestjs/common"
 
 import { CONFIG_OPTIONS } from "./entities/config"
 import { FileMetada, FileUploadDto, IFileSystemService } from "./interfaces/filesystem.interface"
 import { FileSystemDefault, FileSystemDriver, FileSystemModuleOptions, IFileSystemClients } from "./interfaces/config.interface"
 
-import { ApiException } from "@/exceptions/api.exception"
 import { FILESYSTEM_STRATEGY } from "./entities/strategies"
 
 import { S3Strategy } from "./strategies/aws.strategy"
@@ -38,7 +37,7 @@ export class FileSystemService implements IFileSystemService {
     private readonly local: LocalFsStrategy
   ) {
     if (!options.default || !options.clients[options.default]) {
-      throw new ApiException(`Invalid default filesystem: ${options.default}`, 500)
+      throw new HttpException(`Invalid default filesystem: ${options.default}`, 500)
     }
 
     this.default = options.default
@@ -71,6 +70,12 @@ export class FileSystemService implements IFileSystemService {
     return service.getMetaData(path)
   }
 
+  async zipFolder(folderPath: string): Promise<Buffer> {
+    const options = this.clients[this.default]
+    const service = this.getFileSystem(options.driver)
+    return service.zipFolder(folderPath)
+  }
+
   async update(path: string, file: FileUploadDto): Promise<string> {
     const options = this.clients[this.default]
     const service = this.getFileSystem(options.driver)
@@ -87,11 +92,11 @@ export class FileSystemService implements IFileSystemService {
     const options = this.clients[driver]
 
     if (!options) {
-      throw new ApiException(`FileSystem ${driver} not configured`, 500)
+      throw new HttpException(`FileSystem ${driver} not configured`, 500)
     }
 
     const strategy = this.strategyMap[driver]
-    if (!strategy) throw new ApiException(`Invalid filesystem`, 500)
+    if (!strategy) throw new HttpException(`Invalid filesystem`, 500)
 
     return strategy
   }
