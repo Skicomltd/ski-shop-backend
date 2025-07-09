@@ -51,7 +51,8 @@ export class CartsController {
       items: carts.map((cart) => ({
         quantity: cart.quantity,
         unitPrice: cart.product.discountPrice ?? cart.product.price,
-        productId: cart.product.id
+        productId: cart.product.id,
+        storeId: cart.product.storeId
       }))
     })
 

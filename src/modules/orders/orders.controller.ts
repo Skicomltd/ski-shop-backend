@@ -1,16 +1,15 @@
-import { Controller, Get, Query, UseInterceptors } from "@nestjs/common"
+import { Body, Controller, Delete, Get, Param, Patch, Query, UseInterceptors } from "@nestjs/common"
 import { OrdersService } from "./orders.service"
 import { IOrdersQuery } from "./interfaces/query-filter.interface"
 import { OrdersInterceptor } from "./interceptors/orders.interceptor"
+import { NotFoundException } from "@/exceptions/notfound.exception"
+import { UpdateOrderDto, updateOrderSchema } from "./dto/update-order.dto"
+import { JoiValidationPipe } from "@/validations/joi.validation"
+import { OrderInterceptor } from "./interceptors/order.interceptor"
 
 @Controller("orders")
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
-
-  // @Post()
-  // create(@Body() createOrderDto: CreateOrderDto) {
-  //   return this.ordersService.create(createOrderDto)
-  // }
 
   @UseInterceptors(OrdersInterceptor)
   @Get("/")
@@ -18,18 +17,32 @@ export class OrdersController {
     return this.ordersService.find(query)
   }
 
-  // @Get(":id")
-  // findOne(@Param("id") id: string) {
-  //   return this.ordersService.findOne(+id)
-  // }
+  @UseInterceptors(OrderInterceptor)
+  @Get(":id")
+  async findOne(@Param("id") id: string) {
+    const order = this.ordersService.findOne({ id })
 
-  // @Patch(":id")
-  // update(@Param("id") id: string, @Body() updateOrderDto: UpdateOrderDto) {
-  //   return this.ordersService.update(+id, updateOrderDto)
-  // }
+    if (!order) {
+      throw new NotFoundException("Order not found")
+    }
 
-  // @Delete(":id")
-  // remove(@Param("id") id: string) {
-  //   return this.ordersService.remove(+id)
-  // }
+    return order
+  }
+
+  @UseInterceptors(OrderInterceptor)
+  @Patch(":id")
+  async update(@Param("id") id: string, @Body(new JoiValidationPipe(updateOrderSchema)) updateOrderDto: UpdateOrderDto) {
+    const order = await this.ordersService.findOne({ id })
+
+    if (!order) {
+      throw new NotFoundException("Order not found")
+    }
+
+    return this.ordersService.update(order, updateOrderDto)
+  }
+
+  @Delete(":id")
+  async remove(@Param("id") id: string) {
+    return this.ordersService.remove({ id })
+  }
 }

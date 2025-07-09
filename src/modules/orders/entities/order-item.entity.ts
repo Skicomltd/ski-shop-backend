@@ -13,6 +13,9 @@ export class OrderItem {
   @Column("")
   productId: string
 
+  @Column()
+  storeId: string
+
   @ManyToOne(() => Product, { eager: true })
   product: Product
 
