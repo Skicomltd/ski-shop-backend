@@ -1,4 +1,5 @@
 import { UnAuthorizedException } from "@/exceptions/unAuthorized.exception"
+import { PaymentModuleOption } from "@/modules/services/payments/interfaces/config.interface"
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
 import * as crypto from "crypto"
@@ -14,7 +15,7 @@ export class PaystackWebhookGuard implements CanActivate {
     if (!signature) {
       return false
     }
-    const secret = this.configService.get<string>("Paystack_Secret")
+    const secret = this.configService.get<PaymentModuleOption>("payment").providers.paystack.secret
 
     const hash = crypto.createHmac("sha512", secret).update(JSON.stringify(request.body)).digest("hex")
 

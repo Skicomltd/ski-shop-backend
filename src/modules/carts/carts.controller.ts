@@ -54,6 +54,7 @@ export class CartsController {
       const order = await this.ordersService.create(
         {
           buyerId: user.id,
+          paymentMethod: createCartDto.paymentMethod,
           items: carts.map((cart) => ({
             quantity: cart.quantity,
             unitPrice: cart.product.discountPrice ?? cart.product.price,
@@ -70,7 +71,7 @@ export class CartsController {
         reference: order.id
       }
 
-      return await this.paymentsService.initiatePayment(payload)
+      return await this.paymentsService.with(createCartDto.paymentMethod).initiatePayment(payload)
     })
   }
 

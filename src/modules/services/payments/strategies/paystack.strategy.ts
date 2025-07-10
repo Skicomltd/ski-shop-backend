@@ -28,7 +28,7 @@ export class PaystackStrategy implements IPaymentService {
 
     const observable = this.httpService.post<PaystackInitiatePaymentResponse>(
       this.url + "/transaction/initialize",
-      { ...payload, currency },
+      { ...payload, currency, amount: payload.amount * 100 }, // paystack requires kobo
       { headers }
     )
 

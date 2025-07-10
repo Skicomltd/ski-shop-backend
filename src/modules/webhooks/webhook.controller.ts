@@ -1,15 +1,21 @@
 import { Body, Controller, Post, UseGuards } from "@nestjs/common"
 import { WebhookService } from "./webhook.service"
-import { PaystackWebhookDto } from "./dto/paystack-webhook-dto"
 import { PaystackWebhookGuard } from "./guard/paystack.guard"
+import { Public } from "../auth/decorators/public.decorator"
+import { PaystackWebhook } from "../services/payments/interfaces/paystack.interface"
 
-@Controller("webhook")
+@Public()
+@Controller("webhooks")
 export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}
 
   @UseGuards(PaystackWebhookGuard)
-  @Post("/paystack")
-  async handlePaystackWebhook(@Body() body: PaystackWebhookDto) {
-    return await this.webhookService.handlePaystackWebhookEvent(body)
+  @Post("paystack")
+  async handlePaystackWebhook(@Body() body: PaystackWebhook) {
+    if (body.event === "charge.success") {
+      this.webhookService.handleChargeSuccess(body.data)
+    }
+
+    return ""
   }
 }
