@@ -16,7 +16,7 @@ export abstract class OrderResponseMapper implements IInterceptor {
         price: item.unitPrice,
         quantity: item.quantity
       })),
-      createdAt: data.createdAt.toISOString()
+      createdAt: data.paidAt?.toISOString() ?? data.createdAt.toISOString()
     }
   }
 }

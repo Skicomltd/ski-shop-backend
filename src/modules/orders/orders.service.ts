@@ -46,15 +46,33 @@ export class OrdersService implements IService<Order> {
       skip: page ? page - 1 : undefined
     })
 
-    return [orders, count]
+    // filter out products not from the store
+    const filteredOrders = orders.map((order) => {
+      const filteredItems = storeId ? order.items.filter((item) => item.storeId === storeId) : order.items
+
+      return { ...order, items: filteredItems }
+    })
+
+    return [filteredOrders, count]
   }
 
   async findById(id: string): Promise<Order> {
     return await this.orderRepository.findOne({ where: { id } })
   }
 
-  async findOne(filter: FindOptionsWhere<Order>): Promise<Order> {
-    return await this.orderRepository.findOne({ where: filter })
+  async findOne(filter: FindOptionsWhere<Order> & { storeId?: string }): Promise<Order> {
+    const { storeId, ...orderFilter } = filter
+
+    const order = await this.orderRepository.findOne({
+      where: orderFilter,
+      relations: ["items"]
+    })
+
+    if (!order) return null
+
+    const items = storeId ? order.items.filter((item) => item.storeId === storeId) : order.items
+
+    return { ...order, items }
   }
 
   async exists(filter: FindOptionsWhere<Order>): Promise<boolean> {

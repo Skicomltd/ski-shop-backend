@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, UseGuards, UseInterceptors } from "@nestjs/common"
+import { Controller, Get, Param, Query, Req, UseGuards, UseInterceptors } from "@nestjs/common"
 import { OrdersService } from "./orders.service"
 import { IOrdersQuery } from "./interfaces/query-filter.interface"
 import { OrdersInterceptor } from "./interceptors/orders.interceptor"
@@ -9,6 +9,9 @@ import { AppAbility } from "../services/casl/casl-ability.factory"
 import { PolicyOrderGuard } from "../auth/guard/policy-order.guard"
 import { Action } from "../services/casl/actions/action"
 import { Order } from "./entities/order.entity"
+import { Request } from "express"
+import { FindOptionsWhere } from "typeorm"
+import { UserRoleEnum } from "../users/entity/user.entity"
 
 @Controller("orders")
 export class OrdersController {
@@ -18,7 +21,13 @@ export class OrdersController {
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Order))
   @UseInterceptors(OrdersInterceptor)
   @Get("/")
-  findAll(@Query() query: IOrdersQuery) {
+  findAll(@Query() query: IOrdersQuery, @Req() req: Request) {
+    const user = req.user
+    if (user.role === "customer") {
+      query.buyerId = user.id
+    } else {
+      query.storeId = user.business.store.id
+    }
     return this.ordersService.find(query)
   }
 
@@ -26,8 +35,14 @@ export class OrdersController {
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Order))
   @UseInterceptors(OrderInterceptor)
   @Get(":id")
-  async findOne(@Param("id") id: string) {
-    const order = this.ordersService.findOne({ id })
+  async findOne(@Param("id") id: string, @Req() req: Request) {
+    const filter: FindOptionsWhere<Order> & { storeId?: string } = { id }
+
+    if (req.user.role !== UserRoleEnum.Customer) {
+      filter.storeId = req.user.business.store.id
+    }
+
+    const order = this.ordersService.findOne(filter)
 
     if (!order) {
       throw new NotFoundException("Order not found")
