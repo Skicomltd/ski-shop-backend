@@ -26,6 +26,7 @@ import { VendorModule } from "./modules/vendors/vendor.module"
 import { BusinessModule } from "./modules/business/business.module"
 import { WebhooksModule } from "./modules/webhooks/webhooks.module"
 import { OrdersModule } from "./modules/orders/orders.module"
+import paymentConfig from "./config/payment.config"
 
 @Module({
   imports: [
@@ -33,7 +34,7 @@ import { OrdersModule } from "./modules/orders/orders.module"
     AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, authConfig, mailConfig, filesystemsConfig, logConfig]
+      load: [appConfig, authConfig, mailConfig, filesystemsConfig, logConfig, paymentConfig]
     }),
     BullModule.forRoot({
       connection: {

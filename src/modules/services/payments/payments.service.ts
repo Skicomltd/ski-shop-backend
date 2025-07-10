@@ -1,26 +1,31 @@
-import { Injectable } from "@nestjs/common"
-import { InitiatePayment, InitiatePaymentResponse, IPayment, PaystackInitiatePaymentResponse } from "./interfaces/strategy.interface"
-import { HttpService } from "@nestjs/axios"
-import { firstValueFrom, map } from "rxjs"
+import { Inject, Injectable } from "@nestjs/common"
+
+import { PaymentModuleOption, PaymentStrategyType } from "./interfaces/config.interface"
+import { InitiatePayment, InitiatePaymentResponse, IPaymentService } from "./interfaces/strategy.interface"
+
+import { CONFIG_OPTIONS } from "./constants/config"
+import { PAYMENT_STRATEGY } from "./constants/strategies"
+import { PaystackStrategy } from "./strategies/paystack.strategy"
 
 @Injectable()
-export class PaymentsService implements IPayment {
-  constructor(private readonly httpService: HttpService) {}
+export class PaymentsService implements IPaymentService {
+  constructor(
+    @Inject(CONFIG_OPTIONS)
+    protected options: PaymentModuleOption,
+    @Inject(PAYMENT_STRATEGY.paystack)
+    private readonly paystack: PaystackStrategy
+  ) {}
 
-  async initiatePayment({ currency = "NGN", ...payload }: InitiatePayment): Promise<InitiatePaymentResponse> {
-    const secret = "pk_test_6f7e8401bb6d6eff496389fab0b26b4197e55a31"
+  private strategyMap: Record<PaymentStrategyType, IPaymentService> = {
+    paystack: this.paystack
+  }
 
-    const headers = {
-      Authorization: `Bearer ${secret}`,
-      "Content-Type": "application/json"
-    }
+  async initiatePayment(payload: InitiatePayment): Promise<InitiatePaymentResponse> {
+    const d = this.strategyMap[this.options.default]
+    return d.initiatePayment(payload)
+  }
 
-    const url = "ttps://api.paystack.co"
-
-    const observable = this.httpService.post<PaystackInitiatePaymentResponse>(url + "/transaction/initialize", { ...payload, currency }, { headers })
-
-    const { data } = await firstValueFrom(observable.pipe(map((res) => res.data)))
-
-    return { reference: data.reference, paymentLink: data.authorization_url }
+  with(provider: PaymentStrategyType) {
+    return this.strategyMap[provider]
   }
 }

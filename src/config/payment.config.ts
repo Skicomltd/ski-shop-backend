@@ -1,16 +1,20 @@
-import { PaymentModuleAsyncOptions, PaymentModuleOption } from "@/modules/services/payments/interfaces/config.interface"
 import { ConfigModule, ConfigService, registerAs } from "@nestjs/config"
+
+import { PaymentModuleAsyncOptions, PaymentModuleOption } from "@/modules/services/payments/interfaces/config.interface"
 
 function getOptions(): PaymentModuleOption {
   return {
-    paystack: {
-      secret: "",
-      subscriptionCode: ""
+    default: "paystack",
+    providers: {
+      paystack: {
+        secret: process.env.PAYSTACK_SECRET || "",
+        subscriptionCode: process.env.PAYSTACK_SUB_CODE || ""
+      }
     }
   }
 }
 
-export const mailConfigAsync: PaymentModuleAsyncOptions = {
+export const paymentConfigAsync: PaymentModuleAsyncOptions = {
   imports: [ConfigModule],
   useFactory: async (configService: ConfigService) => {
     const config = configService.get<PaymentModuleOption>("payment")

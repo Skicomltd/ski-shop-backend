@@ -1,4 +1,4 @@
-export interface IPayment {
+export interface IPaymentService {
   initiatePayment: (data: InitiatePayment) => Promise<InitiatePaymentResponse>
 }
 
@@ -12,7 +12,7 @@ export interface InitiatePayment {
 }
 
 export interface InitiatePaymentResponse {
-  paymentLink: string
+  checkoutUrl: string
   reference: string
 }
 

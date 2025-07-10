@@ -15,6 +15,7 @@ import { LogService } from "./log/log.service"
 import { MailService } from "./mail/mail.service"
 import { PaymentsModule } from "./payments/payments.module"
 import { HttpModule } from "@nestjs/axios"
+import { paymentConfigAsync } from "@/config/payment.config"
 
 @Global()
 @Module({
@@ -27,7 +28,7 @@ import { HttpModule } from "@nestjs/axios"
     JwtModule.registerAsync(jwtConfig),
     CaslModule,
     LogModule.registerAsync(logConfigAsync),
-    PaymentsModule
+    PaymentsModule.registerAsync(paymentConfigAsync)
   ],
   providers: [PaginationService, LogService, MailService],
   exports: [MailService, PaginationService, UtilsModule, FileSystemModule, CaslModule, LogService, PaymentsModule]

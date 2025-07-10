@@ -14,6 +14,7 @@ import { CheckoutDto, checkoutSchema } from "./dto/checkout.dto"
 import { PaymentsService } from "../services/payments/payments.service"
 import { InitiatePayment } from "../services/payments/interfaces/strategy.interface"
 import { OrdersService } from "../orders/orders.service"
+import { TransactionHelper } from "../services/utils/transactions/transactions.service"
 
 @Controller("carts")
 export class CartsController {
@@ -21,7 +22,8 @@ export class CartsController {
     private readonly cartsService: CartsService,
     private productService: ProductsService,
     private readonly paymentsService: PaymentsService,
-    private readonly ordersService: OrdersService
+    private readonly ordersService: OrdersService,
+    private readonly transactionHelper: TransactionHelper
   ) {}
 
   @Post()
@@ -42,27 +44,34 @@ export class CartsController {
   async checkout(@Body(new JoiValidationPipe(checkoutSchema)) createCartDto: CheckoutDto, @Req() req: Request) {
     const user = req.user
 
-    const [carts] = await this.cartsService.find({ user: { id: user.id } })
+    return this.transactionHelper.runInTransaction(async (manager) => {
+      if (!(await this.cartsService.exists({ user: { id: user.id } }))) throw new NotFoundException("empty cart")
 
-    const amount = await this.cartsService.calculateTotalPrice(user.id)
+      const [carts] = await this.cartsService.find({ user: { id: user.id } })
 
-    const order = await this.ordersService.create({
-      buyerId: user.id,
-      items: carts.map((cart) => ({
-        quantity: cart.quantity,
-        unitPrice: cart.product.discountPrice ?? cart.product.price,
-        productId: cart.product.id,
-        storeId: cart.product.storeId
-      }))
+      const amount = await this.cartsService.calculateTotalPrice(user.id)
+
+      const order = await this.ordersService.create(
+        {
+          buyerId: user.id,
+          items: carts.map((cart) => ({
+            quantity: cart.quantity,
+            unitPrice: cart.product.discountPrice ?? cart.product.price,
+            productId: cart.product.id,
+            storeId: cart.product.storeId
+          }))
+        },
+        manager
+      )
+
+      const payload: InitiatePayment = {
+        amount,
+        email: user.email,
+        reference: order.id
+      }
+
+      return await this.paymentsService.initiatePayment(payload)
     })
-
-    const payload: InitiatePayment = {
-      amount,
-      email: user.email,
-      reference: order.id
-    }
-
-    return await this.paymentsService.initiatePayment(payload)
   }
 
   @Get()

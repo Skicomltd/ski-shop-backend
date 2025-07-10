@@ -42,15 +42,7 @@ export class FileSystemModule {
         },
         FileSystemService
       ],
-      exports: [
-        FileSystemService,
-        CONFIG_OPTIONS,
-        FILESYSTEM_STRATEGY.local,
-        FILESYSTEM_STRATEGY.aws,
-        FILESYSTEM_STRATEGY.google,
-        FILESYSTEM_STRATEGY.digitalOcean,
-        FILESYSTEM_STRATEGY.cloudinary
-      ]
+      exports: [FileSystemService, CONFIG_OPTIONS, ...Object.values(FILESYSTEM_STRATEGY)]
     }
   }
 
@@ -86,15 +78,7 @@ export class FileSystemModule {
         },
         FileSystemService
       ],
-      exports: [
-        FileSystemService,
-        CONFIG_OPTIONS,
-        FILESYSTEM_STRATEGY.local,
-        FILESYSTEM_STRATEGY.aws,
-        FILESYSTEM_STRATEGY.google,
-        FILESYSTEM_STRATEGY.digitalOcean,
-        FILESYSTEM_STRATEGY.cloudinary
-      ]
+      exports: [FileSystemService, CONFIG_OPTIONS, ...Object.values(FILESYSTEM_STRATEGY)]
     }
   }
 }

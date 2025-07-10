@@ -1,17 +1,22 @@
 import { ModuleMetadata } from "@nestjs/common"
 
+export type PaymentStrategyType = "paystack"
+
 export interface PaystackOptions {
-  secret: ""
-  subscriptionCode: ""
+  secret: string
+  subscriptionCode: string
 }
 
 export interface FlutterwaveOptions {}
 export interface StripeOptions {}
 
-export interface PaymentModuleOption {
+export type ProviderConfig = {
   paystack?: PaystackOptions
-  flutterwave?: FlutterwaveOptions
-  stripe?: StripeOptions
+}
+
+export interface PaymentModuleOption {
+  providers: ProviderConfig
+  default: keyof ProviderConfig
 }
 
 export interface PaymentModuleAsyncOptions extends Pick<ModuleMetadata, "imports"> {
