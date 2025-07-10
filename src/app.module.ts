@@ -26,6 +26,7 @@ import { VendorModule } from "./modules/vendors/vendor.module"
 import { BusinessModule } from "./modules/business/business.module"
 import { WebhooksModule } from "./modules/webhooks/webhooks.module"
 import { OrdersModule } from "./modules/orders/orders.module"
+import { ReviewsModule } from "./modules/reviews/reviews.module"
 import paymentConfig from "./config/payment.config"
 
 @Module({
@@ -52,7 +53,8 @@ import paymentConfig from "./config/payment.config"
     VendorModule,
     BusinessModule,
     WebhooksModule,
-    OrdersModule
+    OrdersModule,
+    ReviewsModule
   ],
   controllers: [AppController],
   providers: [
