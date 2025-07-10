@@ -5,7 +5,8 @@ import { catchError, firstValueFrom, map } from "rxjs"
 
 import { CONFIG_OPTIONS } from "../constants/config"
 import { PaymentModuleOption } from "../interfaces/config.interface"
-import { InitiatePayment, InitiatePaymentResponse, IPaymentService, PaystackInitiatePaymentResponse } from "../interfaces/strategy.interface"
+import { InitiatePayment, InitiatePaymentResponse, IPaymentService } from "../interfaces/strategy.interface"
+import { PaystackInitiatePaymentResponse, PaystackTransactionVerification } from "../interfaces/paystack.interface"
 
 @Injectable()
 export class PaystackStrategy implements IPaymentService {
@@ -42,5 +43,26 @@ export class PaystackStrategy implements IPaymentService {
     )
 
     return { reference: data.reference, checkoutUrl: data.authorization_url }
+  }
+
+  async validatePayment(reference: string): Promise<boolean> {
+    const headers = {
+      Authorization: `Bearer ${this.secret}`,
+      "Content-Type": "application/json"
+    }
+    const observable = this.httpService.get<PaystackTransactionVerification>(`${this.url}/transaction/verify/${reference}`, { headers })
+
+    const { data } = await firstValueFrom(
+      observable.pipe(
+        map((res) => res.data),
+        catchError((error: AxiosError) => {
+          throw error
+        })
+      )
+    )
+
+    if (data.status === "success") return true
+
+    return false
   }
 }

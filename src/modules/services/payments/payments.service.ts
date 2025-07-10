@@ -25,6 +25,11 @@ export class PaymentsService implements IPaymentService {
     return d.initiatePayment(payload)
   }
 
+  async validatePayment(reference: string): Promise<boolean> {
+    const d = this.strategyMap[this.options.default]
+    return d.validatePayment(reference)
+  }
+
   with(provider: PaymentStrategyType) {
     return this.strategyMap[provider]
   }

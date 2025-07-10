@@ -1,10 +1,12 @@
+import { OrderDeliveryStatus } from "../interfaces/delivery-status"
 import { OrderStatus } from "../interfaces/order-status"
 import { PaymentMethod } from "../interfaces/payment-method.interface"
 
 export class CreateOrderDto {
   status?: OrderStatus
-  paymentStatus?: OrderStatus
+  deliveryStatus?: OrderDeliveryStatus
   paymentMethod: PaymentMethod
+  paidAt?: string
   buyerId: string
   items: Array<{
     quantity: number

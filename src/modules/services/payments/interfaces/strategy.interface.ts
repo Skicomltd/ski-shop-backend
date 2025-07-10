@@ -1,5 +1,6 @@
 export interface IPaymentService {
   initiatePayment: (data: InitiatePayment) => Promise<InitiatePaymentResponse>
+  validatePayment: (refrence: string) => Promise<boolean>
 }
 
 export interface InitiatePayment {
@@ -14,14 +15,4 @@ export interface InitiatePayment {
 export interface InitiatePaymentResponse {
   checkoutUrl: string
   reference: string
-}
-
-export interface PaystackInitiatePaymentResponse {
-  status: true
-  message: string
-  data: {
-    authorization_url: string
-    access_code: string
-    reference: string
-  }
 }

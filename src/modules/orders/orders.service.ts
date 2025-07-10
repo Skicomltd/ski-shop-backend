@@ -19,15 +19,15 @@ export class OrdersService implements IService<Order> {
     return await repo.save(order)
   }
 
-  async find({ page, limit, buyerId, paymentStatus, status, storeId }: IOrdersQuery): Promise<[Order[], number]> {
+  async find({ page, limit, buyerId, deliveryStatus, status, storeId }: IOrdersQuery): Promise<[Order[], number]> {
     const where: FindManyOptions<Order>["where"] = {}
 
     if (buyerId) {
       where.buyerId = buyerId
     }
 
-    if (paymentStatus) {
-      where.paymentStatus = paymentStatus
+    if (deliveryStatus) {
+      where.deliveryStatus = deliveryStatus
     }
 
     if (status) {

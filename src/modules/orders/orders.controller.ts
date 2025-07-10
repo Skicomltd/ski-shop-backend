@@ -1,10 +1,8 @@
-import { Body, Controller, Delete, Get, Param, Patch, Query, UseGuards, UseInterceptors } from "@nestjs/common"
+import { Controller, Get, Param, Query, UseGuards, UseInterceptors } from "@nestjs/common"
 import { OrdersService } from "./orders.service"
 import { IOrdersQuery } from "./interfaces/query-filter.interface"
 import { OrdersInterceptor } from "./interceptors/orders.interceptor"
 import { NotFoundException } from "@/exceptions/notfound.exception"
-import { UpdateOrderDto, updateOrderSchema } from "./dto/update-order.dto"
-import { JoiValidationPipe } from "@/validations/joi.validation"
 import { OrderInterceptor } from "./interceptors/order.interceptor"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { AppAbility } from "../services/casl/casl-ability.factory"
@@ -36,26 +34,5 @@ export class OrdersController {
     }
 
     return order
-  }
-
-  @UseGuards(PolicyOrderGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Order))
-  @UseInterceptors(OrderInterceptor)
-  @Patch(":id")
-  async update(@Param("id") id: string, @Body(new JoiValidationPipe(updateOrderSchema)) updateOrderDto: UpdateOrderDto) {
-    const order = await this.ordersService.findOne({ id })
-
-    if (!order) {
-      throw new NotFoundException("Order not found")
-    }
-
-    return this.ordersService.update(order, updateOrderDto)
-  }
-
-  @UseGuards(PolicyOrderGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, Order))
-  @Delete(":id")
-  async remove(@Param("id") id: string) {
-    return this.ordersService.remove({ id })
   }
 }
