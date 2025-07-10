@@ -36,6 +36,7 @@ import { Product } from "./entities/product.entity"
 import { PoliciesGuard } from "../auth/guard/policies-handler.guard"
 import { Public } from "../auth/decorators/public.decorator"
 import { ProductCategoriesEnum } from "../common/types"
+import { SaveProductDto, saveProductSchema } from "./dto/save-product.dto"
 @Controller("products")
 export class ProductsController {
   constructor(
@@ -80,11 +81,36 @@ export class ProductsController {
     return await this.productsService.create({ ...createProductDto, user: user, store: store })
   }
 
+  @Post("/saves")
+  @UseInterceptors(ProductInterceptor)
+  async save(@Body(new JoiValidationPipe(saveProductSchema)) saveProductDto: SaveProductDto, @Req() req: Request) {
+    const user = req.user
+    const product = await this.productsService.findById(saveProductDto.productId)
+    if (!product) throw new NotFoundException("product not found")
+    return this.productsService.save({ user, product })
+  }
+
+  @Delete("/saves/:productId")
+  @UseInterceptors(ProductInterceptor)
+  async unsave(@Param("productId", ParseUUIDPipe) productId: string, @Req() req: Request) {
+    const user = req.user
+    const product = await this.productsService.findById(productId)
+    if (!product) throw new NotFoundException("product not found")
+    await this.productsService.unsave({ user, product })
+    return product
+  }
+
   @Get("")
   @Public()
   @UseInterceptors(ProductsInterceptor)
   async findAll(@Query() query: IProductsQuery) {
     return await this.productsService.find(query)
+  }
+
+  @Get("/saves")
+  @UseInterceptors(ProductsInterceptor)
+  async saved(@Query() query: IProductsQuery, @Req() req: Request) {
+    return await this.productsService.saved({ ...query, userId: req.user.id })
   }
 
   @Get("/categories")

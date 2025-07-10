@@ -9,11 +9,13 @@ import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.inte
 import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { IProductsQuery } from "./interfaces/query-filter.interface"
 import { ProductCategoriesEnum } from "../common/types"
+import { SavedProduct } from "./entities/saved-product.entity"
 
 @Injectable()
 export class ProductsService implements IService<Product> {
   constructor(
     @InjectRepository(Product) private productRepository: Repository<Product>,
+    @InjectRepository(SavedProduct) private savedProductRepository: Repository<SavedProduct>,
     private fileSystem: FileSystemService
   ) {}
 
@@ -25,6 +27,28 @@ export class ProductsService implements IService<Product> {
     const product = await repo.save(createProduct)
 
     return product
+  }
+
+  async save(data: Partial<SavedProduct>): Promise<Product> {
+    const saved = this.savedProductRepository.create(data)
+    await this.savedProductRepository.save(saved)
+    return saved.product
+  }
+
+  async unsave(data: Partial<SavedProduct>) {
+    const remove = await this.savedProductRepository.delete(data)
+    return remove.affected
+  }
+
+  async saved({ userId, page, limit }: IProductsQuery): Promise<[Product[], number]> {
+    const [saved, count] = await this.savedProductRepository.findAndCount({
+      where: { user: { id: userId } },
+      take: limit,
+      skip: page ? page - 1 : undefined
+    })
+
+    const products = saved.map((item) => item.product)
+    return [products, count]
   }
 
   async find({ page, limit, status, stockCount, storeId, categories, vendor }: IProductsQuery) {
@@ -50,10 +74,6 @@ export class ProductsService implements IService<Product> {
     if (vendor) {
       where.store = { type: vendor }
     }
-
-    // if (slug) {
-    //   where.slug = In(Array.isArray(slug) ? slug : [slug])
-    // }
 
     return await this.productRepository.findAndCount({
       where,
