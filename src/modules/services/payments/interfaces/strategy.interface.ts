@@ -13,6 +13,7 @@ export interface InitiatePayment {
 }
 
 export interface InitiatePaymentResponse {
-  checkoutUrl: string
+  checkoutUrl: string // for web
   reference: string
+  checkoutCode: string // for mobile
 }

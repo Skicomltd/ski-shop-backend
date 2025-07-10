@@ -42,7 +42,7 @@ export class PaystackStrategy implements IPaymentService {
       )
     )
 
-    return { reference: data.reference, checkoutUrl: data.authorization_url }
+    return { reference: data.reference, checkoutUrl: data.authorization_url, checkoutCode: data.access_code }
   }
 
   async validatePayment(reference: string): Promise<boolean> {
