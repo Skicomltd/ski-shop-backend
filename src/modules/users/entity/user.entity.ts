@@ -17,6 +17,7 @@ import { Cart } from "@/modules/carts/entities/cart.entity"
 import Business from "@/modules/business/entities/business.entity"
 import { SavedProduct } from "@/modules/products/entities/saved-product.entity"
 import { Order } from "@/modules/orders/entities/order.entity"
+import { Review } from "@/modules/reviews/entities/review.entity"
 
 export enum UserRoleEnum {
   "Customer" = "customer",
@@ -73,6 +74,9 @@ export class User {
 
   @OneToMany(() => Order, (order) => order.buyer)
   orders: Order[]
+
+  @OneToMany(() => Review, (review) => review.user)
+  reviews: Review[]
 
   private _previousPassword?: string
 

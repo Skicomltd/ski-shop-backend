@@ -27,16 +27,17 @@ export class ReviewsService implements IService<Review> {
     return this.reviewRepository.findAndCount({
       where,
       take: limit,
-      skip: page ? (page - 1) * limit : undefined
+      skip: page ? (page - 1) * limit : undefined,
+      relations: ["product, user"]
     })
   }
 
   async findById(id: string): Promise<Review> {
-    return this.reviewRepository.findOne({ where: { id } })
+    return this.reviewRepository.findOne({ where: { id }, relations: ["product, user"] })
   }
 
   async findOne(filter: FindOptionsWhere<Review>): Promise<Review> {
-    return this.reviewRepository.findOne({ where: filter })
+    return this.reviewRepository.findOne({ where: filter, relations: ["product, user"] })
   }
 
   async exists(filter: FindOptionsWhere<Review>): Promise<boolean> {

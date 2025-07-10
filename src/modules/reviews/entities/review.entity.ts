@@ -1,4 +1,5 @@
 import { Product } from "@/modules/products/entities/product.entity"
+import { User } from "@/modules/users/entity/user.entity"
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from "typeorm"
 
 @Entity()
@@ -23,6 +24,9 @@ export class Review {
   })
   @JoinColumn({ name: "productId" })
   product: Product
+
+  @ManyToOne(() => User, (user) => user.reviews)
+  user: User
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date
