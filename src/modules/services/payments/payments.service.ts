@@ -21,13 +21,11 @@ export class PaymentsService implements IPaymentService {
   }
 
   async initiatePayment(payload: InitiatePayment): Promise<InitiatePaymentResponse> {
-    const d = this.strategyMap[this.options.default]
-    return d.initiatePayment(payload)
+    return this.with(this.options.default).initiatePayment(payload)
   }
 
   async validatePayment(reference: string): Promise<boolean> {
-    const d = this.strategyMap[this.options.default]
-    return d.validatePayment(reference)
+    return this.with(this.options.default).validatePayment(reference)
   }
 
   with(provider: PaymentStrategyType) {
