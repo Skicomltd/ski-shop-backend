@@ -8,8 +8,9 @@ import { Bank } from "@/modules/banks/entities/bank.entity"
 import { ProductStatusEnum } from "@/modules/common/types"
 import Business from "@/modules/business/entities/business.entity"
 import { Order } from "@/modules/orders/entities/order.entity"
+import { Review } from "@/modules/reviews/entities/review.entity"
 
-type Subjects = InferSubjects<typeof User | typeof Product | typeof Business | typeof Store | typeof Bank | typeof Order> | "all"
+type Subjects = InferSubjects<typeof User | typeof Product | typeof Business | typeof Store | typeof Bank | typeof Order | typeof Review> | "all"
 
 export type AppAbility = MongoAbility<[Action, Subjects]>
 type Can = AbilityBuilder<MongoAbility>["can"]
@@ -154,6 +155,24 @@ export class CaslAbilityFactory {
     } else if (user.role === UserRoleEnum.Admin) {
       can(Action.Manage, "Order")
     }
+
+    return build({
+      detectSubjectType: (item) => item.constructor as ExtractSubjectType<Subjects>
+    }) as AppAbility
+  }
+
+  createAbilityForUserReview(user: User): AppAbility {
+    const { can, build } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, "Review")
+    } else if (user.role === UserRoleEnum.Vendor || user.role === UserRoleEnum.Customer) {
+      can(Action.Update, Review, { reviewerId: user.id })
+      can(Action.Delete, Review, { reviewerId: user.id })
+    }
+
+    can(Action.Read, Review)
+    can(Action.Create, Review)
 
     return build({
       detectSubjectType: (item) => item.constructor as ExtractSubjectType<Subjects>
