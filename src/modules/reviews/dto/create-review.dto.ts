@@ -1,4 +1,5 @@
 import { Product } from "@/modules/products/entities/product.entity"
+import { User } from "@/modules/users/entity/user.entity"
 import * as joi from "joi"
 
 export class CreateReviewDto {
@@ -7,6 +8,7 @@ export class CreateReviewDto {
   text: string
   rating: number
   product: Product
+  user: User
 }
 
 export const CreateReviewSchema = joi.object({

@@ -44,7 +44,7 @@ export class ReviewsService implements IService<Review> {
     return this.reviewRepository.exists({ where: filter })
   }
 
-  update(entity: Review, data: UpdateReviewDto, manager?: EntityManager): Promise<Review> {
+  async update(entity: Review, data: UpdateReviewDto, manager?: EntityManager): Promise<Review> {
     const repo = manager ? manager.getRepository(Review) : this.reviewRepository
     const updatedEntity = repo.merge(entity, data)
     return repo.save(updatedEntity)
