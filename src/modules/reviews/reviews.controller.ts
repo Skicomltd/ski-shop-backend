@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UseGuards } from "@nestjs/common"
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UseGuards, Req } from "@nestjs/common"
 import { ReviewsService } from "./reviews.service"
 import { CreateReviewDto, CreateReviewSchema } from "./dto/create-review.dto"
 import { UpdateReviewDto, UpdateReviewSchema } from "./dto/update-review.dto"
@@ -14,6 +14,7 @@ import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { AppAbility } from "../services/casl/casl-ability.factory"
 import { Action } from "../services/casl/actions/action"
 import { Review } from "./entities/review.entity"
+import { Request } from "express"
 
 @Controller("reviews")
 export class ReviewsController {
@@ -26,14 +27,15 @@ export class ReviewsController {
   @UseGuards(PolicyReviewGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Review))
   @Post()
-  async create(@Body(new JoiValidationPipe(CreateReviewSchema)) createReviewDto: CreateReviewDto) {
-    const user = await this.userService.findOne({ id: createReviewDto.reviewerId })
+  async create(@Body(new JoiValidationPipe(CreateReviewSchema)) createReviewDto: CreateReviewDto, @Req() req: Request) {
+    const user = req.user
     if (!user) throw new NotFoundException("User not found")
 
     const product = await this.productService.findOne({ id: createReviewDto.productId })
 
     if (!product) throw new NotFoundException("Product does not exist")
 
+    createReviewDto.reviewerId = user.id
     createReviewDto.product = product
     createReviewDto.user = user
 
