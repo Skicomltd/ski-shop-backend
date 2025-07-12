@@ -4,7 +4,6 @@ import { CreateReviewDto, CreateReviewSchema } from "./dto/create-review.dto"
 import { UpdateReviewDto, UpdateReviewSchema } from "./dto/update-review.dto"
 import { IReviewQuery } from "./interface/review-query-filter"
 import { JoiValidationPipe } from "@/validations/joi.validation"
-import { ReviewsInterceptor } from "./interceptor/reviews.interceptor"
 import { ReviewInterceptor } from "./interceptor/review.interceptor"
 import { ProductsService } from "../products/products.service"
 import { NotFoundException } from "@/exceptions/notfound.exception"
@@ -17,6 +16,7 @@ import { Request } from "express"
 import { OrdersService } from "../orders/orders.service"
 import { BadReqException } from "@/exceptions/badRequest.exception"
 import { ConflictException } from "@/exceptions/conflict.exception"
+import { ReviewsInterceptor } from "./interceptor/reviews.interceptor"
 
 @Controller("reviews")
 export class ReviewsController {
@@ -26,7 +26,6 @@ export class ReviewsController {
     private orderService: OrdersService
   ) {}
 
-  @UseInterceptors(ReviewInterceptor)
   @UseGuards(PolicyReviewGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Review))
   @Post()
@@ -38,18 +37,17 @@ export class ReviewsController {
 
     if (!product) throw new NotFoundException("Product does not exist")
 
-    const [reviews] = await this.reviewsService.find({ reviewerId: user.id, productId: product.id })
+    const reviews = await this.reviewsService.findOne({ reviewerId: user.id, productId: product.id })
 
-    if (reviews.length > 1) throw new ConflictException("You already reviewed this product")
+    if (reviews) throw new ConflictException("You already reviewed this product")
 
-    const [orders] = await this.orderService.find({ buyerId: user.id, productId: product.id, status: "paid" })
+    const orders = await this.orderService.findOne({ buyerId: user.id, items: { productId: product.id }, status: "paid" })
 
-    if (orders.length < 1) {
+    if (!orders) {
       throw new BadReqException("Purchase the product to be able to review")
     }
     createReviewDto.reviewerId = user.id
-    createReviewDto.product = product
-    createReviewDto.reviewer = user
+    createReviewDto.productId = product.id
 
     return await this.reviewsService.create(createReviewDto)
   }

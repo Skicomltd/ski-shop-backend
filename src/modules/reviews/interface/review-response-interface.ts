@@ -1,7 +1,5 @@
 export interface IReviewResponse {
   id: string
-  reviewId: string
-  productId: string
   comment: string
   rating: number
   product: {

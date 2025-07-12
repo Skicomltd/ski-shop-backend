@@ -5,8 +5,6 @@ export abstract class ReviewResponseMapper implements IInterceptor {
   transform(data: Review): IReviewResponse {
     return {
       id: data.id,
-      reviewId: data.reviewerId,
-      productId: data.productId,
       comment: data.comment,
       rating: data.rating,
       product: {

@@ -1,4 +1,4 @@
-import { CallHandler, ExecutionContext, NestInterceptor } from "@nestjs/common"
+import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common"
 import { ReviewResponseMapper } from "../interface/review-response-mapper"
 import { Review } from "../entities/review.entity"
 import { IReviewsResponse } from "../interface/reviews-response-interface"
@@ -6,9 +6,11 @@ import { map, Observable } from "rxjs"
 import { PaginationService } from "@/modules/services/pagination/pagination.service"
 import { PaginationParams } from "@/modules/services/pagination/interfaces/paginationParams.interface"
 import { IReviewResponse } from "../interface/review-response-interface"
+import { PaginatedResult } from "@/modules/services/pagination/interfaces/paginationResult.interface"
 
 type PayloadType = [Review[], number]
 
+@Injectable()
 export class ReviewsInterceptor extends ReviewResponseMapper implements NestInterceptor<PayloadType, IReviewsResponse> {
   constructor(private paginationService: PaginationService) {
     super()
@@ -21,7 +23,7 @@ export class ReviewsInterceptor extends ReviewResponseMapper implements NestInte
     return next.handle().pipe(map((data) => this.paginate(data, { page, limit })))
   }
 
-  paginate([reviews, total]: PayloadType, params: PaginationParams): IReviewsResponse {
+  paginate([reviews, total]: PayloadType, params: PaginationParams): PaginatedResult<IReviewResponse> {
     const data = reviews.map((review) => this.transform(review))
     return this.paginationService.paginate<IReviewResponse>(data, total, params)
   }
