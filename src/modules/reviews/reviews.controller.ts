@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UseGuards, Req } from "@nestjs/common"
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseInterceptors, UseGuards, Req, ParseUUIDPipe } from "@nestjs/common"
 import { ReviewsService } from "./reviews.service"
 import { CreateReviewDto, CreateReviewSchema } from "./dto/create-review.dto"
 import { UpdateReviewDto, UpdateReviewSchema } from "./dto/update-review.dto"
@@ -64,14 +64,15 @@ export class ReviewsController {
   @UseGuards(PolicyReviewGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Review))
   @Get(":id")
-  async findOne(@Param("id") id: string) {
+  async findOne(@Param("id", ParseUUIDPipe) id: string) {
     return await this.reviewsService.findOne({ id })
   }
 
+  @UseInterceptors(ReviewInterceptor)
   @UseGuards(PolicyReviewGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Review))
   @Patch(":id")
-  async update(@Param("id") id: string, @Body(new JoiValidationPipe(UpdateReviewSchema)) updateReviewDto: UpdateReviewDto) {
+  async update(@Param("id", ParseUUIDPipe) id: string, @Body(new JoiValidationPipe(UpdateReviewSchema)) updateReviewDto: UpdateReviewDto) {
     const review = await this.reviewsService.findById(id)
 
     if (!review) throw new NotFoundException("Review not found")
@@ -82,7 +83,7 @@ export class ReviewsController {
   @UseGuards(PolicyReviewGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, Review))
   @Delete(":id")
-  async remove(@Param("id") id: string) {
+  async remove(@Param("id", ParseUUIDPipe) id: string) {
     return await this.reviewsService.remove({ id })
   }
 }

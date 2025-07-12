@@ -7,6 +7,6 @@ export class UpdateReviewDto extends PartialType(CreateReviewDto) {}
 export const UpdateReviewSchema = joi.object({
   reviewerId: joi.string().uuid().optional(),
   productId: joi.string().uuid().optional(),
-  text: joi.string().min(1).max(500).optional(),
+  comment: joi.string().min(1).max(500).optional(),
   rating: joi.number().min(0).max(5).optional()
 })
