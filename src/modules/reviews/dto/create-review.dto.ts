@@ -5,14 +5,14 @@ import * as joi from "joi"
 export class CreateReviewDto {
   reviewerId: string
   productId: string
-  text: string
+  comment: string
   rating: number
   product: Product
-  user: User
+  reviewer: User
 }
 
 export const CreateReviewSchema = joi.object({
   productId: joi.string().uuid().required(),
-  text: joi.string().min(1).max(500).required(),
+  comment: joi.string().min(1).max(500).required(),
   rating: joi.number().min(0).max(5).required()
 })

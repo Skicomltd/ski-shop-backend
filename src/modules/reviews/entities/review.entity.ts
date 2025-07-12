@@ -14,7 +14,7 @@ export class Review {
   productId: string
 
   @Column({ type: "text" })
-  text: string
+  comment: string
 
   @Column({ type: "int", default: 0 })
   rating: number
@@ -26,7 +26,7 @@ export class Review {
   product: Product
 
   @ManyToOne(() => User, (user) => user.reviews)
-  user: User
+  reviewer: User
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt: Date

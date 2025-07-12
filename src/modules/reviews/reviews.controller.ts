@@ -7,7 +7,6 @@ import { JoiValidationPipe } from "@/validations/joi.validation"
 import { ReviewsInterceptor } from "./interceptor/reviews.interceptor"
 import { ReviewInterceptor } from "./interceptor/review.interceptor"
 import { ProductsService } from "../products/products.service"
-import { UserService } from "../users/user.service"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { PolicyReviewGuard } from "../auth/guard/policy-review.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
@@ -15,13 +14,16 @@ import { AppAbility } from "../services/casl/casl-ability.factory"
 import { Action } from "../services/casl/actions/action"
 import { Review } from "./entities/review.entity"
 import { Request } from "express"
+import { OrdersService } from "../orders/orders.service"
+import { BadReqException } from "@/exceptions/badRequest.exception"
+import { ConflictException } from "@/exceptions/conflict.exception"
 
 @Controller("reviews")
 export class ReviewsController {
   constructor(
     private readonly reviewsService: ReviewsService,
     private productService: ProductsService,
-    private userService: UserService
+    private orderService: OrdersService
   ) {}
 
   @UseGuards(PolicyReviewGuard)
@@ -35,9 +37,18 @@ export class ReviewsController {
 
     if (!product) throw new NotFoundException("Product does not exist")
 
+    const [reviews] = await this.reviewsService.find({ reviewerId: user.id, productId: product.id })
+
+    if (reviews.length > 1) throw new ConflictException("You already reviewed this product")
+
+    const [orders] = await this.orderService.find({ buyerId: user.id, productId: product.id, status: "paid" })
+
+    if (orders.length < 1) {
+      throw new BadReqException("Purchase the product to be able to review")
+    }
     createReviewDto.reviewerId = user.id
     createReviewDto.product = product
-    createReviewDto.user = user
+    createReviewDto.reviewer = user
 
     return await this.reviewsService.create(createReviewDto)
   }

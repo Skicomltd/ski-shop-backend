@@ -5,4 +5,5 @@ import { PaginationParams } from "@/modules/services/pagination/interfaces/pagin
 
 export interface IOrdersQuery extends PaginationParams, FindOptionsWhere<Order> {
   storeId?: string
+  productId: string
 }

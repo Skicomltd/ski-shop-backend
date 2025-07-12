@@ -19,7 +19,7 @@ export class OrdersService implements IService<Order> {
     return await repo.save(order)
   }
 
-  async find({ page, limit, buyerId, deliveryStatus, status, storeId }: IOrdersQuery): Promise<[Order[], number]> {
+  async find({ page, limit, buyerId, deliveryStatus, status, storeId, productId }: IOrdersQuery): Promise<[Order[], number]> {
     const where: FindManyOptions<Order>["where"] = {}
 
     if (buyerId) {
@@ -37,6 +37,12 @@ export class OrdersService implements IService<Order> {
     if (storeId) {
       where.items = {
         storeId
+      }
+    }
+
+    if (productId) {
+      where.items = {
+        productId
       }
     }
 

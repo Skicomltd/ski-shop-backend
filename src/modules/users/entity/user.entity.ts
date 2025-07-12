@@ -75,7 +75,7 @@ export class User {
   @OneToMany(() => Order, (order) => order.buyer)
   orders: Order[]
 
-  @OneToMany(() => Review, (review) => review.user)
+  @OneToMany(() => Review, (review) => review.reviewer)
   reviews: Review[]
 
   private _previousPassword?: string
