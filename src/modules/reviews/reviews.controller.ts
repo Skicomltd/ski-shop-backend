@@ -26,6 +26,7 @@ export class ReviewsController {
     private orderService: OrdersService
   ) {}
 
+  @UseInterceptors(ReviewInterceptor)
   @UseGuards(PolicyReviewGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Review))
   @Post()
