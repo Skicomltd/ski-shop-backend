@@ -9,9 +9,12 @@ import { PaystackWebhook } from "../services/payments/interfaces/paystack.interf
 export class WebhookController {
   constructor(private readonly webhookService: WebhookService) {}
 
+  @Public()
   @UseGuards(PaystackWebhookGuard)
   @Post("paystack")
   async handlePaystackWebhook(@Body() body: PaystackWebhook) {
+    console.log("i got here..........................................")
+
     if (body.event === "charge.success") {
       this.webhookService.handleChargeSuccess(body.data)
     }
