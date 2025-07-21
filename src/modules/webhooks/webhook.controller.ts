@@ -13,8 +13,6 @@ export class WebhookController {
   @UseGuards(PaystackWebhookGuard)
   @Post("paystack")
   async handlePaystackWebhook(@Body() body: PaystackWebhook) {
-    console.log("i got here..........................................")
-
     if (body.event === "charge.success") {
       this.webhookService.handleChargeSuccess(body.data)
     }
