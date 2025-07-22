@@ -6,7 +6,14 @@ import { catchError, firstValueFrom, map } from "rxjs"
 import { CONFIG_OPTIONS } from "../constants/config"
 import { PaymentModuleOption } from "../interfaces/config.interface"
 import { InitiatePayment, InitiatePaymentResponse, IPaymentService } from "../interfaces/strategy.interface"
-import { PaystackInitiatePaymentResponse, PaystackTransactionVerification } from "../interfaces/paystack.interface"
+import {
+  CreatePaystackSubscription,
+  CreatePaystackPlan,
+  PaystackInitiatePaymentResponse,
+  PaystackPlanResponse,
+  PaystackTransactionVerification,
+  PaymentPlanResponse
+} from "../interfaces/paystack.interface"
 
 @Injectable()
 export class PaystackStrategy implements IPaymentService {
@@ -64,5 +71,55 @@ export class PaystackStrategy implements IPaymentService {
     if (data.status === "success") return true
 
     return false
+  }
+
+  async createPaymentPlan({ amount, interval, name }: CreatePaystackPlan): Promise<PaymentPlanResponse> {
+    const headers = {
+      Authorization: `Bearer ${this.secret}`,
+      "Content-Type": "application/json"
+    }
+
+    const observable = this.httpService.post<PaystackPlanResponse>(`${this.url}/plan`, { name, interval, amount: amount * 100 }, { headers })
+
+    const { data } = await firstValueFrom(
+      observable.pipe(
+        map((res) => {
+          return res.data
+        }),
+        catchError((error: AxiosError) => {
+          throw error
+        })
+      )
+    )
+
+    return { interval: data.interval, amount: data.amount, planCode: data.plan_code, name: data.name }
+  }
+
+  async createSubscription({ amount, plan_code, email }: CreatePaystackSubscription) {
+    const headers = {
+      Authorization: `Bearer ${this.secret}`,
+      "Content-Type": "application/json"
+    }
+
+    const observable = this.httpService.post<PaystackInitiatePaymentResponse>(
+      `${this.url}//transaction/initialize`,
+      { email, plan_code, amount },
+      { headers }
+    )
+
+    const { data } = await firstValueFrom(
+      observable.pipe(
+        map((res) => res.data),
+        catchError((error: AxiosError) => {
+          throw error
+        })
+      )
+    )
+
+    return {
+      authorization_url: data.authorization_url,
+      access_code: data.access_code,
+      reference: data.reference
+    }
   }
 }

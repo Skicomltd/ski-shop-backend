@@ -1,6 +1,9 @@
+import { CreatePaystackPlan, PaymentPlanResponse } from "./paystack.interface"
+
 export interface IPaymentService {
   initiatePayment: (data: InitiatePayment) => Promise<InitiatePaymentResponse>
   validatePayment: (refrence: string) => Promise<boolean>
+  createPaymentPlan: (data: CreatePaystackPlan) => Promise<PaymentPlanResponse>
 }
 
 export interface InitiatePayment {

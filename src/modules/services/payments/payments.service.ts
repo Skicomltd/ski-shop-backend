@@ -6,6 +6,7 @@ import { InitiatePayment, InitiatePaymentResponse, IPaymentService } from "./int
 import { CONFIG_OPTIONS } from "./constants/config"
 import { PAYMENT_STRATEGY } from "./constants/strategies"
 import { PaystackStrategy } from "./strategies/paystack.strategy"
+import { CreatePaystackPlan } from "./interfaces/paystack.interface"
 
 @Injectable()
 export class PaymentsService implements IPaymentService {
@@ -26,6 +27,10 @@ export class PaymentsService implements IPaymentService {
 
   async validatePayment(reference: string): Promise<boolean> {
     return this.with(this.options.default).validatePayment(reference)
+  }
+
+  async createPaymentPlan(data: CreatePaystackPlan) {
+    return this.with(this.options.default).createPaymentPlan(data)
   }
 
   with(provider: PaymentStrategyType) {

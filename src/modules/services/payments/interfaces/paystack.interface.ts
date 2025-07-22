@@ -152,3 +152,46 @@ export interface PaystackTransactionVerification
     plan_object: any
     subaccount: any
   }> {}
+
+export interface CreatePaystackPlan {
+  name: string
+  interval: string
+  amount: number
+}
+
+export interface PaystackPlanResponse {
+  status: boolean
+  message: string
+  data: PaystackPlanData
+}
+
+interface PaystackPlanData {
+  name: string
+  interval: string
+  amount: number
+  integration: number
+  domain: string
+  currency: string
+  plan_code: string
+  invoice_limit: number
+  send_invoices: boolean
+  send_sms: boolean
+  hosted_page: boolean
+  migrate: boolean
+  id: number
+  createdAt: string
+  updatedAt: string
+}
+
+export interface CreatePaystackSubscription {
+  email: string
+  amount: number
+  plan_code: string
+}
+
+export interface PaymentPlanResponse {
+  amount: number
+  interval: string
+  planCode: string
+  name: string
+}
