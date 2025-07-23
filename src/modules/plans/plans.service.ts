@@ -12,11 +12,11 @@ export class PlansService implements IService<Plan> {
   async create(data: CreatePlanDto, manager?: EntityManager): Promise<Plan> {
     const repo = manager ? manager.getRepository(Plan) : this.planRepository
 
-    const createProduct = repo.create({ ...data })
+    const createPlan = repo.create({ ...data })
 
-    const product = await repo.save(createProduct)
+    const plan = await repo.save(createPlan)
 
-    return product
+    return plan
   }
 
   async find(): Promise<[Plan[], number]> {

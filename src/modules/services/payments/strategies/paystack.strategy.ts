@@ -5,14 +5,13 @@ import { catchError, firstValueFrom, map } from "rxjs"
 
 import { CONFIG_OPTIONS } from "../constants/config"
 import { PaymentModuleOption } from "../interfaces/config.interface"
-import { InitiatePayment, InitiatePaymentResponse, IPaymentService } from "../interfaces/strategy.interface"
+import { InitiatePayment, InitiatePaymentResponse, IPaymentService, PaymentPlanResponse } from "../interfaces/strategy.interface"
 import {
-  CreatePaystackSubscription,
-  CreatePaystackPlan,
+  CreateSubscription,
+  CreatePlan,
   PaystackInitiatePaymentResponse,
   PaystackPlanResponse,
-  PaystackTransactionVerification,
-  PaymentPlanResponse
+  PaystackTransactionVerification
 } from "../interfaces/paystack.interface"
 
 @Injectable()
@@ -73,7 +72,7 @@ export class PaystackStrategy implements IPaymentService {
     return false
   }
 
-  async createPaymentPlan({ amount, interval, name }: CreatePaystackPlan): Promise<PaymentPlanResponse> {
+  async createPaymentPlan({ amount, interval, name }: CreatePlan): Promise<PaymentPlanResponse> {
     const headers = {
       Authorization: `Bearer ${this.secret}`,
       "Content-Type": "application/json"
@@ -95,7 +94,7 @@ export class PaystackStrategy implements IPaymentService {
     return { interval: data.interval, amount: data.amount, planCode: data.plan_code, name: data.name }
   }
 
-  async createSubscription({ amount, plan_code, email }: CreatePaystackSubscription) {
+  async createSubscription({ amount, plan_code, email }: CreateSubscription) {
     const headers = {
       Authorization: `Bearer ${this.secret}`,
       "Content-Type": "application/json"

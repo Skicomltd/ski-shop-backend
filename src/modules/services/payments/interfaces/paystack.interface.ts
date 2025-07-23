@@ -17,6 +17,8 @@ export type PaystackChargeSuccess<T = any> = {
   paid_at: string
   created_at: string
   channel: string
+  period_start: Date
+  period_end: Date
   currency: string
   ip_address: string
   metadata: any
@@ -63,7 +65,24 @@ export type PaystackChargeSuccess<T = any> = {
     entry_point: string
     identifier: string | null
   }
+  transaction: {
+    reference: string | null
+    status: string | null
+    amount: number | null
+    currency: string
+  }
+  subscription: {
+    status: string
+    subscription_code: string
+    email_token: string
+    amount: number
+    cron_expression: string
+    next_payment_date: Date
+    open_invoice: null
+  }
 }
+
+export interface PaystackSubscriptionCreated {}
 
 export interface PaystackApiResponse<T> {
   status: boolean
@@ -153,7 +172,7 @@ export interface PaystackTransactionVerification
     subaccount: any
   }> {}
 
-export interface CreatePaystackPlan {
+export interface CreatePlan {
   name: string
   interval: string
   amount: number
@@ -183,15 +202,8 @@ interface PaystackPlanData {
   updatedAt: string
 }
 
-export interface CreatePaystackSubscription {
+export interface CreateSubscription {
   email: string
   amount: number
   plan_code: string
-}
-
-export interface PaymentPlanResponse {
-  amount: number
-  interval: string
-  planCode: string
-  name: string
 }

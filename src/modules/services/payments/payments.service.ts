@@ -1,12 +1,12 @@
 import { Inject, Injectable } from "@nestjs/common"
 
 import { PaymentModuleOption, PaymentStrategyType } from "./interfaces/config.interface"
-import { InitiatePayment, InitiatePaymentResponse, IPaymentService } from "./interfaces/strategy.interface"
+import { InitiatePayment, InitiatePaymentResponse, IPaymentService, PaymentPlanResponse, SubscriptionResponse } from "./interfaces/strategy.interface"
 
 import { CONFIG_OPTIONS } from "./constants/config"
 import { PAYMENT_STRATEGY } from "./constants/strategies"
 import { PaystackStrategy } from "./strategies/paystack.strategy"
-import { CreatePaystackPlan } from "./interfaces/paystack.interface"
+import { CreatePlan, CreateSubscription } from "./interfaces/paystack.interface"
 
 @Injectable()
 export class PaymentsService implements IPaymentService {
@@ -29,8 +29,12 @@ export class PaymentsService implements IPaymentService {
     return this.with(this.options.default).validatePayment(reference)
   }
 
-  async createPaymentPlan(data: CreatePaystackPlan) {
+  async createPaymentPlan(data: CreatePlan): Promise<PaymentPlanResponse> {
     return this.with(this.options.default).createPaymentPlan(data)
+  }
+
+  async createSubscription(data: CreateSubscription): Promise<SubscriptionResponse> {
+    return await this.with(this.options.default).createSubscription(data)
   }
 
   with(provider: PaymentStrategyType) {

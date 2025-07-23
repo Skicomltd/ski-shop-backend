@@ -1,1 +1,42 @@
-export class Subscription {}
+import { User } from "@/modules/users/entity/user.entity"
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm"
+
+export enum SubscriptionEnum {
+  "ACTIVE" = "active",
+  "INACTIVE" = "inactive"
+}
+@Entity()
+export class Subscription {
+  @PrimaryGeneratedColumn("uuid")
+  id: string
+
+  @Column()
+  vendorId: string
+
+  @Column({ nullable: true })
+  reference: string
+
+  @Column()
+  planCode: string
+
+  @Column({ type: "timestamp" })
+  startDate: Date
+
+  @Column({ type: "timestamp" })
+  endDate: Date
+
+  @Column()
+  planType: string
+
+  @Column({ type: "enum", enum: SubscriptionEnum, default: SubscriptionEnum.INACTIVE })
+  status: SubscriptionEnum
+
+  @ManyToOne(() => User, (user) => user.subscriptions)
+  vendor: User
+
+  @CreateDateColumn()
+  createdAt: Date
+
+  @UpdateDateColumn()
+  updatedAt: Date
+}

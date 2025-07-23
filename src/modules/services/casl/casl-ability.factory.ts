@@ -188,7 +188,7 @@ export class CaslAbilityFactory {
 
     if (user.role === UserRoleEnum.Admin) {
       can(Action.Manage, Plan)
-    } else {
+    } else if (user.role === UserRoleEnum.Vendor) {
       can(Action.Read, Plan)
     }
 
