@@ -43,29 +43,26 @@ export class WebhookService {
     await this.subscriptionService.update(subscription, {
       status: SubscriptionEnum.ACTIVE
     })
+    return
   }
 
   async handleChargeSuccessForOrders(data: PaystackChargeSuccess) {
-    try {
-      const order = await this.orderService.findById(data.reference)
-      if (!order || order.status === "paid") {
-        return
-      }
-
-      // validate payment
-      const isValid = await this.paymentsService.with("paystack").validatePayment(data.reference)
-      if (!isValid) {
-        return
-      }
-
-      await this.orderService.update(order, {
-        status: "paid",
-        deliveryStatus: "pending",
-        paidAt: data.paidAt
-      })
-    } catch (error) {
-      console.error("Error handling order charge success:", error)
-      throw error
+    const order = await this.orderService.findById(data.reference)
+    if (!order || order.status === "paid") {
+      return
     }
+
+    // validate payment
+    const isValid = await this.paymentsService.with("paystack").validatePayment(data.reference)
+    if (!isValid) {
+      return
+    }
+
+    await this.orderService.update(order, {
+      status: "paid",
+      deliveryStatus: "pending",
+      paidAt: data.paidAt
+    })
+    return
   }
 }
