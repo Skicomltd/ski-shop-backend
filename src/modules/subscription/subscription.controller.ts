@@ -58,7 +58,7 @@ export class SubscriptionController {
     return await this.subscriptionService.find(query)
   }
 
-  @Get("/payment")
+  @Get("/subscriber")
   async getSubscriptions(@Query() query: GetSubscriptionPayload) {
     return await this.subscriptionService.getSubscription(query)
   }
