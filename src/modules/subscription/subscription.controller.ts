@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseInterceptors } from "@nestjs/common"
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseInterceptors, Query } from "@nestjs/common"
 import { SubscriptionService } from "./subscription.service"
 import { createSubcriptionSchema, CreateSubscriptionDto } from "./dto/create-subscription.dto"
 import { UpdateSubscriptionDto } from "./dto/update-subscription.dto"
@@ -9,6 +9,7 @@ import { PaymentsService } from "../services/payments/payments.service"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { SubscriptionsInterceptor } from "./interceptor/subscriptions.interceptor"
 import { SubscriptionInterceptor } from "./interceptor/subscription.interceptor"
+import { ISubscriptionsQuery } from "./interface/query-filter.interface"
 
 @Controller("subscription")
 export class SubscriptionController {
@@ -37,25 +38,21 @@ export class SubscriptionController {
     const subscription = await this.subscriptionService.create(createSubscriptionDto)
 
     return {
-      id: subscription.id,
-      vendorId: subscription.vendorId,
-      planType: subscription.planType,
-      startDate: subscription.startDate,
-      endDate: subscription.endDate,
+      subscription,
       payment: createSubscription
     }
   }
 
   @UseInterceptors(SubscriptionsInterceptor)
   @Get()
-  findAll() {
-    return this.subscriptionService.find()
+  async findAll(@Query() query: ISubscriptionsQuery) {
+    return await this.subscriptionService.find(query)
   }
 
   @UseInterceptors(SubscriptionInterceptor)
   @Get(":id")
-  findOne(@Param("id") id: string) {
-    return this.subscriptionService.findOne({ id: id })
+  async findOne(@Param("id") id: string) {
+    return await this.subscriptionService.findOne({ id: id })
   }
 
   @Patch(":id")

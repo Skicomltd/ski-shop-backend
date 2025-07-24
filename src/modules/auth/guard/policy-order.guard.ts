@@ -2,6 +2,7 @@ import { AppAbility, CaslAbilityFactory } from "@/modules/services/casl/casl-abi
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common"
 import { Reflector } from "@nestjs/core"
 import { PolicyHandler } from "../interface/policies-interface"
+import { CHECK_POLICIES_KEY } from "../decorators/policies-handler.decorator"
 
 @Injectable()
 export class PolicyOrderGuard implements CanActivate {
@@ -11,7 +12,7 @@ export class PolicyOrderGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const policyHandlers = this.reflector.get<PolicyHandler[]>("policies", context.getHandler()) || []
+    const policyHandlers = this.reflector.get<PolicyHandler[]>(CHECK_POLICIES_KEY, context.getHandler()) || []
 
     const { user } = context.switchToHttp().getRequest()
 

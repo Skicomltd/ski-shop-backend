@@ -103,14 +103,16 @@ export class PaystackStrategy implements IPaymentService {
     }
 
     const observable = this.httpService.post<PaystackInitiatePaymentResponse>(
-      `${this.url}//transaction/initialize`,
-      { email, plan_code, amount: amount * 100 },
+      `${this.url}/transaction/initialize`,
+      { email, plan: plan_code, amount: amount * 100 },
       { headers }
     )
 
     const { data } = await firstValueFrom(
       observable.pipe(
-        map((res) => res.data),
+        map((res) => {
+          return res.data
+        }),
         catchError((error: AxiosError) => {
           throw error
         })

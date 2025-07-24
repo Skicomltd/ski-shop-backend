@@ -2,8 +2,9 @@ import { Injectable } from "@nestjs/common"
 import { CreateSubscriptionDto } from "./dto/create-subscription.dto"
 import { UpdateSubscriptionDto } from "./dto/update-subscription.dto"
 import { Subscription } from "./entities/subscription.entity"
-import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
+import { EntityManager, FindManyOptions, FindOptionsWhere, Repository } from "typeorm"
 import { InjectRepository } from "@nestjs/typeorm"
+import { ISubscriptionsQuery } from "./interface/query-filter.interface"
 
 @Injectable()
 export class SubscriptionService implements IService<Subscription> {
@@ -19,8 +20,23 @@ export class SubscriptionService implements IService<Subscription> {
     return subscription
   }
 
-  async find(): Promise<[Subscription[], number]> {
-    return await this.subscriptionRepository.findAndCount({ relations: ["vendor", "vendor.business", "vendor.business.store"] })
+  async find({ page, limit, planType, status }: ISubscriptionsQuery): Promise<[Subscription[], number]> {
+    const where: FindManyOptions<Subscription>["where"] = {}
+
+    if (planType) {
+      where.planType = planType
+    }
+
+    if (status) {
+      where.status = status
+    }
+
+    return await this.subscriptionRepository.findAndCount({
+      where,
+      take: limit,
+      skip: page ? page - 1 : undefined,
+      relations: ["vendor", "vendor.business", "vendor.business.store"]
+    })
   }
 
   async findById(id: string): Promise<Subscription> {

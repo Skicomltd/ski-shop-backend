@@ -190,14 +190,22 @@ export class CaslAbilityFactory {
       can(Action.Manage, Plan)
     } else if (user.role === UserRoleEnum.Vendor) {
       can(Action.Read, Plan)
+      cannot(Action.Create, Plan)
+      cannot(Action.Update, Plan)
+      cannot(Action.Delete, Plan)
+    } else {
+      cannot(Action.Read, Plan)
+      cannot(Action.Create, Plan)
+      cannot(Action.Update, Plan)
+      cannot(Action.Delete, Plan)
     }
 
-    cannot(Action.Create, Plan)
-    cannot(Action.Update, Plan)
-    cannot(Action.Delete, Plan)
-
-    return build({
-      detectSubjectType: (item) => item.constructor as ExtractSubjectType<Subjects>
+    const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
     }) as AppAbility
+
+    return ability
   }
 }
