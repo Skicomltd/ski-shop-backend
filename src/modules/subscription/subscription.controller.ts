@@ -58,6 +58,8 @@ export class SubscriptionController {
     return await this.subscriptionService.find(query)
   }
 
+  @UseGuards(PolicySubscriptionGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, Subscription))
   @Get("/subscriber")
   async getSubscriptions(@Query() query: GetSubscriptionPayload) {
     return await this.subscriptionService.getSubscription(query)
