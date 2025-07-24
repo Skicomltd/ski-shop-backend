@@ -4,13 +4,15 @@ import { PaymentsService } from "../services/payments/payments.service"
 import { PaystackChargeSuccess } from "../services/payments/interfaces/paystack.interface"
 import { SubscriptionService } from "../subscription/subscription.service"
 import { SubscriptionEnum } from "../subscription/entities/subscription.entity"
+import { UserService } from "../users/user.service"
 
 @Injectable()
 export class WebhookService {
   constructor(
     private readonly orderService: OrdersService,
     private readonly paymentsService: PaymentsService,
-    private readonly subscriptionService: SubscriptionService
+    private readonly subscriptionService: SubscriptionService,
+    private readonly userService: UserService
   ) {}
 
   async handleChargeSuccess(data: PaystackChargeSuccess) {
@@ -19,23 +21,23 @@ export class WebhookService {
     })
 
     if (subscription) {
-      await this.handleChargeSuccessForSubscription(data.reference)
+      await this.handleChargeSuccessForSubscription(data)
       return
     }
 
     await this.handleChargeSuccessForOrders(data)
   }
 
-  async handleChargeSuccessForSubscription(reference: string) {
+  async handleChargeSuccessForSubscription(data: PaystackChargeSuccess) {
     const subscription = await this.subscriptionService.findOne({
-      reference: reference
+      reference: data.reference
     })
 
     if (!subscription || subscription.status === SubscriptionEnum.ACTIVE) {
       return
     }
 
-    const isValid = await this.paymentsService.with("paystack").validatePayment(reference)
+    const isValid = await this.paymentsService.with("paystack").validatePayment(data.reference)
     if (!isValid) {
       return
     }
@@ -64,5 +66,27 @@ export class WebhookService {
       paidAt: data.paidAt
     })
     return
+  }
+
+  async handleInvoiceCreate(data: PaystackChargeSuccess) {
+    const user = await this.userService.findOne({ email: data.customer.email })
+
+    if (!user) return
+
+    const subscription = await this.subscriptionService.getSubscription({ code: data.subscription.subscription_code })
+
+    if (!subscription) return
+
+    await this.subscriptionService.create({
+      amount: data.transaction.amount,
+      planCode: subscription.plan_code,
+      planType: subscription.interval,
+      status: SubscriptionEnum.INACTIVE,
+      reference: data.transaction.reference,
+      vendorId: user.id,
+      startDate: data.period_start,
+      endDate: data.period_end,
+      subscriptionCode: data.subscription.subscription_code
+    })
   }
 }

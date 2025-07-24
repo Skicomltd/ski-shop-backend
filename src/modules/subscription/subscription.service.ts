@@ -4,11 +4,15 @@ import { UpdateSubscriptionDto } from "./dto/update-subscription.dto"
 import { Subscription } from "./entities/subscription.entity"
 import { EntityManager, FindManyOptions, FindOptionsWhere, Repository } from "typeorm"
 import { InjectRepository } from "@nestjs/typeorm"
-import { ISubscriptionsQuery } from "./interface/query-filter.interface"
+import { GetSubscriptionPayload, ISubscriptionsQuery } from "./interface/query-filter.interface"
+import { PaymentsService } from "../services/payments/payments.service"
 
 @Injectable()
 export class SubscriptionService implements IService<Subscription> {
-  constructor(@InjectRepository(Subscription) private subscriptionRepository: Repository<Subscription>) {}
+  constructor(
+    @InjectRepository(Subscription) private subscriptionRepository: Repository<Subscription>,
+    private paymentService: PaymentsService
+  ) {}
 
   async create(data: CreateSubscriptionDto, manager?: EntityManager): Promise<Subscription> {
     const repo = manager ? manager.getRepository<Subscription>(Subscription) : this.subscriptionRepository
@@ -80,5 +84,10 @@ export class SubscriptionService implements IService<Subscription> {
     }
 
     return { startDate, endDate }
+  }
+
+  async getSubscription({ code }: GetSubscriptionPayload) {
+    const getSubscription = await this.paymentService.getSubscription({ code })
+    return getSubscription
   }
 }

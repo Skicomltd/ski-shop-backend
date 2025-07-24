@@ -3,6 +3,7 @@ export interface IPaymentService {
   validatePayment: (refrence: string) => Promise<boolean>
   createPaymentPlan: (data: CreatePlan) => Promise<PaymentPlanResponse>
   createSubscription: (data: CreateSubscription) => Promise<SubscriptionResponse>
+  getSubscription: (data: GetSubscription) => Promise<GetSubscriptionResponse>
 }
 
 export interface InitiatePayment {
@@ -42,4 +43,15 @@ export interface CreatePlan {
   name: string
   interval: string
   amount: number
+}
+
+export interface GetSubscriptionResponse {
+  plan_code: string
+  interval: string
+  customer_code: string
+  customer_email: string
+}
+
+export interface GetSubscription {
+  code: string
 }

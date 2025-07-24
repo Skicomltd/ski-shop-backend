@@ -3,3 +3,7 @@ import { Subscription } from "@/modules/subscription/entities/subscription.entit
 import { FindOptionsWhere } from "typeorm"
 
 export interface ISubscriptionsQuery extends PaginationParams, FindOptionsWhere<Subscription> {}
+
+export interface GetSubscriptionPayload {
+  code: string
+}

@@ -8,13 +8,21 @@ import { PaymentModuleOption } from "../interfaces/config.interface"
 import {
   CreatePlan,
   CreateSubscription,
+  GetSubscription,
+  GetSubscriptionResponse,
   InitiatePayment,
   InitiatePaymentResponse,
   IPaymentService,
   PaymentPlanResponse,
   SubscriptionResponse
 } from "../interfaces/strategy.interface"
-import { PaystackInitiatePaymentResponse, PaystackPlanResponse, PaystackTransactionVerification } from "../interfaces/paystack.interface"
+import {
+  GetSubscriptionPaystackResponse,
+  PaystackInitiatePaymentResponse,
+  PaystackPlanData,
+  PaystackPlanResponse,
+  PaystackTransactionVerification
+} from "../interfaces/paystack.interface"
 
 @Injectable()
 export class PaystackStrategy implements IPaymentService {
@@ -80,7 +88,11 @@ export class PaystackStrategy implements IPaymentService {
       "Content-Type": "application/json"
     }
 
-    const observable = this.httpService.post<PaystackPlanResponse>(`${this.url}/plan`, { name, interval, amount: amount * 100 }, { headers })
+    const observable = this.httpService.post<PaystackPlanResponse<PaystackPlanData>>(
+      `${this.url}/plan`,
+      { name, interval, amount: amount * 100 },
+      { headers }
+    )
 
     const { data } = await firstValueFrom(
       observable.pipe(
@@ -123,6 +135,33 @@ export class PaystackStrategy implements IPaymentService {
       authorization_url: data.authorization_url,
       access_code: data.access_code,
       reference: data.reference
+    }
+  }
+
+  async getSubscription({ code }: GetSubscription): Promise<GetSubscriptionResponse> {
+    const headers = {
+      Authorization: `Bearer ${this.secret}`,
+      "Content-Type": "application/json"
+    }
+
+    const observable = this.httpService.get<PaystackPlanResponse<GetSubscriptionPaystackResponse>>(`${this.url}/subscription/${code}`, { headers })
+
+    const { data } = await firstValueFrom(
+      observable.pipe(
+        map((res) => {
+          return res.data
+        }),
+        catchError((error: AxiosError) => {
+          throw error
+        })
+      )
+    )
+
+    return {
+      plan_code: data.plan.plan_code,
+      interval: data.plan.interval,
+      customer_code: data.customer.customer_code,
+      customer_email: data.customer.email
     }
   }
 }

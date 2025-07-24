@@ -9,7 +9,7 @@ import { PaymentsService } from "../services/payments/payments.service"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { SubscriptionsInterceptor } from "./interceptor/subscriptions.interceptor"
 import { SubscriptionInterceptor } from "./interceptor/subscription.interceptor"
-import { ISubscriptionsQuery } from "./interface/query-filter.interface"
+import { GetSubscriptionPayload, ISubscriptionsQuery } from "./interface/query-filter.interface"
 import { PolicySubscriptionGuard } from "../auth/guard/policy-subscription.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { AppAbility } from "../services/casl/casl-ability.factory"
@@ -56,6 +56,11 @@ export class SubscriptionController {
   @Get()
   async findAll(@Query() query: ISubscriptionsQuery) {
     return await this.subscriptionService.find(query)
+  }
+
+  @Get("/paystack")
+  async getSubscriptions(@Query() query: GetSubscriptionPayload) {
+    return await this.subscriptionService.getSubscription(query)
   }
 
   @UseGuards(PolicySubscriptionGuard)

@@ -10,6 +10,7 @@ export class CreateSubscriptionDto {
   planCode: string
   status: SubscriptionEnum
   amount: number
+  subscriptionCode: string
 }
 
 export const createSubcriptionSchema = joi.object({

@@ -4,6 +4,8 @@ import { PaymentModuleOption, PaymentStrategyType } from "./interfaces/config.in
 import {
   CreatePlan,
   CreateSubscription,
+  GetSubscription,
+  GetSubscriptionResponse,
   InitiatePayment,
   InitiatePaymentResponse,
   IPaymentService,
@@ -42,6 +44,10 @@ export class PaymentsService implements IPaymentService {
 
   async createSubscription(data: CreateSubscription): Promise<SubscriptionResponse> {
     return await this.with(this.options.default).createSubscription(data)
+  }
+
+  async getSubscription(data: GetSubscription): Promise<GetSubscriptionResponse> {
+    return await this.with(this.options.default).getSubscription(data)
   }
 
   with(provider: PaymentStrategyType) {

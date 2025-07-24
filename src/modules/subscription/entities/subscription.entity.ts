@@ -19,6 +19,9 @@ export class Subscription {
   @Column()
   planCode: string
 
+  @Column({ default: "" })
+  subscriptionCode: string
+
   @Column({ type: "timestamp" })
   startDate: Date
 
