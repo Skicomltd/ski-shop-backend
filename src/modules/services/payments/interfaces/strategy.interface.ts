@@ -1,5 +1,3 @@
-import { CreatePlan, CreateSubscription } from "./paystack.interface"
-
 export interface IPaymentService {
   initiatePayment: (data: InitiatePayment) => Promise<InitiatePaymentResponse>
   validatePayment: (refrence: string) => Promise<boolean>
@@ -22,15 +20,26 @@ export interface InitiatePaymentResponse {
   checkoutCode: string // for mobile
 }
 
-export interface SubscriptionResponse {
+export interface SubscriptionResponse extends Partial<InitiatePayment> {
   authorization_url: string
   access_code: string
-  reference: string
 }
 
 export interface PaymentPlanResponse {
   amount: number
   interval: string
-  planCode: string
+  plan_code: string
   name: string
+}
+
+export interface CreateSubscription {
+  email: string
+  amount: number
+  plan_code: string
+}
+
+export interface CreatePlan {
+  name: string
+  interval: string
+  amount: number
 }

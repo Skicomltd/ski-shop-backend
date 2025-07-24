@@ -1,12 +1,19 @@
 import { Inject, Injectable } from "@nestjs/common"
 
 import { PaymentModuleOption, PaymentStrategyType } from "./interfaces/config.interface"
-import { InitiatePayment, InitiatePaymentResponse, IPaymentService, PaymentPlanResponse, SubscriptionResponse } from "./interfaces/strategy.interface"
+import {
+  CreatePlan,
+  CreateSubscription,
+  InitiatePayment,
+  InitiatePaymentResponse,
+  IPaymentService,
+  PaymentPlanResponse,
+  SubscriptionResponse
+} from "./interfaces/strategy.interface"
 
 import { CONFIG_OPTIONS } from "./constants/config"
 import { PAYMENT_STRATEGY } from "./constants/strategies"
 import { PaystackStrategy } from "./strategies/paystack.strategy"
-import { CreatePlan, CreateSubscription } from "./interfaces/paystack.interface"
 
 @Injectable()
 export class PaymentsService implements IPaymentService {

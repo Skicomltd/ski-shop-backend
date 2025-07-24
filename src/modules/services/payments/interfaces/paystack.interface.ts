@@ -172,12 +172,6 @@ export interface PaystackTransactionVerification
     subaccount: any
   }> {}
 
-export interface CreatePlan {
-  name: string
-  interval: string
-  amount: number
-}
-
 export interface PaystackPlanResponse {
   status: boolean
   message: string
@@ -200,10 +194,4 @@ interface PaystackPlanData {
   id: number
   createdAt: string
   updatedAt: string
-}
-
-export interface CreateSubscription {
-  email: string
-  amount: number
-  plan_code: string
 }

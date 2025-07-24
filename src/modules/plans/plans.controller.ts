@@ -28,7 +28,7 @@ export class PlansController {
       interval: createPlanDto.interval,
       name: createPlanDto.name
     })
-    createPlanDto.planCode = payment.planCode
+    createPlanDto.planCode = payment.plan_code
     return await this.plansService.create(createPlanDto)
   }
 
