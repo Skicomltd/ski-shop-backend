@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseInterceptors, Query } from "@nestjs/common"
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseInterceptors, Query, UseGuards } from "@nestjs/common"
 import { SubscriptionService } from "./subscription.service"
 import { createSubcriptionSchema, CreateSubscriptionDto } from "./dto/create-subscription.dto"
 import { UpdateSubscriptionDto } from "./dto/update-subscription.dto"
@@ -10,6 +10,11 @@ import { NotFoundException } from "@/exceptions/notfound.exception"
 import { SubscriptionsInterceptor } from "./interceptor/subscriptions.interceptor"
 import { SubscriptionInterceptor } from "./interceptor/subscription.interceptor"
 import { ISubscriptionsQuery } from "./interface/query-filter.interface"
+import { PolicySubscriptionGuard } from "../auth/guard/policy-subscription.guard"
+import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
+import { AppAbility } from "../services/casl/casl-ability.factory"
+import { Action } from "../services/casl/actions/action"
+import { Subscription } from "./entities/subscription.entity"
 
 @Controller("subscription")
 export class SubscriptionController {
@@ -19,6 +24,8 @@ export class SubscriptionController {
     private paymentService: PaymentsService
   ) {}
 
+  @UseGuards(PolicySubscriptionGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Subscription))
   @Post()
   async create(@Body(new JoiValidationPipe(createSubcriptionSchema)) createSubscriptionDto: CreateSubscriptionDto, @Req() req: Request) {
     const user = req.user
@@ -43,18 +50,24 @@ export class SubscriptionController {
     }
   }
 
+  @UseGuards(PolicySubscriptionGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Subscription))
   @UseInterceptors(SubscriptionsInterceptor)
   @Get()
   async findAll(@Query() query: ISubscriptionsQuery) {
     return await this.subscriptionService.find(query)
   }
 
+  @UseGuards(PolicySubscriptionGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Subscription))
   @UseInterceptors(SubscriptionInterceptor)
   @Get(":id")
   async findOne(@Param("id") id: string) {
     return await this.subscriptionService.findOne({ id: id })
   }
 
+  @UseGuards(PolicySubscriptionGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Subscription))
   @Patch(":id")
   async update(@Param("id") id: string, @Body() updateSubscriptionDto: UpdateSubscriptionDto) {
     const subscription = await this.subscriptionService.findOne({ id: id })
@@ -64,6 +77,8 @@ export class SubscriptionController {
     return await this.subscriptionService.update(subscription, updateSubscriptionDto)
   }
 
+  @UseGuards(PolicySubscriptionGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, Subscription))
   @Delete(":id")
   remove(@Param("id") id: string) {
     return this.subscriptionService.remove({ id: id })

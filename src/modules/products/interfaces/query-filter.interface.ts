@@ -6,5 +6,5 @@ import { FindOptionsWhere } from "typeorm"
 export interface IProductsQuery extends PaginationParams, FindOptionsWhere<Product> {
   categories?: string
   vendor?: vendonEnumType
-  topSeller?: string
+  topSeller?: boolean
 }

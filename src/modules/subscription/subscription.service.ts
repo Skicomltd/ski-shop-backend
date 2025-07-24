@@ -20,7 +20,7 @@ export class SubscriptionService implements IService<Subscription> {
     return subscription
   }
 
-  async find({ page, limit, planType, status }: ISubscriptionsQuery): Promise<[Subscription[], number]> {
+  async find({ page, limit, planType, status, vendorId }: ISubscriptionsQuery): Promise<[Subscription[], number]> {
     const where: FindManyOptions<Subscription>["where"] = {}
 
     if (planType) {
@@ -31,11 +31,15 @@ export class SubscriptionService implements IService<Subscription> {
       where.status = status
     }
 
+    if (vendorId) {
+      where.vendorId = vendorId
+    }
+
     return await this.subscriptionRepository.findAndCount({
       where,
       take: limit,
       skip: page ? page - 1 : undefined,
-      relations: ["vendor", "vendor.business", "vendor.business.store"]
+      relations: ["vendor", "vendor.business", "vendor.business.store", "vendor.business.store.product"]
     })
   }
 
