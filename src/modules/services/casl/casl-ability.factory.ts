@@ -11,11 +11,13 @@ import { Order } from "@/modules/orders/entities/order.entity"
 import { Review } from "@/modules/reviews/entities/review.entity"
 import { Plan } from "@/modules/plans/entities/plan.entity"
 import { Subscription } from "@/modules/subscription/entities/subscription.entity"
+import { Promotion } from "@/modules/promotions/entities/promotion.entity"
 
 type Subjects =
   | InferSubjects<typeof User | typeof Product | typeof Business | typeof Store | typeof Bank | typeof Order | typeof Review>
   | typeof Plan
   | typeof Subscription
+  | typeof Promotion
   | "all"
 
 export type AppAbility = MongoAbility<[Action, Subjects]>
@@ -226,6 +228,32 @@ export class CaslAbilityFactory {
       cannot(Action.Create, Subscription)
       cannot(Action.Update, Subscription)
       cannot(Action.Delete, Subscription)
+    }
+
+    const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
+  }
+
+  createAbilityForPromotions(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, Promotion)
+    } else if (user.role === UserRoleEnum.Vendor) {
+      can(Action.Read, Promotion)
+      cannot(Action.Delete, Promotion)
+      cannot(Action.Update, Promotion)
+      cannot(Action.Create, Promotion)
+    } else {
+      cannot(Action.Read, Promotion)
+      cannot(Action.Delete, Promotion)
+      cannot(Action.Update, Promotion)
+      cannot(Action.Create, Promotion)
     }
 
     const ability = build({
