@@ -21,6 +21,7 @@ export class PlansController {
 
   @UseGuards(PolicyPlanGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Plan))
+  @UseInterceptors(PlanInterceptor)
   @Post()
   async create(@Body(new JoiValidationPipe(createPlanSchema)) createPlanDto: CreatePlanDto) {
     const payment = await this.paymentService.createPaymentPlan({

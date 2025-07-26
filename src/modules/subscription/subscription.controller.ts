@@ -24,6 +24,7 @@ export class SubscriptionController {
     private paymentService: PaymentsService
   ) {}
 
+  @UseInterceptors(SubscriptionInterceptor)
   @UseGuards(PolicySubscriptionGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Subscription))
   @Post()

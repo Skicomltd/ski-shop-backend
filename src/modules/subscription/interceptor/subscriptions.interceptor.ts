@@ -25,8 +25,8 @@ export class SubscriptionsInterceptor extends SubscriptionResponseMapper impleme
     return next.handle().pipe(map((data) => this.paginate(data, { page, limit })))
   }
 
-  paginate([orders, total]: PayloadType, params: PaginationParams): ISubscriptionResponses {
-    const data = orders.map((order) => this.transform(order))
+  paginate([subscription, total]: PayloadType, params: PaginationParams): ISubscriptionResponses {
+    const data = subscription.map((sub) => this.transform(sub))
     return this.paginationService.paginate<ISubscriptionResponse>(data, total, params)
   }
 }

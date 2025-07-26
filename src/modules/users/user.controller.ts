@@ -1,20 +1,24 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query } from "@nestjs/common"
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, UseInterceptors } from "@nestjs/common"
 import { UserService } from "./user.service"
 import { CreateUserDto, createUserSchema } from "./dto/create-user-dto"
 import { UpdateUserDto, updateUserSchema } from "./dto/update-user-dto"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { IUserQuery } from "./interfaces/users-query.interface"
+import { UserInterceptor } from "./interceptor/user.interceptor"
+import { UsersInterceptor } from "./interceptor/users.interceptor"
 
 @Controller("user")
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  @UseInterceptors(UserInterceptor)
   @Post("")
   async create(@Body(new JoiValidationPipe(createUserSchema)) createUser: CreateUserDto) {
     return await this.userService.create(createUser)
   }
 
+  @UseInterceptors(UserInterceptor)
   @Patch("/:id")
   async update(@Param("id", ParseUUIDPipe) id: string, @Body(new JoiValidationPipe(updateUserSchema)) updateUser: UpdateUserDto) {
     const user = await this.userService.findOne({ id })
@@ -33,11 +37,13 @@ export class UserController {
     return await this.userService.update(user, prepareUserUpdate)
   }
 
+  @UseInterceptors(UsersInterceptor)
   @Get()
   async findAll(@Query() query: IUserQuery) {
     return await this.userService.find(query)
   }
 
+  @UseInterceptors(UserInterceptor)
   @Get("/:id")
   async findOne(@Param("id", ParseUUIDPipe) id: string) {
     return await this.userService.findOne({ id })
