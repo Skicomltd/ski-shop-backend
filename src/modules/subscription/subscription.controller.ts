@@ -16,7 +16,7 @@ import { AppAbility } from "../services/casl/casl-ability.factory"
 import { Action } from "../services/casl/actions/action"
 import { Subscription } from "./entities/subscription.entity"
 
-@Controller("subscription")
+@Controller("subscriptions")
 export class SubscriptionController {
   constructor(
     private readonly subscriptionService: SubscriptionService,
