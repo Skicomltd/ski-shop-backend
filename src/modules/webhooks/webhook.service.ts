@@ -41,10 +41,16 @@ export class WebhookService {
     if (!isValid) {
       return
     }
+    const vendor = await this.userService.findOne({ id: subscription.vendorId })
+
+    if (!vendor) return
 
     await this.subscriptionService.update(subscription, {
       status: SubscriptionEnum.ACTIVE
     })
+
+    await this.userService.update(vendor, { isStarSeller: true })
+
     return
   }
 
