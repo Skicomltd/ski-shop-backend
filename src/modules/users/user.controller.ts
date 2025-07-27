@@ -8,7 +8,7 @@ import { IUserQuery } from "./interfaces/users-query.interface"
 import { UserInterceptor } from "./interceptor/user.interceptor"
 import { UsersInterceptor } from "./interceptor/users.interceptor"
 
-@Controller("user")
+@Controller("users")
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
