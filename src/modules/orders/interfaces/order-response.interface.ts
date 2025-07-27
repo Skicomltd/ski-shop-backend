@@ -12,5 +12,6 @@ export interface OrderItemResponse {
   name: string
   images: string[]
   price: number
+  vendor: IdName
   quantity: number
 }
