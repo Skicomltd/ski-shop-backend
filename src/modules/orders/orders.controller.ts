@@ -26,6 +26,9 @@ export class OrdersController {
     if (user.role === UserRoleEnum.Customer) {
       query.buyerId = user.id
     } else if (user.role === UserRoleEnum.Vendor) {
+      if (!user.business.store) {
+        throw new NotFoundException("Vendors need to have a store")
+      }
       query.storeId = user.business.store.id
     }
     return this.ordersService.find(query)
