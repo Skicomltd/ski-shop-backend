@@ -12,7 +12,9 @@ export class WebhookService {
   constructor(
     private orderService: OrdersService,
     private readonly paymentsService: PaymentsService,
-    private readonly cartsService: CartsService
+    private readonly cartsService: CartsService,
+    private readonly subscriptionService: SubscriptionService,
+    private readonly userService: UserService
   ) {}
 
   async handleChargeSuccess(data: PaystackChargeSuccess) {
