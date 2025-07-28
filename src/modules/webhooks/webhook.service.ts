@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common"
 import { OrdersService } from "../orders/orders.service"
 import { PaymentsService } from "../services/payments/payments.service"
 import { PaystackChargeSuccess } from "../services/payments/interfaces/paystack.interface"
+import { CartsService } from "../carts/carts.service"
 import { SubscriptionService } from "../subscription/subscription.service"
 import { SubscriptionEnum } from "../subscription/entities/subscription.entity"
 import { UserService } from "../users/user.service"
@@ -9,10 +10,9 @@ import { UserService } from "../users/user.service"
 @Injectable()
 export class WebhookService {
   constructor(
-    private readonly orderService: OrdersService,
+    private orderService: OrdersService,
     private readonly paymentsService: PaymentsService,
-    private readonly subscriptionService: SubscriptionService,
-    private readonly userService: UserService
+    private readonly cartsService: CartsService
   ) {}
 
   async handleChargeSuccess(data: PaystackChargeSuccess) {
@@ -61,10 +61,11 @@ export class WebhookService {
     }
 
     // validate payment
-    const isValid = await this.paymentsService.with("paystack").validatePayment(data.reference)
-    if (!isValid) {
-      return
-    }
+    const isValid = this.paymentsService.with("paystack").validatePayment(order.id)
+    if (!isValid) return
+
+    // clear user cart
+    await this.cartsService.remove({ user: { id: order.buyerId } })
 
     await this.orderService.update(order, {
       status: "paid",

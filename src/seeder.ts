@@ -22,6 +22,7 @@ import Business from "./modules/business/entities/business.entity"
 import { SavedProduct } from "./modules/products/entities/saved-product.entity"
 import { Order } from "./modules/orders/entities/order.entity"
 import { OrderItem } from "./modules/orders/entities/order-item.entity"
+import { Review } from "./modules/reviews/entities/review.entity"
 
 seeder({
   imports: [
@@ -30,7 +31,7 @@ seeder({
       load: [appConfig, authConfig, mailConfig, filesystemsConfig, logConfig]
     }),
     TypeOrmModule.forRootAsync(databaseConfigAsync),
-    TypeOrmModule.forFeature([User, Business, Bank, Store, Product, Cart, SavedProduct, Order, OrderItem]),
+    TypeOrmModule.forFeature([User, Business, Bank, Store, Product, Cart, SavedProduct, Order, OrderItem, Review]),
     UserModule
   ],
   providers: [UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder]

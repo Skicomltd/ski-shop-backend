@@ -23,6 +23,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
   }
 
   async validate(req: Request, _accessToken: string, _refreshToken: string, profile: any): Promise<User> {
+    console.error("profile: ", profile)
+
     const user = await this.authService.validateEmail(profile.email)
 
     req.user = user
