@@ -1,7 +1,17 @@
 import { Inject, Injectable } from "@nestjs/common"
 
 import { PaymentModuleOption, PaymentStrategyType } from "./interfaces/config.interface"
-import { InitiatePayment, InitiatePaymentResponse, IPaymentService } from "./interfaces/strategy.interface"
+import {
+  CreatePlan,
+  CreateSubscription,
+  GetSubscription,
+  GetSubscriptionResponse,
+  InitiatePayment,
+  InitiatePaymentResponse,
+  IPaymentService,
+  PaymentPlanResponse,
+  SubscriptionResponse
+} from "./interfaces/strategy.interface"
 
 import { CONFIG_OPTIONS } from "./constants/config"
 import { PAYMENT_STRATEGY } from "./constants/strategies"
@@ -26,6 +36,18 @@ export class PaymentsService implements IPaymentService {
 
   async validatePayment(reference: string): Promise<boolean> {
     return this.with(this.options.default).validatePayment(reference)
+  }
+
+  async createPaymentPlan(data: CreatePlan): Promise<PaymentPlanResponse> {
+    return this.with(this.options.default).createPaymentPlan(data)
+  }
+
+  async createSubscription(data: CreateSubscription): Promise<SubscriptionResponse> {
+    return await this.with(this.options.default).createSubscription(data)
+  }
+
+  async getSubscription(data: GetSubscription): Promise<GetSubscriptionResponse> {
+    return await this.with(this.options.default).getSubscription(data)
   }
 
   with(provider: PaymentStrategyType) {

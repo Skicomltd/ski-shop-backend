@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, Req, UseGuards } from "@nestjs/common"
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post, Query, Req, UseGuards, UseInterceptors } from "@nestjs/common"
 import { BusinessService } from "./business.service"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { CreateBusinessDto, createBusinessSchema } from "./dto/create-business-dto"
@@ -11,11 +11,14 @@ import { AppAbility } from "../services/casl/casl-ability.factory"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { Action } from "../services/casl/actions/action"
 import Business from "./entities/business.entity"
+import { BusinessInterceptor } from "./interceptor/business.interceptor"
+import { BusinessesInterceptor } from "./interceptor/businesses.interceptor"
 
 @Controller("business")
 export class BusinessController {
   constructor(private readonly businessService: BusinessService) {}
 
+  @UseInterceptors(BusinessInterceptor)
   @Post("/")
   async create(@Body(new JoiValidationPipe(createBusinessSchema)) createBusiness: CreateBusinessDto, @Req() req: Request) {
     const user = req.user
@@ -25,6 +28,7 @@ export class BusinessController {
     return await this.businessService.create(createBusiness)
   }
 
+  @UseInterceptors(BusinessesInterceptor)
   @Get("/")
   async findAll(@Query() query: IBusinessQuery) {
     return await this.businessService.find(query)
@@ -32,6 +36,7 @@ export class BusinessController {
 
   @UseGuards(PoliciesHasBusinessGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Business))
+  @UseInterceptors(BusinessInterceptor)
   @Get("/user")
   async findUserBusiness(@Req() req: Request) {
     const user = req.user
@@ -41,6 +46,7 @@ export class BusinessController {
     return business
   }
 
+  @UseInterceptors(BusinessInterceptor)
   @Get("/:id")
   async findOne(@Param("id", ParseUUIDPipe) id: string) {
     const business = await this.businessService.findOne({ id })
@@ -50,6 +56,7 @@ export class BusinessController {
     return business
   }
 
+  @UseInterceptors(BusinessInterceptor)
   @Patch("/:id")
   async update(@Param("id", ParseUUIDPipe) id: string, @Body(new JoiValidationPipe(updateBusinessSchema)) updateBusiness: UpdateBusinessDto) {
     const business = await this.businessService.findOne({ id })

@@ -30,7 +30,7 @@ export class StoreController {
   ) {}
 
   @Post("")
-  @UseInterceptors(FileInterceptor("image", { ...memoryUpload, fileFilter: imageFilter }))
+  @UseInterceptors(FileInterceptor("image", { ...memoryUpload, fileFilter: imageFilter }), StoreInterceptor)
   async create(
     @Body(new JoiValidationPipe(createStoreSchema)) createStoreDto: CreateStoreDto,
     @UploadedFile() fileUploaded: CustomFile,

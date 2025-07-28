@@ -18,6 +18,7 @@ import Business from "@/modules/business/entities/business.entity"
 import { SavedProduct } from "@/modules/products/entities/saved-product.entity"
 import { Order } from "@/modules/orders/entities/order.entity"
 import { Review } from "@/modules/reviews/entities/review.entity"
+import { Subscription } from "@/modules/subscription/entities/subscription.entity"
 
 export enum UserRoleEnum {
   "Customer" = "customer",
@@ -44,6 +45,9 @@ export class User {
 
   @Column()
   email: string
+
+  @Column({ type: "boolean", default: false })
+  isStarSeller: boolean
 
   @Column({ type: "text", default: "" })
   phoneNumber: string
@@ -77,6 +81,9 @@ export class User {
 
   @OneToMany(() => Review, (review) => review.reviewer)
   reviews: Review[]
+
+  @OneToMany(() => Subscription, (subscription) => subscription.vendor)
+  subscriptions: Subscription[]
 
   private _previousPassword?: string
 

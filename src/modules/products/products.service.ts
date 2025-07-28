@@ -10,12 +10,15 @@ import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { IProductsQuery } from "./interfaces/query-filter.interface"
 import { ProductCategoriesEnum } from "../common/types"
 import { SavedProduct } from "./entities/saved-product.entity"
+import { SubscriptionService } from "../subscription/subscription.service"
+import { SubscriptionEnum } from "../subscription/entities/subscription.entity"
 
 @Injectable()
 export class ProductsService implements IService<Product> {
   constructor(
     @InjectRepository(Product) private productRepository: Repository<Product>,
     @InjectRepository(SavedProduct) private savedProductRepository: Repository<SavedProduct>,
+    private subscriptionService: SubscriptionService,
     private fileSystem: FileSystemService
   ) {}
 
@@ -51,7 +54,7 @@ export class ProductsService implements IService<Product> {
     return [products, count]
   }
 
-  async find({ page, limit, status, stockCount, storeId, categories, vendor }: IProductsQuery) {
+  async find({ page, limit, status, stockCount, storeId, categories, vendor, topSeller }: IProductsQuery) {
     const where: FindManyOptions<Product>["where"] = {}
 
     if (storeId) {
@@ -73,6 +76,17 @@ export class ProductsService implements IService<Product> {
 
     if (vendor) {
       where.store = { type: vendor }
+    }
+
+    if (topSeller) {
+      const [subscriptions] = await this.subscriptionService.find({ status: SubscriptionEnum.ACTIVE })
+      const products = subscriptions.map((subscription) => {
+        return subscription.vendor.business.store.product
+      })
+      const productsId = products[0].map((product) => {
+        return product.id
+      })
+      where.id = In(productsId)
     }
 
     return await this.productRepository.findAndCount({

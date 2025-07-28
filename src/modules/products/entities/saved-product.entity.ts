@@ -13,6 +13,9 @@ export class SavedProduct {
   @Column()
   productId: string
 
+  @Column({ type: "boolean", default: false })
+  isLiked: boolean
+
   @ManyToOne(() => User, (user) => user.savedProducts, { onDelete: "CASCADE" })
   user: User
 

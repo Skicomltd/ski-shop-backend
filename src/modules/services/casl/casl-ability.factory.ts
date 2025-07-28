@@ -9,8 +9,14 @@ import { ProductStatusEnum } from "@/modules/common/types"
 import Business from "@/modules/business/entities/business.entity"
 import { Order } from "@/modules/orders/entities/order.entity"
 import { Review } from "@/modules/reviews/entities/review.entity"
+import { Plan } from "@/modules/plans/entities/plan.entity"
+import { Subscription } from "@/modules/subscription/entities/subscription.entity"
 
-type Subjects = InferSubjects<typeof User | typeof Product | typeof Business | typeof Store | typeof Bank | typeof Order | typeof Review> | "all"
+type Subjects =
+  | InferSubjects<typeof User | typeof Product | typeof Business | typeof Store | typeof Bank | typeof Order | typeof Review>
+  | typeof Plan
+  | typeof Subscription
+  | "all"
 
 export type AppAbility = MongoAbility<[Action, Subjects]>
 type Can = AbilityBuilder<MongoAbility>["can"]
@@ -177,5 +183,57 @@ export class CaslAbilityFactory {
     return build({
       detectSubjectType: (item) => item.constructor as ExtractSubjectType<Subjects>
     }) as AppAbility
+  }
+
+  createAbilityForPlan(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, Plan)
+    } else if (user.role === UserRoleEnum.Vendor) {
+      can(Action.Read, Plan)
+      cannot(Action.Create, Plan)
+      cannot(Action.Update, Plan)
+      cannot(Action.Delete, Plan)
+    } else {
+      cannot(Action.Read, Plan)
+      cannot(Action.Create, Plan)
+      cannot(Action.Update, Plan)
+      cannot(Action.Delete, Plan)
+    }
+
+    const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
+  }
+
+  createAbilityForSubscription(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, Subscription)
+    } else if (user.role === UserRoleEnum.Vendor) {
+      can(Action.Read, Subscription)
+      can(Action.Create, Subscription)
+      cannot(Action.Update, Subscription)
+      cannot(Action.Delete, Subscription)
+    } else {
+      cannot(Action.Read, Subscription)
+      cannot(Action.Create, Subscription)
+      cannot(Action.Update, Subscription)
+      cannot(Action.Delete, Subscription)
+    }
+
+    const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
   }
 }

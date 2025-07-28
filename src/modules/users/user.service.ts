@@ -27,15 +27,24 @@ export class UserService implements IService<User> {
   }
 
   async find(data: IUserQuery): Promise<[User[], number]> {
-    return await this.userRepository.findAndCount({ where: data, relations: ["business", "business.store"] })
+    return await this.userRepository.findAndCount({
+      where: data,
+      relations: ["business", "business.store", "bank", "product", "carts", "savedProducts", "orders", "reviews", "subscriptions"]
+    })
   }
 
   async findById(id: string): Promise<User> {
-    return await this.userRepository.findOne({ where: { id: id }, relations: ["business", "business.store"] })
+    return await this.userRepository.findOne({
+      where: { id: id },
+      relations: ["business", "business.store", "bank", "product", "carts", "savedProducts", "orders", "reviews", "subscriptions"]
+    })
   }
 
   async findOne(filter: FindOptionsWhere<User>): Promise<User> {
-    const user = await this.userRepository.findOne({ where: filter, relations: ["business", "business.store"] })
+    const user = await this.userRepository.findOne({
+      where: filter,
+      relations: ["business", "business.store", "bank", "product", "carts", "savedProducts", "orders", "reviews", "subscriptions"]
+    })
     if (!user) throw new BadReqException("User not found")
     return user
   }
