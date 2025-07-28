@@ -23,9 +23,9 @@ export class OrdersController {
   @Get("/")
   findAll(@Query() query: IOrdersQuery, @Req() req: Request) {
     const user = req.user
-    if (user.role === "customer") {
+    if (user.role === UserRoleEnum.Customer) {
       query.buyerId = user.id
-    } else {
+    } else if (user.role === UserRoleEnum.Vendor) {
       query.storeId = user.business.store.id
     }
     return this.ordersService.find(query)
