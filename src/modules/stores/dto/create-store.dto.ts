@@ -8,6 +8,7 @@ export class CreateStoreDto {
   logo: string
   type: vendonEnumType
   business: Business
+  isStarSeller?: boolean
 }
 
 export const createStoreSchema = Joi.object({

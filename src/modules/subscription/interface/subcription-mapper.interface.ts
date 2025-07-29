@@ -1,15 +1,19 @@
-import { Subscription } from "../entities/subscription.entity"
-import { ISubscriptionResponse } from "./subscription-response.interface"
+import { ISubscriptionResponse, Subscribe } from "./subscription-response.interface"
 
 export abstract class SubscriptionResponseMapper implements IInterceptor {
-  transform(data: Subscription): ISubscriptionResponse {
+  transform(data: Subscribe): ISubscriptionResponse {
     return {
       id: data.id,
       vendorName: data.vendor?.business.store.name,
       startDate: data.startDate,
       endDate: data.endDate,
       planType: data.planType,
-      status: data.status
+      status: data.status,
+      payment: {
+        access_code: data.payment?.access_code,
+        authorization_url: data.payment?.authorization_url,
+        reference: data.payment?.reference
+      }
     }
   }
 }
