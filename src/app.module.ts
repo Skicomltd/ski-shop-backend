@@ -30,6 +30,7 @@ import { ReviewsModule } from "./modules/reviews/reviews.module"
 import { PlansModule } from "./modules/plans/plans.module"
 import { SubscriptionModule } from "./modules/subscription/subscription.module"
 import { PromotionsModule } from "./modules/promotions/promotions.module"
+import { PromotionAdsModule } from "./modules/promotion-ads/promotion-ads.module"
 import paymentConfig from "./config/payment.config"
 
 @Module({
@@ -60,7 +61,8 @@ import paymentConfig from "./config/payment.config"
     ReviewsModule,
     PlansModule,
     SubscriptionModule,
-    PromotionsModule
+    PromotionsModule,
+    PromotionAdsModule
   ],
   controllers: [AppController],
   providers: [

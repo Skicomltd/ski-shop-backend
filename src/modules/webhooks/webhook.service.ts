@@ -4,8 +4,11 @@ import { PaymentsService } from "../services/payments/payments.service"
 import { PaystackChargeSuccess } from "../services/payments/interfaces/paystack.interface"
 import { CartsService } from "../carts/carts.service"
 import { SubscriptionService } from "../subscription/subscription.service"
-import { SubscriptionEnum } from "../subscription/entities/subscription.entity"
+import { Subscription, SubscriptionEnum } from "../subscription/entities/subscription.entity"
 import { UserService } from "../users/user.service"
+import { PromotionAdsService } from "../promotion-ads/promotion-ads.service"
+import { Ads, PromotionAdEnum } from "../promotion-ads/entities/promotion-ad.entity"
+import { Order } from "../orders/entities/order.entity"
 
 @Injectable()
 export class WebhookService {
@@ -14,33 +17,35 @@ export class WebhookService {
     private readonly paymentsService: PaymentsService,
     private readonly cartsService: CartsService,
     private readonly subscriptionService: SubscriptionService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly promotionAdsService: PromotionAdsService
   ) {}
 
   async handleChargeSuccess(data: PaystackChargeSuccess) {
-    const subscription = await this.subscriptionService.findOne({
-      reference: data.reference
-    })
-
-    if (subscription) {
-      await this.handleChargeSuccessForSubscription(data)
-      return
-    }
-
-    await this.handleChargeSuccessForOrders(data)
-  }
-
-  async handleChargeSuccessForSubscription(data: PaystackChargeSuccess) {
-    const subscription = await this.subscriptionService.findOne({
-      reference: data.reference
-    })
-
-    if (!subscription || subscription.status === SubscriptionEnum.ACTIVE) {
-      return
-    }
+    const [subscription, promotionAds, order] = await Promise.all([
+      this.subscriptionService.findOne({ reference: data.reference }),
+      this.promotionAdsService.findOne({ id: data.reference }),
+      this.orderService.findById(data.reference)
+    ])
 
     const isValid = await this.paymentsService.with("paystack").validatePayment(data.reference)
     if (!isValid) {
+      return
+    }
+
+    if (subscription) {
+      await this.handleChargeSuccessForSubscription(subscription)
+      return
+    } else if (promotionAds) {
+      await this.handleChargeForPromotionAds(promotionAds)
+      return
+    }
+
+    await this.handleChargeSuccessForOrders(order, data)
+  }
+
+  async handleChargeSuccessForSubscription(subscription: Subscription) {
+    if (!subscription || subscription.status === SubscriptionEnum.ACTIVE) {
       return
     }
 
@@ -50,15 +55,10 @@ export class WebhookService {
     return
   }
 
-  async handleChargeSuccessForOrders(data: PaystackChargeSuccess) {
-    const order = await this.orderService.findById(data.reference)
+  async handleChargeSuccessForOrders(order: Order, data: PaystackChargeSuccess) {
     if (!order || order.status === "paid") {
       return
     }
-
-    // validate payment
-    const isValid = await this.paymentsService.with("paystack").validatePayment(data.reference)
-    if (!isValid) return
 
     // clear user cart
     await this.cartsService.remove({ user: { id: order.buyerId } })
@@ -91,5 +91,12 @@ export class WebhookService {
       endDate: data.period_end,
       subscriptionCode: data.subscription.subscription_code
     })
+  }
+
+  async handleChargeForPromotionAds(data: Ads) {
+    await this.promotionAdsService.update(data, { status: PromotionAdEnum.ACTIVE })
+    console.log(data)
+
+    return
   }
 }

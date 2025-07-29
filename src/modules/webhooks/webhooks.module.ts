@@ -7,9 +7,10 @@ import { CartsModule } from "../carts/carts.module"
 import { PlansModule } from "../plans/plans.module"
 import { UserModule } from "../users/user.module"
 import { SubscriptionModule } from "../subscription/subscription.module"
+import { PromotionAdsModule } from "../promotion-ads/promotion-ads.module"
 
 @Module({
-  imports: [OrdersModule, CartsModule, SubscriptionModule, PlansModule, UserModule],
+  imports: [OrdersModule, CartsModule, SubscriptionModule, PlansModule, UserModule, PromotionAdsModule],
   controllers: [WebhookController],
   providers: [WebhookService, PaymentsService]
 })
