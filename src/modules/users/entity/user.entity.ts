@@ -47,6 +47,9 @@ export class User {
   @Column()
   email: string
 
+  @Column({ type: "boolean", default: false })
+  isStarSeller: boolean
+
   @Column({ type: "text", default: "" })
   phoneNumber: string
 

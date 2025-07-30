@@ -13,7 +13,7 @@ import { Order } from "../orders/entities/order.entity"
 @Injectable()
 export class WebhookService {
   constructor(
-    private readonly orderService: OrdersService,
+    private orderService: OrdersService,
     private readonly paymentsService: PaymentsService,
     private readonly cartsService: CartsService,
     private readonly subscriptionService: SubscriptionService,
@@ -49,9 +49,16 @@ export class WebhookService {
       return
     }
 
+    const vendor = await this.userService.findOne({ id: subscription.vendorId })
+
+    if (!vendor) return
+
     await this.subscriptionService.update(subscription, {
       status: SubscriptionEnum.ACTIVE
     })
+
+    await this.userService.update(vendor, { isStarSeller: true })
+
     return
   }
 
@@ -95,8 +102,8 @@ export class WebhookService {
 
   async handleChargeForPromotionAds(data: Ads) {
     await this.promotionAdsService.update(data, { status: PromotionAdEnum.ACTIVE })
-    console.log(data)
 
+    console.log(data)
     return
   }
 }
