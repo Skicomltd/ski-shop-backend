@@ -36,6 +36,7 @@ export class StoreSeeder implements Seeder {
       description: faker.lorem.sentence(),
       logo: faker.image.url({ width: 200, height: 200 }),
       business,
+      isStarSeller: false,
       type: faker.helpers.enumValue(vendonEnumType),
       createdAt: faker.date.past(),
       updateAt: faker.date.recent()

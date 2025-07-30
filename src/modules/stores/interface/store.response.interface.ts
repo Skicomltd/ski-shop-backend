@@ -5,6 +5,7 @@ export interface StoreResponse {
   id: string
   name: string
   description: string
+  isStarSeller: boolean
   business: Business
   type: vendonEnumType
   createdAt: Date

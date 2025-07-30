@@ -6,6 +6,7 @@ import { CartsService } from "../carts/carts.service"
 import { SubscriptionService } from "../subscription/subscription.service"
 import { SubscriptionEnum } from "../subscription/entities/subscription.entity"
 import { UserService } from "../users/user.service"
+import { StoreService } from "../stores/store.service"
 
 @Injectable()
 export class WebhookService {
@@ -14,7 +15,8 @@ export class WebhookService {
     private readonly paymentsService: PaymentsService,
     private readonly cartsService: CartsService,
     private readonly subscriptionService: SubscriptionService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly storeService: StoreService
   ) {}
 
   async handleChargeSuccess(data: PaystackChargeSuccess) {
@@ -51,7 +53,13 @@ export class WebhookService {
       status: SubscriptionEnum.ACTIVE
     })
 
-    await this.userService.update(vendor, { isStarSeller: true })
+    const store = await this.storeService.findOne({ id: vendor.business.store.id })
+
+    if (!store) {
+      return
+    }
+
+    await this.storeService.update(store, { isStarSeller: true })
 
     return
   }
