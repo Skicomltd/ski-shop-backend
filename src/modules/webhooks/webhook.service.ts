@@ -7,8 +7,9 @@ import { SubscriptionService } from "../subscription/subscription.service"
 import { SubscriptionEnum } from "../subscription/entities/subscription.entity"
 import { UserService } from "../users/user.service"
 import { StoreService } from "../stores/store.service"
-import { EarningsService } from "../earnings/earnings.service"
 import { TransactionHelper } from "../services/utils/transactions/transactions.service"
+import { WithdrawalsService } from "../withdrawals/withdrawals.service"
+import { PayoutsService } from "../payouts/payouts.service"
 
 @Injectable()
 export class WebhookService {
@@ -19,8 +20,9 @@ export class WebhookService {
     private readonly subscriptionService: SubscriptionService,
     private readonly userService: UserService,
     private readonly storeService: StoreService,
-    private readonly earningsService: EarningsService,
-    private readonly transactionHelper: TransactionHelper
+    private readonly transactionHelper: TransactionHelper,
+    private readonly withdrawalsService: WithdrawalsService,
+    private readonly payoutsService: PayoutsService
   ) {}
 
   async handleChargeSuccess(data: PaystackChargeSuccess) {
@@ -97,11 +99,11 @@ export class WebhookService {
         const storeId = product.user.business.store.id
         const total = item.unitPrice * item.quantity
 
-        const earning = await this.earningsService.findOne({ storeId })
-        if (!earning) {
-          await this.earningsService.create({ storeId, total, available: total }, manager)
+        const payout = await this.payoutsService.findOne({ storeId })
+        if (!payout) {
+          await this.payoutsService.create({ storeId, total, available: total }, manager)
         } else {
-          await this.earningsService.update(earning, earning.handleVendorOrder(total), manager)
+          await this.payoutsService.update(payout, payout.handleVendorOrder(total), manager)
         }
       }
     })
@@ -131,22 +133,29 @@ export class WebhookService {
   }
 
   async handleTransferSuccess(data: PaystackTransferData) {
-    const withdrawal = await this.earningsService.findWithdrawal(data.reference)
+    const withdrawal = await this.withdrawalsService.findById(data.reference)
     if (!withdrawal) return
 
     // why are we here exactly?
     if (withdrawal.status !== "pending") return
 
-    await this.earningsService.withdrawalSuccess(withdrawal)
+    return this.transactionHelper.runInTransaction(async (manager) => {
+      const successDto = withdrawal.payout.handleWithdrawSuccess(withdrawal.amount)
+      await this.payoutsService.update(withdrawal.payout, successDto, manager)
+      await this.withdrawalsService.update(withdrawal, { status: "success" }, manager)
+    })
   }
 
   async handleTransferFailed(data: PaystackTransferData) {
-    const withdrawal = await this.earningsService.findWithdrawal(data.reference)
+    const withdrawal = await this.withdrawalsService.findById(data.reference)
     if (!withdrawal) return
 
     // why are we here exactly?
     if (withdrawal.status !== "pending") return
 
-    await this.earningsService.withdrawalFailed(withdrawal)
+    return this.transactionHelper.runInTransaction(async (manager) => {
+      await this.payoutsService.update(withdrawal.payout, withdrawal.payout.handleWithdrawFailed(withdrawal.amount), manager)
+      await this.withdrawalsService.update(withdrawal, { status: "failed" }, manager)
+    })
   }
 }

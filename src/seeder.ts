@@ -22,10 +22,10 @@ import { SavedProduct } from "./modules/products/entities/saved-product.entity"
 import { Order } from "./modules/orders/entities/order.entity"
 import { OrderItem } from "./modules/orders/entities/order-item.entity"
 import { Review } from "./modules/reviews/entities/review.entity"
-import { Earning } from "./modules/earnings/entities/earning.entity"
-import { Withdrawal } from "./modules/earnings/entities/withdrawal.entity"
+import { Withdrawal } from "./modules/withdrawals/entities/withdrawal.entity"
 import { Subscription } from "./modules/subscription/entities/subscription.entity"
 import { Plan } from "./modules/plans/entities/plan.entity"
+import { Payout } from "./modules/payouts/entities/payout.entity"
 
 seeder({
   imports: [
@@ -45,10 +45,10 @@ seeder({
       Order,
       OrderItem,
       Review,
-      Earning,
       Withdrawal,
       Subscription,
-      Plan
+      Plan,
+      Payout
     ])
   ],
   providers: [UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder]

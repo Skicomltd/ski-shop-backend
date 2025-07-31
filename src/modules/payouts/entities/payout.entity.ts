@@ -1,9 +1,9 @@
 import { Store } from "@/modules/stores/entities/store.entity"
+import { Withdrawal } from "@/modules/withdrawals/entities/withdrawal.entity"
 import { Column, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn } from "typeorm"
-import { Withdrawal } from "./withdrawal.entity"
 
 @Entity()
-export class Earning {
+export class Payout {
   @PrimaryGeneratedColumn("uuid")
   id: string
 
@@ -22,10 +22,10 @@ export class Earning {
   @Column()
   storeId: string
 
-  @OneToOne(() => Store, (store) => store.earning, { eager: true })
+  @OneToOne(() => Store, (store) => store.payout, { eager: true })
   store: Store
 
-  @OneToMany(() => Withdrawal, (wi) => wi.earning, { eager: true })
+  @OneToMany(() => Withdrawal, (wi) => wi.payout, { eager: true })
   withdrawals: Withdrawal[]
 
   handleWithdaw(amount: number) {
@@ -52,9 +52,4 @@ export class Earning {
     const available = parseFloat(this.available.toString()) + parseFloat(amount.toString())
     return { total, available }
   }
-
-  //   @AfterUpdate()
-  //   updateCounters() {
-  //    //  this.counter = 0
-  //   }
 }

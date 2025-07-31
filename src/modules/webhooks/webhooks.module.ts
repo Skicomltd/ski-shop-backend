@@ -8,10 +8,11 @@ import { PlansModule } from "../plans/plans.module"
 import { UserModule } from "../users/user.module"
 import { SubscriptionModule } from "../subscription/subscription.module"
 import { StoreModule } from "../stores/store.module"
-import { EarningsModule } from "../earnings/earnings.module"
+import { WithdrawalsModule } from "../withdrawals/withdrawals.module"
+import { PayoutsModule } from "../payouts/payouts.module"
 
 @Module({
-  imports: [OrdersModule, CartsModule, SubscriptionModule, PlansModule, UserModule, StoreModule, EarningsModule],
+  imports: [OrdersModule, CartsModule, SubscriptionModule, PlansModule, UserModule, StoreModule, WithdrawalsModule, PayoutsModule],
   controllers: [WebhookController],
   providers: [WebhookService, PaymentsService]
 })

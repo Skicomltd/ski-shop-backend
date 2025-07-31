@@ -6,7 +6,7 @@ import { CHECK_POLICIES_KEY } from "../../auth/decorators/policies-handler.decor
 import { AppAbility, CaslAbilityFactory } from "@/modules/services/casl/casl-ability.factory"
 
 @Injectable()
-export class PolicyEarningGuard implements CanActivate {
+export class PolicyPayoutGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private caslAbilityFactory: CaslAbilityFactory
@@ -17,7 +17,7 @@ export class PolicyEarningGuard implements CanActivate {
 
     const { user } = context.switchToHttp().getRequest()
 
-    const ability = this.caslAbilityFactory.createAbilityForEarning(user)
+    const ability = this.caslAbilityFactory.createAbilityForPayout(user)
 
     return policyHandlers.every((handler) => this.execPolicyHandler(handler, ability))
   }
