@@ -11,11 +11,21 @@ import { Order } from "@/modules/orders/entities/order.entity"
 import { Review } from "@/modules/reviews/entities/review.entity"
 import { Plan } from "@/modules/plans/entities/plan.entity"
 import { Subscription } from "@/modules/subscription/entities/subscription.entity"
+import { Earning } from "@/modules/earnings/entities/earning.entity"
 
 type Subjects =
-  | InferSubjects<typeof User | typeof Product | typeof Business | typeof Store | typeof Bank | typeof Order | typeof Review>
-  | typeof Plan
-  | typeof Subscription
+  | InferSubjects<
+      | typeof User
+      | typeof Product
+      | typeof Business
+      | typeof Store
+      | typeof Bank
+      | typeof Order
+      | typeof Review
+      | typeof Plan
+      | typeof Subscription
+      | typeof Earning
+    >
   | "all"
 
 export type AppAbility = MongoAbility<[Action, Subjects]>
@@ -226,6 +236,32 @@ export class CaslAbilityFactory {
       cannot(Action.Create, Subscription)
       cannot(Action.Update, Subscription)
       cannot(Action.Delete, Subscription)
+    }
+
+    const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
+  }
+
+  createAbilityForEarning(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, Earning)
+    } else if (user.role === UserRoleEnum.Vendor) {
+      can(Action.Read, Earning)
+      can(Action.Create, Earning)
+      cannot(Action.Update, Earning)
+      cannot(Action.Delete, Earning)
+    } else {
+      cannot(Action.Read, Earning)
+      cannot(Action.Create, Earning)
+      cannot(Action.Update, Earning)
+      cannot(Action.Delete, Earning)
     }
 
     const ability = build({

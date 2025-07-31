@@ -1,4 +1,5 @@
 import Business from "@/modules/business/entities/business.entity"
+import { Earning } from "@/modules/earnings/entities/earning.entity"
 import { Product } from "@/modules/products/entities/product.entity"
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, OneToMany, JoinColumn } from "typeorm"
 
@@ -29,6 +30,10 @@ export class Store {
   @OneToOne(() => Business, (business) => business.store)
   @JoinColumn()
   business: Business
+
+  @OneToOne(() => Earning, (earning) => earning.store)
+  @JoinColumn()
+  earning: Earning
 
   @OneToMany(() => Product, (product) => product.store)
   product: Product[]
