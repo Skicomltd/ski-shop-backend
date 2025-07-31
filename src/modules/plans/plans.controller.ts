@@ -19,8 +19,8 @@ export class PlansController {
     private paymentService: PaymentsService
   ) {}
 
-  @UseGuards(PolicyPlanGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Plan))
+  // @UseGuards(PolicyPlanGuard)
+  // @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Plan))
   @UseInterceptors(PlanInterceptor)
   @Post()
   async create(@Body(new JoiValidationPipe(createPlanSchema)) createPlanDto: CreatePlanDto) {
@@ -29,7 +29,7 @@ export class PlansController {
       interval: createPlanDto.interval,
       name: createPlanDto.name
     })
-    createPlanDto.planCode = payment.plan_code
+    createPlanDto.planCode = payment.planCode
     return await this.plansService.create(createPlanDto)
   }
 

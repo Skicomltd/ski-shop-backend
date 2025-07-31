@@ -113,7 +113,7 @@ export class PaystackStrategy implements IPaymentService {
       )
     )
 
-    return { interval: data.interval, amount: data.amount, plan_code: data.plan_code, name: data.name }
+    return { interval: data.interval, amount: data.amount, planCode: data.plan_code, name: data.name }
   }
 
   async createSubscription({ amount, plan_code, email }: CreateSubscription): Promise<SubscriptionResponse> {

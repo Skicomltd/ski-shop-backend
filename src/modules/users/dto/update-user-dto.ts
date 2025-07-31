@@ -5,8 +5,8 @@ import * as joi from "joi"
 export class UpdateUserDto extends PartialType(CreateUserDto) {}
 
 export const updateUserSchema = joi.object({
-  firstName: joi.string().required(),
-  lastName: joi.string().required(),
-  password: joi.string().required(),
+  firstName: joi.string(),
+  lastName: joi.string(),
+  password: joi.string(),
   role: joi.string().valid("customer", "vendor", "admin")
 })

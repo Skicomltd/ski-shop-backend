@@ -1,3 +1,5 @@
+import { PlanInterval } from "@/modules/plans/interface/plan-interval.interface"
+
 export interface IPaymentService {
   initiatePayment: (data: InitiatePayment) => Promise<InitiatePaymentResponse>
   validatePayment: (refrence: string) => Promise<boolean>
@@ -65,7 +67,7 @@ export interface SubscriptionResponse extends Partial<InitiatePayment> {
 export interface PaymentPlanResponse {
   amount: number
   interval: string
-  plan_code: string
+  planCode: string
   name: string
 }
 
@@ -77,7 +79,7 @@ export interface CreateSubscription {
 
 export interface CreatePlan {
   name: string
-  interval: string
+  interval: PlanInterval
   amount: number
 }
 
