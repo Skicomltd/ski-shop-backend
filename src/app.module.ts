@@ -29,7 +29,7 @@ import { OrdersModule } from "./modules/orders/orders.module"
 import { ReviewsModule } from "./modules/reviews/reviews.module"
 import { PlansModule } from "./modules/plans/plans.module"
 import { SubscriptionModule } from "./modules/subscription/subscription.module"
-import { EarningsModule } from './modules/earnings/earnings.module';
+import { EarningsModule } from "./modules/earnings/earnings.module"
 import paymentConfig from "./config/payment.config"
 
 @Module({
