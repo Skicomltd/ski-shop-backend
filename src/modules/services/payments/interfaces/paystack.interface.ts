@@ -1,5 +1,7 @@
-export type PaystackEventType = "charge.success"
-type PaystackWebhookBody<T> = PaystackChargeSuccess<T>
+import { Currency, GetBanks } from "./strategy.interface"
+
+export type PaystackEventType = "charge.success" | "invoice.create" | "transfer.success" | "transfer.failed" | "transfer.reversed"
+type PaystackWebhookBody<T> = PaystackChargeSuccess<T> | PaystackTransferData
 
 export type PaystackWebhook<T = any> = {
   event: PaystackEventType
@@ -96,6 +98,14 @@ export interface PaystackInitiatePaymentResponse
     access_code: string
     reference: string
   }> {}
+
+export interface PaystackBalanceResponse
+  extends PaystackApiResponse<{
+    currency: Currency
+    amount: number
+  }> {}
+
+export interface PaystackGetBanksResponse extends PaystackApiResponse<GetBanks> {}
 
 export type PaystackPaymentStatus = "abandoned" | "failed" | "ongoing" | "pending" | "processing" | "queued" | "reversed" | "success"
 
@@ -196,6 +206,20 @@ export interface PaystackPlanData {
   updatedAt: string
 }
 
+export interface PaystackCreateRcipientResponse
+  extends PaystackApiResponse<{
+    active: boolean
+    createdAt: string
+    currency: Currency
+    id: number
+    integration: number
+    name: string
+    recipient_code: string
+    type: TransferRecipientType
+    updatedAt: string
+    is_deleted: boolean
+  }> {}
+
 export interface GetSubscriptionPaystackResponse {
   invoices: any[]
   customer: {
@@ -267,4 +291,60 @@ export interface GetSubscriptionPaystackResponse {
   id: number
   createdAt: string
   updatedAt: string
+}
+
+export type TransferRecipientType = "ghipss" | "mobile_money" | "kepss" | "nuban" | "basa" | "authorization"
+
+export type CreatePaystackTransferRecipient = {
+  type: TransferRecipientType
+  name: string
+  account_number: string
+  bank_code: string
+  currency: Currency
+  description?: string
+  metadata?: Record<string, any>
+}
+
+export type PaystackTransfer = {
+  source: "balance"
+  amount: number
+  reference: string
+  recipient: string
+  reason: string
+  currency: Currency
+}
+
+export interface PaystackTransferData {
+  amount: number
+  currency: Currency
+  id: number
+  reason: string
+  reference: string
+  source: "balance"
+  status: string
+  transfer_code: string
+  transferred_at: null
+  recipient: {
+    active: boolean
+    currency: Currency
+    description: string
+    email: string | null
+    id: number
+    integration: number
+    metadata: Record<string, any> | null
+    name: string
+    recipient_code: string
+    type: TransferRecipientType
+    is_deleted: boolean
+    details: {
+      account_number: string
+      account_name: string
+      bank_code: string
+      bank_name: string
+    }
+    created_at: string
+    updated_at: string
+  }
+  created_at: string
+  updated_at: string
 }

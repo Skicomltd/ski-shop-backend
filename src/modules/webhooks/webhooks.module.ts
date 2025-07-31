@@ -8,9 +8,10 @@ import { PlansModule } from "../plans/plans.module"
 import { UserModule } from "../users/user.module"
 import { SubscriptionModule } from "../subscription/subscription.module"
 import { StoreModule } from "../stores/store.module"
+import { EarningsModule } from "../earnings/earnings.module"
 
 @Module({
-  imports: [OrdersModule, CartsModule, SubscriptionModule, PlansModule, UserModule, StoreModule],
+  imports: [OrdersModule, CartsModule, SubscriptionModule, PlansModule, UserModule, StoreModule, EarningsModule],
   controllers: [WebhookController],
   providers: [WebhookService, PaymentsService]
 })

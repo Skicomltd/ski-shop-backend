@@ -7,16 +7,16 @@ export class Earning {
   @PrimaryGeneratedColumn("uuid")
   id: string
 
-  @Column({ type: "numeric", default: 0 })
+  @Column({ type: "float", default: 0 })
   total: number
 
-  @Column({ type: "numeric", default: 0 })
+  @Column({ type: "float", default: 0 })
   available: number
 
-  @Column({ type: "numeric", default: 0 })
+  @Column({ type: "float", default: 0 })
   pending: number
 
-  @Column({ type: "numeric", default: 0 })
+  @Column({ type: "float", default: 0 })
   withdrawn: number
 
   @Column()
@@ -27,6 +27,28 @@ export class Earning {
 
   @OneToMany(() => Withdrawal, (wi) => wi.earning, { eager: true })
   withdrawals: Withdrawal[]
+
+  handleWithdaw(amount: number) {
+    const available = this.available - amount
+    const withdrawn = this.withdrawn + amount
+    const pending = this.pending + amount
+
+    return { available, withdrawn, pending }
+  }
+
+  handleWithdrawSuccess(amount: number) {
+    const pending = this.pending - amount
+
+    return { pending }
+  }
+
+  handleWithdrawFailed(amount: number) {
+    const available = this.available + amount
+    const withdrawn = this.withdrawn - amount
+    const pending = this.pending - amount
+
+    return { available, withdrawn, pending }
+  }
 
   //   @AfterUpdate()
   //   updateCounters() {

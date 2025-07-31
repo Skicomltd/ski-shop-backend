@@ -255,7 +255,7 @@ export class CaslAbilityFactory {
     } else if (user.role === UserRoleEnum.Vendor) {
       can(Action.Read, Earning)
       can(Action.Create, Earning)
-      cannot(Action.Update, Earning)
+      can(Action.Update, Earning)
       cannot(Action.Delete, Earning)
     } else {
       cannot(Action.Read, Earning)

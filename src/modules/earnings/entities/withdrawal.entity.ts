@@ -16,11 +16,14 @@ export class Withdrawal {
   @Column()
   bankId: string
 
-  @Column({ type: "enum", enum: WITHDRAWAL_STATUS })
+  @Column({ type: "enum", enum: WITHDRAWAL_STATUS, default: "pending" })
   status: WithdrawalStatus
 
   @ManyToOne(() => Bank, { eager: true })
   bank: Bank
+
+  @Column({ nullable: true })
+  earningId: string
 
   @ManyToOne(() => Earning, (earning) => earning.withdrawals)
   earning: Earning

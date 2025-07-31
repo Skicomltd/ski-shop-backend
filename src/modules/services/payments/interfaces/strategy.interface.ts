@@ -4,12 +4,48 @@ export interface IPaymentService {
   createPaymentPlan: (data: CreatePlan) => Promise<PaymentPlanResponse>
   createSubscription: (data: CreateSubscription) => Promise<SubscriptionResponse>
   getSubscription: (data: GetSubscription) => Promise<GetSubscriptionResponse>
+  checkBalance: () => Promise<CheckBalance>
+  getBanks: (currency?: Currency) => Promise<Bank[]>
+  createTransferRecipient: (data: CreateTransferRecipient) => Promise<CreateTransferRecipientResponse>
+  transfer(data: Transfer): Promise<void>
 }
+
+export type Transfer = {
+  amount: number
+  reference: string
+  recipient: string
+  reason: string
+  currency?: Currency
+}
+
+export type CreateTransferRecipient = {
+  type?: string
+  name: string
+  accountNumber: string
+  bankCode: string
+  currency?: Currency
+  description?: string
+  metadata?: Record<string, any>
+}
+
+export type CreateTransferRecipientResponse = {
+  code: string
+  name: string
+}
+
+type Bank = {
+  name: string
+  code: string
+}
+
+export type GetBanks = Bank[]
+
+export type Currency = "NGN" | "USD" | "GHS" | "ZAR" | "KES" | "XOF"
 
 export interface InitiatePayment {
   amount: number
   email: string
-  currency?: "NGN" | "USD" | "GHS" | "ZAR" | "KES" | "XOF"
+  currency?: Currency
   reference?: string
   callback_url?: string
   metadata?: Record<string, any>
@@ -54,4 +90,9 @@ export interface GetSubscriptionResponse {
 
 export interface GetSubscription {
   code: string
+}
+
+export interface CheckBalance {
+  amount: number
+  currency: Currency
 }

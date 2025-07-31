@@ -1,12 +1,13 @@
 import { Injectable } from "@nestjs/common"
 import { OrdersService } from "../orders/orders.service"
 import { PaymentsService } from "../services/payments/payments.service"
-import { PaystackChargeSuccess } from "../services/payments/interfaces/paystack.interface"
+import { PaystackChargeSuccess, PaystackTransferData } from "../services/payments/interfaces/paystack.interface"
 import { CartsService } from "../carts/carts.service"
 import { SubscriptionService } from "../subscription/subscription.service"
 import { SubscriptionEnum } from "../subscription/entities/subscription.entity"
 import { UserService } from "../users/user.service"
 import { StoreService } from "../stores/store.service"
+import { EarningsService } from "../earnings/earnings.service"
 
 @Injectable()
 export class WebhookService {
@@ -16,7 +17,8 @@ export class WebhookService {
     private readonly cartsService: CartsService,
     private readonly subscriptionService: SubscriptionService,
     private readonly userService: UserService,
-    private readonly storeService: StoreService
+    private readonly storeService: StoreService,
+    private readonly earningsService: EarningsService
   ) {}
 
   async handleChargeSuccess(data: PaystackChargeSuccess) {
@@ -105,5 +107,25 @@ export class WebhookService {
       endDate: data.period_end,
       subscriptionCode: data.subscription.subscription_code
     })
+  }
+
+  async handleTransferSuccess(data: PaystackTransferData) {
+    const withdrawal = await this.earningsService.findWithdrawal(data.reference)
+    if (!withdrawal) return
+
+    // why are we here exactly?
+    if (withdrawal.status !== "pending") return
+
+    await this.earningsService.withdrawalSuccess(withdrawal)
+  }
+
+  async handleTransferFailed(data: PaystackTransferData) {
+    const withdrawal = await this.earningsService.findWithdrawal(data.reference)
+    if (!withdrawal) return
+
+    // why are we here exactly?
+    if (withdrawal.status !== "pending") return
+
+    await this.earningsService.withdrawalFailed(withdrawal)
   }
 }

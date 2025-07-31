@@ -7,5 +7,6 @@ export class UpdateBankDto extends PartialType(CreateBankDto) {}
 export const updatebankSchema = joi.object({
   bankName: joi.string().optional(),
   accountNumber: joi.string().optional(),
-  accountName: joi.string().optional()
+  accountName: joi.string().optional(),
+  code: joi.string().optional()
 })

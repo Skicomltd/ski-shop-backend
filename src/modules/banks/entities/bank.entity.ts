@@ -15,6 +15,12 @@ export class Bank {
   @Column()
   accountName: string
 
+  @Column()
+  code: string
+
+  @Column()
+  recipientCode: string
+
   @ManyToOne(() => User, (user) => user.bank, { eager: true })
   user: User
 
@@ -23,4 +29,8 @@ export class Bank {
 
   @UpdateDateColumn()
   updatedAt: Date
+
+  isMyBank(userId: string) {
+    return this.user.id === userId
+  }
 }

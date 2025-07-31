@@ -1,5 +1,4 @@
 import { seeder } from "nestjs-seeder"
-import { UserModule } from "./modules/users/user.module"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { User } from "./modules/users/entity/user.entity"
 import { databaseConfigAsync } from "./config/database.config"
@@ -23,6 +22,10 @@ import { SavedProduct } from "./modules/products/entities/saved-product.entity"
 import { Order } from "./modules/orders/entities/order.entity"
 import { OrderItem } from "./modules/orders/entities/order-item.entity"
 import { Review } from "./modules/reviews/entities/review.entity"
+import { Earning } from "./modules/earnings/entities/earning.entity"
+import { Withdrawal } from "./modules/earnings/entities/withdrawal.entity"
+import { Subscription } from "./modules/subscription/entities/subscription.entity"
+import { Plan } from "./modules/plans/entities/plan.entity"
 
 seeder({
   imports: [
@@ -31,8 +34,22 @@ seeder({
       load: [appConfig, authConfig, mailConfig, filesystemsConfig, logConfig]
     }),
     TypeOrmModule.forRootAsync(databaseConfigAsync),
-    TypeOrmModule.forFeature([User, Business, Bank, Store, Product, Cart, SavedProduct, Order, OrderItem, Review]),
-    UserModule
+    TypeOrmModule.forFeature([
+      User,
+      Business,
+      Bank,
+      Store,
+      Product,
+      Cart,
+      SavedProduct,
+      Order,
+      OrderItem,
+      Review,
+      Earning,
+      Withdrawal,
+      Subscription,
+      Plan
+    ])
   ],
   providers: [UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder]
 }).run([UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder])

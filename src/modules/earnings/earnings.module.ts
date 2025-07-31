@@ -4,10 +4,12 @@ import { EarningsController } from "./earnings.controller"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { Earning } from "./entities/earning.entity"
 import { Withdrawal } from "./entities/withdrawal.entity"
+import { BankModule } from "../banks/bank.module"
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Earning, Withdrawal])],
+  imports: [TypeOrmModule.forFeature([Earning, Withdrawal]), BankModule],
   controllers: [EarningsController],
-  providers: [EarningsService]
+  providers: [EarningsService],
+  exports: [EarningsService]
 })
 export class EarningsModule {}

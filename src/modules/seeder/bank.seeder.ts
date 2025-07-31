@@ -31,6 +31,8 @@ export class BankSeeder implements Seeder {
       accountNumber: faker.finance.accountNumber(10), // 10-digit unique account number
       accountName: `${user.firstName} ${user.lastName}`, // Use user's full name
       user, // Link to the user
+      code: "035",
+      recipientCode: "RCP_gx2wn530m0i3w3m",
       createdAt: faker.date.past(),
       updatedAt: faker.date.recent()
     }))

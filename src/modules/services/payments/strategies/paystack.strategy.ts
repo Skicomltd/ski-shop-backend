@@ -8,20 +8,28 @@ import { PaymentModuleOption } from "../interfaces/config.interface"
 import {
   CreatePlan,
   CreateSubscription,
+  CreateTransferRecipient,
+  Currency,
   GetSubscription,
   GetSubscriptionResponse,
   InitiatePayment,
   InitiatePaymentResponse,
   IPaymentService,
   PaymentPlanResponse,
-  SubscriptionResponse
+  SubscriptionResponse,
+  Transfer
 } from "../interfaces/strategy.interface"
 import {
+  CreatePaystackTransferRecipient,
   GetSubscriptionPaystackResponse,
+  PaystackBalanceResponse,
+  PaystackCreateRcipientResponse,
+  PaystackGetBanksResponse,
   PaystackInitiatePaymentResponse,
   PaystackPlanData,
   PaystackPlanResponse,
-  PaystackTransactionVerification
+  PaystackTransactionVerification,
+  PaystackTransfer
 } from "../interfaces/paystack.interface"
 
 @Injectable()
@@ -163,5 +171,113 @@ export class PaystackStrategy implements IPaymentService {
       customer_code: data.customer.customer_code,
       customer_email: data.customer.email
     }
+  }
+
+  async checkBalance() {
+    const headers = {
+      Authorization: `Bearer ${this.secret}`,
+      "Content-Type": "application/json"
+    }
+
+    const observable = this.httpService.get<PaystackBalanceResponse>(`${this.url}/balance`, { headers })
+
+    const { data } = await firstValueFrom(
+      observable.pipe(
+        map((res) => {
+          return res.data
+        }),
+        catchError((error: AxiosError) => {
+          throw error
+        })
+      )
+    )
+
+    return data
+  }
+
+  async getBanks(currency: Currency = "NGN") {
+    const headers = {
+      Authorization: `Bearer ${this.secret}`,
+      "Content-Type": "application/json"
+    }
+
+    const observable = this.httpService.get<PaystackGetBanksResponse>(`${this.url}/bank?currency=${currency}`, { headers })
+
+    const { data } = await firstValueFrom(
+      observable.pipe(
+        map((res) => {
+          return res.data
+        }),
+        catchError((error: AxiosError) => {
+          throw error
+        })
+      )
+    )
+
+    return data.map((d) => ({ name: d.name, code: d.code }))
+  }
+
+  async createTransferRecipient(data: CreateTransferRecipient) {
+    const headers = {
+      Authorization: `Bearer ${this.secret}`,
+      "Content-Type": "application/json"
+    }
+
+    const body: CreatePaystackTransferRecipient = {
+      type: "nuban",
+      name: data.name,
+      account_number: data.accountNumber,
+      bank_code: data.bankCode,
+      currency: data.currency || "NGN",
+      description: data.description,
+      metadata: data.metadata
+    }
+
+    const observable = this.httpService.post<PaystackCreateRcipientResponse>(`${this.url}/transferrecipient`, body, { headers })
+
+    const { data: result } = await firstValueFrom(
+      observable.pipe(
+        map((res) => {
+          return res.data
+        }),
+        catchError((error: AxiosError) => {
+          throw error
+        })
+      )
+    )
+
+    return {
+      code: result.recipient_code,
+      name: result.name
+    }
+  }
+
+  async transfer(data: Transfer): Promise<void> {
+    const headers = {
+      Authorization: `Bearer ${this.secret}`,
+      "Content-Type": "application/json"
+    }
+
+    const body: PaystackTransfer = {
+      source: "balance",
+      amount: data.amount * 100,
+      reference: data.reference,
+      recipient: data.recipient,
+      reason: data.reason,
+      currency: data.currency || "NGN"
+    }
+
+    const observable = this.httpService.post(`${this.url}/transfer`, body, { headers })
+
+    await firstValueFrom(
+      observable.pipe(
+        map((res) => {
+          return res.data
+        }),
+        catchError((error: AxiosError) => {
+          throw error
+        })
+      )
+    )
   }
 }

@@ -4,13 +4,16 @@ import { PaymentModuleOption, PaymentStrategyType } from "./interfaces/config.in
 import {
   CreatePlan,
   CreateSubscription,
+  CreateTransferRecipient,
+  Currency,
   GetSubscription,
   GetSubscriptionResponse,
   InitiatePayment,
   InitiatePaymentResponse,
   IPaymentService,
   PaymentPlanResponse,
-  SubscriptionResponse
+  SubscriptionResponse,
+  Transfer
 } from "./interfaces/strategy.interface"
 
 import { CONFIG_OPTIONS } from "./constants/config"
@@ -48,6 +51,22 @@ export class PaymentsService implements IPaymentService {
 
   async getSubscription(data: GetSubscription): Promise<GetSubscriptionResponse> {
     return await this.with(this.options.default).getSubscription(data)
+  }
+
+  async checkBalance() {
+    return await this.with(this.options.default).checkBalance()
+  }
+
+  async getBanks(currency?: Currency) {
+    return await this.with(this.options.default).getBanks(currency)
+  }
+
+  async createTransferRecipient(data: CreateTransferRecipient) {
+    return await this.with(this.options.default).createTransferRecipient(data)
+  }
+
+  async transfer(data: Transfer) {
+    return await this.with(this.options.default).transfer(data)
   }
 
   with(provider: PaymentStrategyType) {

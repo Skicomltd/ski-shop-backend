@@ -46,6 +46,7 @@ import { BusinessService } from "../business/business.service"
 import { OnboardBankDto } from "./dto/onboard-bank.dto"
 import { BankService } from "../banks/bank.service"
 import { bankSchema } from "../banks/dto/create-bank.dto"
+import { PaymentsService } from "../services/payments/payments.service"
 
 @Public()
 @Controller("auth")
@@ -60,7 +61,8 @@ export class AuthController {
     private readonly transactionHelper: TransactionHelper,
     private readonly fileSystemService: FileSystemService,
     private readonly storeService: StoreService,
-    private readonly bankService: BankService
+    private readonly bankService: BankService,
+    private readonly paymentsService: PaymentsService
   ) {}
 
   @Post("/register")
@@ -162,7 +164,13 @@ export class AuthController {
     const bank = await this.bankService.findOne({ user: { id: user.id } })
     if (bank) throw new ConflictException("User already created a business")
 
-    await this.bankService.create({ ...onboardBankDto, user })
+    const { code } = await this.paymentsService.createTransferRecipient({
+      name: onboardBankDto.accountName,
+      accountNumber: onboardBankDto.accountNumber,
+      bankCode: onboardBankDto.code
+    })
+
+    await this.bankService.create({ ...onboardBankDto, user, recipientCode: code })
 
     const payload = { email: user.email, id: user.id }
 
