@@ -8,6 +8,7 @@ import { SubscriptionEnum } from "../subscription/entities/subscription.entity"
 import { UserService } from "../users/user.service"
 import { StoreService } from "../stores/store.service"
 import { EarningsService } from "../earnings/earnings.service"
+import { TransactionHelper } from "../services/utils/transactions/transactions.service"
 
 @Injectable()
 export class WebhookService {
@@ -18,7 +19,8 @@ export class WebhookService {
     private readonly subscriptionService: SubscriptionService,
     private readonly userService: UserService,
     private readonly storeService: StoreService,
-    private readonly earningsService: EarningsService
+    private readonly earningsService: EarningsService,
+    private readonly transactionHelper: TransactionHelper
   ) {}
 
   async handleChargeSuccess(data: PaystackChargeSuccess) {
@@ -76,13 +78,32 @@ export class WebhookService {
     const isValid = this.paymentsService.with("paystack").validatePayment(order.id)
     if (!isValid) return
 
-    // clear user cart
-    await this.cartsService.remove({ user: { id: order.buyerId } })
+    await this.transactionHelper.runInTransaction(async (manager) => {
+      // clear user cart
+      await this.cartsService.remove({ user: { id: order.buyerId } }, manager)
 
-    await this.orderService.update(order, {
-      status: "paid",
-      deliveryStatus: "pending",
-      paidAt: data.paidAt
+      await this.orderService.update(
+        order,
+        {
+          status: "paid",
+          deliveryStatus: "pending",
+          paidAt: data.paidAt
+        },
+        manager
+      )
+
+      for (const item of order.items) {
+        const product = item.product
+        const storeId = product.user.business.store.id
+        const total = item.unitPrice * item.quantity
+
+        const earning = await this.earningsService.findOne({ storeId })
+        if (!earning) {
+          await this.earningsService.create({ storeId, total, available: total }, manager)
+        } else {
+          await this.earningsService.update(earning, earning.handleVendorOrder(total), manager)
+        }
+      }
     })
     return
   }

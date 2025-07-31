@@ -30,7 +30,7 @@ export class EarningsService implements IService<Earning> {
   }
 
   async findOne(where: FindOptionsWhere<Earning>): Promise<Earning> {
-    return await this.earningsRepository.findOne({ where })
+    return await this.earningsRepository.findOne({ where, relations: ["withdrawals"] })
   }
 
   async exists(filter: FindOptionsWhere<Earning>): Promise<boolean> {
@@ -49,15 +49,25 @@ export class EarningsService implements IService<Earning> {
   }
 
   async withdraw(data: Partial<Withdrawal>, manager?: EntityManager): Promise<Withdrawal> {
-    this.update(data.earning, data.earning.handleWithdaw(data.amount), manager)
     const repo = manager ? manager.getRepository(Withdrawal) : this.withdrawalsRepository
-    const withdrawal = repo.create(data)
+
+    const earningId = data.earning?.id
+    if (!earningId) throw new Error("Missing earningId from Earning")
+
+    await this.update(data.earning, data.earning.handleWithdaw(data.amount), manager)
+
+    const withdrawal = repo.create({
+      amount: data.amount,
+      bankId: data.bankId,
+      earningId
+    })
+
     const saved = await repo.save(withdrawal)
     return saved
   }
 
   async findWithdrawal(id: string): Promise<Withdrawal> {
-    return await this.withdrawalsRepository.findOne({ where: { id } })
+    return await this.withdrawalsRepository.findOne({ where: { id }, relations: ["earning"] })
   }
 
   async updateWithdrawal(entity: Withdrawal, data: Partial<Withdrawal>, manager?: EntityManager) {

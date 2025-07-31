@@ -29,25 +29,28 @@ export class Earning {
   withdrawals: Withdrawal[]
 
   handleWithdaw(amount: number) {
-    const available = this.available - amount
-    const withdrawn = this.withdrawn + amount
-    const pending = this.pending + amount
-
+    const available = parseFloat(this.available.toString()) - parseFloat(amount.toString())
+    const withdrawn = parseFloat(this.withdrawn.toString()) + parseFloat(amount.toString())
+    const pending = parseFloat(this.pending.toString()) + parseFloat(amount.toString())
     return { available, withdrawn, pending }
   }
 
   handleWithdrawSuccess(amount: number) {
-    const pending = this.pending - amount
-
+    const pending = parseFloat(this.pending.toString()) - parseFloat(amount.toString())
     return { pending }
   }
 
   handleWithdrawFailed(amount: number) {
-    const available = this.available + amount
-    const withdrawn = this.withdrawn - amount
-    const pending = this.pending - amount
-
+    const available = parseFloat(this.available.toString()) + parseFloat(amount.toString())
+    const withdrawn = parseFloat(this.withdrawn.toString()) - parseFloat(amount.toString())
+    const pending = parseFloat(this.pending.toString()) - parseFloat(amount.toString())
     return { available, withdrawn, pending }
+  }
+
+  handleVendorOrder(amount: number) {
+    const total = parseFloat(this.total.toString()) + parseFloat(amount.toString())
+    const available = parseFloat(this.available.toString()) + parseFloat(amount.toString())
+    return { total, available }
   }
 
   //   @AfterUpdate()

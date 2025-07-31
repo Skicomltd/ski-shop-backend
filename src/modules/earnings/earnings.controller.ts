@@ -41,7 +41,7 @@ export class EarningsController {
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Earning))
   @UseInterceptors(EarningResponseInterceptor)
   async withdraw(@Body(new JoiValidationPipe(withdrawEarningSchema)) dto: WithrawEarningDto, @Req() req: Request) {
-    return this.transactionHelper.runInTransaction(async (manager) => {
+    const e = await this.transactionHelper.runInTransaction(async (manager) => {
       const storeId = req.user.business.store.id
 
       const bank = await this.bankService.findById(dto.bankId)
@@ -59,16 +59,15 @@ export class EarningsController {
 
       const withdrawal = await this.earningsService.withdraw({ amount: dto.amount, bankId: dto.bankId, earning, earningId: earning.id }, manager)
 
-      // if (withdrawal) {
       await this.paymentsService.transfer({
         amount: dto.amount,
         reference: withdrawal.id,
         recipient: bank.recipientCode,
         reason: `${req.user.getFullName()} initiated withdrawal`
       })
-      // }
 
       return earning
     })
+    return await this.earningsService.findById(e.id)
   }
 }

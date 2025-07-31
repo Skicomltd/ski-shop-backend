@@ -134,7 +134,6 @@ export class ProductsController {
   async update(
     @Param("id", ParseUUIDPipe) id: string,
     @Body(new JoiValidationPipe(updateProductSchema)) updateProductDto: UpdateProductDto,
-    @Req() req: Request,
     @UploadedFiles() uploadedFiles: Array<CustomFile>
   ) {
     const product = await this.productsService.findOne({ id: id })

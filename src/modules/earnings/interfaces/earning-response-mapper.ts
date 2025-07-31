@@ -5,11 +5,11 @@ export abstract class EarningResponseMapper implements IInterceptor {
   public transform(data: Earning): IEarningResponse {
     return {
       id: data.id,
-      pending: data.pending,
-      available: data.available,
-      withdrawn: data.withdrawn,
-      total: data.total,
-      history: data.withdrawals.map((w) => ({
+      pending: parseFloat(data.pending.toString()),
+      available: parseFloat(data.available.toString()),
+      withdrawn: parseFloat(data.withdrawn.toString()),
+      total: parseFloat(data.total.toString()),
+      history: (data.withdrawals || []).map((w) => ({
         amount: w.amount,
         date: w.createdAt.toISOString(),
         status: w.status,

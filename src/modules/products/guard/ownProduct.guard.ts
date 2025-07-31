@@ -1,4 +1,6 @@
+import { Request } from "express"
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common"
+
 import { ProductsService } from "../products.service"
 
 @Injectable()
@@ -6,17 +8,8 @@ export class OwnProductGuard implements CanActivate {
   constructor(private readonly productsService: ProductsService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest()
-    const user = request.user
-    const productId = request.params.product
-
-    const productData = await this.productsService.findOne({ id: productId })
-    if (!productData) {
-      return false
-    }
-    if (productData.user.id !== user.id) {
-      return false
-    }
-    return true
+    const request = context.switchToHttp().getRequest<Request>()
+    const productData = await this.productsService.findById(request.params.id)
+    return !productData ? false : productData.user.id === request.user.id
   }
 }
