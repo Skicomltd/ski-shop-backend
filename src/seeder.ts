@@ -26,6 +26,7 @@ import { Withdrawal } from "./modules/withdrawals/entities/withdrawal.entity"
 import { Subscription } from "./modules/subscription/entities/subscription.entity"
 import { Plan } from "./modules/plans/entities/plan.entity"
 import { Payout } from "./modules/payouts/entities/payout.entity"
+import { Ads } from "./modules/promotion-ads/entities/promotion-ad.entity"
 
 seeder({
   imports: [
@@ -48,7 +49,8 @@ seeder({
       Withdrawal,
       Subscription,
       Plan,
-      Payout
+      Payout,
+      Ads
     ])
   ],
   providers: [UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder]
