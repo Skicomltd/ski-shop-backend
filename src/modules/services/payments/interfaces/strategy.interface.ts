@@ -60,8 +60,8 @@ export interface InitiatePaymentResponse {
 }
 
 export interface SubscriptionResponse extends Partial<InitiatePayment> {
-  authorization_url: string
-  access_code: string
+  authorizationUrl: string
+  accessCode: string
 }
 
 export interface PaymentPlanResponse {
@@ -74,7 +74,7 @@ export interface PaymentPlanResponse {
 export interface CreateSubscription {
   email: string
   amount: number
-  plan_code: string
+  planCode: string
 }
 
 export interface CreatePlan {

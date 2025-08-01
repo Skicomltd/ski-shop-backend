@@ -29,7 +29,7 @@ export class Subscription {
   endDate: Date
 
   @Column()
-  planType: string
+  planType: string // name of the plan
 
   @Column({ type: "enum", enum: SubscriptionEnum, default: SubscriptionEnum.INACTIVE })
   status: SubscriptionEnum
