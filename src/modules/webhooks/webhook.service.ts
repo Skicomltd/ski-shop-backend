@@ -9,6 +9,7 @@ import { UserService } from "../users/user.service"
 import { PromotionAdsService } from "../promotion-ads/promotion-ads.service"
 import { Ads, PromotionAdEnum } from "../promotion-ads/entities/promotion-ad.entity"
 import { Order } from "../orders/entities/order.entity"
+import { StoreService } from "../stores/store.service"
 
 @Injectable()
 export class WebhookService {
@@ -18,6 +19,7 @@ export class WebhookService {
     private readonly cartsService: CartsService,
     private readonly subscriptionService: SubscriptionService,
     private readonly userService: UserService,
+    private readonly storeService: StoreService,
     private readonly promotionAdsService: PromotionAdsService
   ) {}
 
@@ -57,7 +59,13 @@ export class WebhookService {
       status: SubscriptionEnum.ACTIVE
     })
 
-    await this.userService.update(vendor, { isStarSeller: true })
+    const store = await this.storeService.findOne({ id: vendor.business.store.id })
+
+    if (!store) {
+      return
+    }
+
+    await this.storeService.update(store, { isStarSeller: true })
 
     return
   }
@@ -103,7 +111,6 @@ export class WebhookService {
   async handleChargeForPromotionAds(data: Ads) {
     await this.promotionAdsService.update(data, { status: PromotionAdEnum.ACTIVE })
 
-    console.log(data)
     return
   }
 }

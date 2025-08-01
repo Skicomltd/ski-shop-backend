@@ -8,7 +8,6 @@ export class CreateUserDto {
   role: UserRoleEnum
   email: string
   isEmailVerified?: boolean
-  isStarSeller: boolean
 }
 
 export const createUserSchema = joi.object({

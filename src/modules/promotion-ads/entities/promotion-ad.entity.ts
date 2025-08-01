@@ -1,5 +1,6 @@
 import { Product } from "@/modules/products/entities/product.entity"
 import { PromotionTypeEnum } from "@/modules/promotions/entities/promotion.entity"
+import { Store } from "@/modules/stores/entities/store.entity"
 import { User } from "@/modules/users/entity/user.entity"
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne } from "typeorm"
 
@@ -23,6 +24,9 @@ export class Ads {
   @Column()
   productId: string
 
+  @Column()
+  storeId: string
+
   @Column({ type: "enum", enum: PromotionTypeEnum })
   type: PromotionTypeEnum
 
@@ -40,6 +44,9 @@ export class Ads {
 
   @ManyToOne(() => Product, (product) => product)
   product: Product
+
+  @ManyToOne(() => Store, (store) => store)
+  store: Store
 
   @CreateDateColumn()
   createdAt: Date

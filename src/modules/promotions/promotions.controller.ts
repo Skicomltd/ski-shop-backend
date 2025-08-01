@@ -68,6 +68,7 @@ export class PromotionsController {
     const promotionAds = await this.promotionAdsService.create({
       duration: promotion.duration,
       productId: product.id,
+      storeId: user.business?.store.id,
       vendorId: user.id,
       type: promotion.type,
       startDate: startDate,

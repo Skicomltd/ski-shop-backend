@@ -34,16 +34,17 @@ export class PromotionAdsService implements IService<Ads> {
     return await this.promotionAdRepository.findAndCount({
       where,
       take: limit,
-      skip: page ? page - 1 : undefined
+      skip: page ? page - 1 : undefined,
+      relations: ["vendor", "product", "store"]
     })
   }
 
   async findById(id: string): Promise<Ads> {
-    return await this.promotionAdRepository.findOne({ where: { id: id } })
+    return await this.promotionAdRepository.findOne({ where: { id: id }, relations: ["vendor", "product", "store"] })
   }
 
   async findOne(filter: FindOptionsWhere<Ads>): Promise<Ads> {
-    return await this.promotionAdRepository.findOne({ where: filter })
+    return await this.promotionAdRepository.findOne({ where: filter, relations: ["vendor", "product", "store"] })
   }
 
   async exists(filter: FindOptionsWhere<Ads>): Promise<boolean> {

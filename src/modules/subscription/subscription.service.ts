@@ -75,12 +75,18 @@ export class SubscriptionService implements IService<Subscription> {
   async getStartAndEndDate(planType: string) {
     const startDate = new Date()
     let endDate: Date
+
     if (planType === "monthly") {
-      endDate = new Date(startDate.setMonth(startDate.getMonth() + 1))
+      endDate = new Date(startDate)
+      endDate.setMonth(endDate.getMonth() + 1)
     } else if (planType === "quarterly") {
-      endDate = new Date(startDate.setMonth(startDate.getMonth() + 3))
+      endDate = new Date(startDate)
+      endDate.setMonth(endDate.getMonth() + 3)
     } else if (planType === "annually") {
-      endDate = new Date(startDate.setFullYear(startDate.getFullYear() + 1))
+      endDate = new Date(startDate)
+      endDate.setFullYear(endDate.getFullYear() + 1)
+    } else {
+      throw new Error("Invalid plan type")
     }
 
     return { startDate, endDate }
