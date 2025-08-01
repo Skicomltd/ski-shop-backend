@@ -1,7 +1,7 @@
 import { PromotionTypeEnum } from "@/modules/promotions/entities/promotion.entity"
-import { PromotionAdEnum } from "../entities/promotion-ad.entity"
+import { AdStatus } from "../interfaces/ad-status.interface"
 
-export class CreatePromotionAdDto {
+export class CreateAdDto {
   duration: number
   vendorId: string
   storeId: string
@@ -9,5 +9,5 @@ export class CreatePromotionAdDto {
   type: PromotionTypeEnum
   startDate: Date
   endDate: Date
-  status: PromotionAdEnum
+  status: AdStatus
 }

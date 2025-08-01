@@ -1,8 +1,8 @@
-import { Ads } from "../entities/promotion-ad.entity"
-import { IPromotionAdsResponse } from "./promotion-ads-response.interface"
+import { Ad } from "../entities/ad.entity"
+import { IAdResponse } from "./ad-response.interface"
 
-export abstract class PromotionAdsMapper implements IInterceptor {
-  transform(data: Ads): IPromotionAdsResponse {
+export abstract class AdsMapper implements IInterceptor {
+  transform(data: Ad): IAdResponse {
     return {
       id: data.id,
       duration: data.duration,
@@ -10,15 +10,15 @@ export abstract class PromotionAdsMapper implements IInterceptor {
       status: data.status,
       startDate: data.startDate,
       endDate: data.endDate,
+      clicks: data.clicks,
+      impressions: data.impressions,
+      conversionRate: data.conversionRate.toFixed(1),
       product: {
         id: data.product.id,
         name: data.product.name,
         images: data.product.images
       },
-      store: {
-        id: data.store.id,
-        name: data.store.name
-      },
+      store: data.product.store.getShortFormat(),
       vendor: {
         id: data.vendor.id,
         email: data.vendor.email,

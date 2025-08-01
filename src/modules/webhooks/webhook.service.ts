@@ -6,13 +6,13 @@ import { CartsService } from "../carts/carts.service"
 import { SubscriptionService } from "../subscription/subscription.service"
 import { Subscription, SubscriptionEnum } from "../subscription/entities/subscription.entity"
 import { UserService } from "../users/user.service"
-import { PromotionAdsService } from "../promotion-ads/promotion-ads.service"
-import { Ads, PromotionAdEnum } from "../promotion-ads/entities/promotion-ad.entity"
 import { Order } from "../orders/entities/order.entity"
 import { StoreService } from "../stores/store.service"
 import { TransactionHelper } from "../services/utils/transactions/transactions.service"
 import { WithdrawalsService } from "../withdrawals/withdrawals.service"
 import { PayoutsService } from "../payouts/payouts.service"
+import { AdsService } from "../ads/ads.service"
+import { Ad } from "../ads/entities/ad.entity"
 
 @Injectable()
 export class WebhookService {
@@ -23,33 +23,35 @@ export class WebhookService {
     private readonly subscriptionService: SubscriptionService,
     private readonly userService: UserService,
     private readonly storeService: StoreService,
-    private readonly promotionAdsService: PromotionAdsService,
+    private readonly adsService: AdsService,
     private readonly transactionHelper: TransactionHelper,
     private readonly withdrawalsService: WithdrawalsService,
     private readonly payoutsService: PayoutsService
   ) {}
 
   async handleChargeSuccess(data: PaystackChargeSuccess) {
-    const [subscription, promotionAds, order] = await Promise.all([
+    const [subscription, ads, order] = await Promise.all([
       this.subscriptionService.findOne({ reference: data.reference }),
-      this.promotionAdsService.findOne({ id: data.reference }),
+      this.adsService.findOne({ id: data.reference }),
       this.orderService.findById(data.reference)
     ])
 
+    if (!subscription && !ads && !order) return
+
     const isValid = await this.paymentsService.with("paystack").validatePayment(data.reference)
-    if (!isValid) {
-      return
-    }
+    if (!isValid) return
 
     if (subscription) {
       await this.handleChargeSuccessForSubscription(subscription)
-      return
-    } else if (promotionAds) {
-      await this.handleChargeForPromotionAds(promotionAds)
-      return
     }
 
-    await this.handleChargeSuccessForOrders(order, data)
+    if (ads) {
+      await this.handleChargeForAds(ads)
+    }
+
+    if (order) {
+      await this.handleChargeSuccessForOrders(order, data)
+    }
   }
 
   async handleChargeSuccessForSubscription(subscription: Subscription) {
@@ -160,9 +162,8 @@ export class WebhookService {
     })
   }
 
-  async handleChargeForPromotionAds(data: Ads) {
-    await this.promotionAdsService.update(data, { status: PromotionAdEnum.ACTIVE })
-
+  async handleChargeForAds(data: Ad) {
+    await this.adsService.update(data, { status: "active" })
     return
   }
 }

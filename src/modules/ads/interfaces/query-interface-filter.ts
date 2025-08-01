@@ -1,5 +1,8 @@
 import { FindOptionsWhere } from "typeorm"
-import { Ads } from "../entities/promotion-ad.entity"
+
+import { Ad } from "../entities/ad.entity"
 import { PaginationParams } from "@/modules/services/pagination/interfaces/paginationParams.interface"
 
-export interface IPromotionAdsQuery extends PaginationParams, FindOptionsWhere<Ads> {}
+export interface IAdsQuery extends PaginationParams, FindOptionsWhere<Ad> {
+  storeId: string
+}
