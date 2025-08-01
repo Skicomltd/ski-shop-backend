@@ -7,6 +7,7 @@ export abstract class StoreResponseMapper implements IInterceptor {
       id: data.id,
       name: data.name,
       description: data.description,
+      logo: data.logo,
       business: data.business,
       isStarSeller: data.isStarSeller,
       createdAt: data.createdAt,

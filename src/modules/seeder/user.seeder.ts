@@ -22,6 +22,54 @@ export class UserSeeder implements Seeder {
       updatedAt: faker.date.recent()
     }))
 
+    users.push({
+      firstName: "customer",
+      lastName: "one",
+      password: "password1234",
+      role: UserRoleEnum.Customer,
+      phoneNumber: faker.phone.number(),
+      email: "cutomerone@gmail.com",
+      isEmailVerified: true,
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
+    })
+
+    users.push({
+      firstName: "customer",
+      lastName: "two",
+      password: "password1234",
+      role: UserRoleEnum.Customer,
+      phoneNumber: faker.phone.number(),
+      email: "cutomertwo@gmail.com",
+      isEmailVerified: true,
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
+    })
+
+    users.push({
+      firstName: "vendor",
+      lastName: "one",
+      password: "password1234",
+      role: UserRoleEnum.Vendor,
+      phoneNumber: faker.phone.number(),
+      email: "vendorone@gmail.com",
+      isEmailVerified: true,
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
+    })
+
+    users.push({
+      firstName: "vendor",
+      lastName: "two",
+      password: "password1234",
+      role: UserRoleEnum.Vendor,
+      phoneNumber: faker.phone.number(),
+      email: "vendortwo@gmail.com",
+      isEmailVerified: true,
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
+    })
+
     const userEntities = this.userRepository.create(users)
     await this.userRepository.save(userEntities)
   }
