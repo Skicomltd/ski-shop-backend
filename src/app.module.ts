@@ -29,6 +29,8 @@ import { OrdersModule } from "./modules/orders/orders.module"
 import { ReviewsModule } from "./modules/reviews/reviews.module"
 import { PlansModule } from "./modules/plans/plans.module"
 import { SubscriptionModule } from "./modules/subscription/subscription.module"
+import { PayoutsModule } from "./modules/payouts/payouts.module"
+import { WithdrawalsModule } from "./modules/withdrawals/withdrawals.module"
 import { PromotionsModule } from "./modules/promotions/promotions.module"
 import { PromotionAdsModule } from "./modules/promotion-ads/promotion-ads.module"
 import paymentConfig from "./config/payment.config"
@@ -61,6 +63,8 @@ import paymentConfig from "./config/payment.config"
     ReviewsModule,
     PlansModule,
     SubscriptionModule,
+    PayoutsModule,
+    WithdrawalsModule,
     PromotionsModule,
     PromotionAdsModule
   ],

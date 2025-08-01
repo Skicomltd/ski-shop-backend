@@ -1,4 +1,6 @@
 import { Entity, Column, CreateDateColumn, UpdateDateColumn, PrimaryGeneratedColumn } from "typeorm"
+import { PlanInterval } from "../interface/plan-interval.interface"
+import { PLAN_INTERVAL } from "../enums/plan-interval.enum"
 
 @Entity()
 export class Plan {
@@ -8,8 +10,8 @@ export class Plan {
   @Column()
   planCode: string
 
-  @Column()
-  interval: string
+  @Column({ type: "enum", enum: PLAN_INTERVAL })
+  interval: PlanInterval
 
   @Column()
   name: string

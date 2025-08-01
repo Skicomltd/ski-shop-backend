@@ -46,8 +46,8 @@ import { BusinessService } from "../business/business.service"
 import { OnboardBankDto } from "./dto/onboard-bank.dto"
 import { BankService } from "../banks/bank.service"
 import { bankSchema } from "../banks/dto/create-bank.dto"
+import { PaymentsService } from "../services/payments/payments.service"
 
-@Public()
 @Controller("auth")
 export class AuthController {
   constructor(
@@ -60,9 +60,11 @@ export class AuthController {
     private readonly transactionHelper: TransactionHelper,
     private readonly fileSystemService: FileSystemService,
     private readonly storeService: StoreService,
-    private readonly bankService: BankService
+    private readonly bankService: BankService,
+    private readonly paymentsService: PaymentsService
   ) {}
 
+  @Public()
   @Post("/register")
   @HttpCode(201)
   async register(@Body(new JoiValidationPipe(registerSchema)) registerDto: AuthDto) {
@@ -162,7 +164,13 @@ export class AuthController {
     const bank = await this.bankService.findOne({ user: { id: user.id } })
     if (bank) throw new ConflictException("User already created a business")
 
-    await this.bankService.create({ ...onboardBankDto, user })
+    const { code } = await this.paymentsService.createTransferRecipient({
+      name: onboardBankDto.accountName,
+      accountNumber: onboardBankDto.accountNumber,
+      bankCode: onboardBankDto.code
+    })
+
+    await this.bankService.create({ ...onboardBankDto, user, recipientCode: code })
 
     const payload = { email: user.email, id: user.id }
 
@@ -170,6 +178,7 @@ export class AuthController {
     return { token }
   }
 
+  @Public()
   @Patch("/resendotp")
   async resendOtp(@Body(new JoiValidationPipe(resendOtpSchema)) { email }: ResendOtpDto) {
     const user = await this.userService.findOne({ email })
@@ -193,6 +202,7 @@ export class AuthController {
     return { token: shortTimeToken }
   }
 
+  @Public()
   @Post("/login/password")
   @HttpCode(200)
   @UseInterceptors(AuthInterceptor)
@@ -203,10 +213,12 @@ export class AuthController {
     return { user: req.user, tokens }
   }
 
+  @Public()
   @Get("/oauth/google/redirect")
   @UseGuards(GoogleOAuthGuard)
   async googleLogin() {}
 
+  @Public()
   @Get("oauth/google/callback")
   @HttpCode(200)
   @UseInterceptors(AuthInterceptor)

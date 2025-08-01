@@ -10,8 +10,8 @@ export abstract class SubscriptionResponseMapper implements IInterceptor {
       planType: data.planType,
       status: data.status,
       payment: {
-        access_code: data.payment?.access_code,
-        authorization_url: data.payment?.authorization_url,
+        accessCode: data.payment?.accessCode,
+        authorizationUrl: data.payment?.authorizationUrl,
         reference: data.payment?.reference
       }
     }

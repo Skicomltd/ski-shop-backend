@@ -8,16 +8,16 @@ export interface ISubscriptionResponse {
   endDate: Date
   status: SubscriptionEnum
   payment?: {
-    authorization_url: string
-    access_code: string
+    authorizationUrl: string
+    accessCode: string
     reference: string
   }
 }
 
 export interface Subscribe extends Subscription {
   payment?: {
-    authorization_url: string
-    access_code: string
+    authorizationUrl: string
+    accessCode: string
     reference: string
   }
 }

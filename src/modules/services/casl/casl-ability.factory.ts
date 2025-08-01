@@ -13,14 +13,25 @@ import { Plan } from "@/modules/plans/entities/plan.entity"
 import { Subscription } from "@/modules/subscription/entities/subscription.entity"
 import { Promotion } from "@/modules/promotions/entities/promotion.entity"
 import { Ads } from "@/modules/promotion-ads/entities/promotion-ad.entity"
+import { Payout } from "@/modules/payouts/entities/payout.entity"
+import { Withdrawal } from "@/modules/withdrawals/entities/withdrawal.entity"
 
-type Subjects =
-  | InferSubjects<typeof User | typeof Product | typeof Business | typeof Store | typeof Bank | typeof Order | typeof Review>
+type Subjects = InferSubjects<
+  | typeof User
+  | typeof Product
+  | typeof Business
+  | typeof Store
+  | typeof Bank
+  | typeof Order
+  | typeof Review
   | typeof Plan
   | typeof Subscription
+  | typeof Payout
+  | typeof Withdrawal
   | typeof Promotion
   | typeof Ads
   | "all"
+>
 
 export type AppAbility = MongoAbility<[Action, Subjects]>
 type Can = AbilityBuilder<MongoAbility>["can"]
@@ -230,6 +241,58 @@ export class CaslAbilityFactory {
       cannot(Action.Create, Subscription)
       cannot(Action.Update, Subscription)
       cannot(Action.Delete, Subscription)
+    }
+
+    const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
+  }
+
+  createAbilityForPayout(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, Payout)
+    } else if (user.role === UserRoleEnum.Vendor) {
+      can(Action.Read, Payout)
+      can(Action.Create, Payout)
+      can(Action.Update, Payout)
+      cannot(Action.Delete, Payout)
+    } else {
+      cannot(Action.Read, Payout)
+      cannot(Action.Create, Payout)
+      cannot(Action.Update, Payout)
+      cannot(Action.Delete, Payout)
+    }
+
+    const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
+  }
+
+  createAbilityForWithdrawal(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, Withdrawal)
+    } else if (user.role === UserRoleEnum.Vendor) {
+      can(Action.Read, Withdrawal)
+      can(Action.Create, Withdrawal)
+      can(Action.Update, Withdrawal)
+      cannot(Action.Delete, Withdrawal)
+    } else {
+      cannot(Action.Read, Withdrawal)
+      cannot(Action.Create, Withdrawal)
+      cannot(Action.Update, Withdrawal)
+      cannot(Action.Delete, Withdrawal)
     }
 
     const ability = build({

@@ -12,10 +12,15 @@ import { Bank } from "./entities/bank.entity"
 import { Action } from "../services/casl/actions/action"
 import { AppAbility } from "../services/casl/casl-ability.factory"
 import { BanksInterceptor } from "./interceptors/banks.interceptor"
+import { Public } from "../auth/decorators/public.decorator"
+import { PaymentsService } from "../services/payments/payments.service"
 
 @Controller("banks")
 export class BankController {
-  constructor(private readonly bankService: BankService) {}
+  constructor(
+    private readonly bankService: BankService,
+    private readonly paymentsService: PaymentsService
+  ) {}
 
   @Post()
   @UseGuards(PoliciesGuard)
@@ -23,7 +28,18 @@ export class BankController {
   @UseInterceptors(BankInterceptor)
   async create(@Body(new JoiValidationPipe(bankSchema)) createBankDto: CreateBankDto, @Req() req: Request) {
     if (await this.bankService.exists({ accountNumber: createBankDto.accountNumber })) throw new ConflictException("Bank credentials already exist")
-    return await this.bankService.create({ ...createBankDto, user: req.user })
+    const { code } = await this.paymentsService.createTransferRecipient({
+      name: createBankDto.accountName,
+      accountNumber: createBankDto.accountNumber,
+      bankCode: createBankDto.code
+    })
+    return await this.bankService.create({ ...createBankDto, user: req.user, recipientCode: code })
+  }
+
+  @Get("available")
+  @Public()
+  async available() {
+    return await this.paymentsService.getBanks()
   }
 
   @Get("")

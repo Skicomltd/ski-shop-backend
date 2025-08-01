@@ -1,4 +1,5 @@
 import Business from "@/modules/business/entities/business.entity"
+import { Payout } from "@/modules/payouts/entities/payout.entity"
 import { Product } from "@/modules/products/entities/product.entity"
 import { Ads } from "@/modules/promotion-ads/entities/promotion-ad.entity"
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, OneToMany, JoinColumn } from "typeorm"
@@ -30,6 +31,10 @@ export class Store {
   @OneToOne(() => Business, (business) => business.store)
   @JoinColumn()
   business: Business
+
+  @OneToOne(() => Payout, (payout) => payout.store)
+  @JoinColumn()
+  payout: Payout
 
   @OneToMany(() => Product, (product) => product.store)
   product: Product[]

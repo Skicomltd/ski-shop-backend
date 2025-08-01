@@ -31,11 +31,12 @@ export class SubscriptionController {
   async create(@Body(new JoiValidationPipe(createSubcriptionSchema)) createSubscriptionDto: CreateSubscriptionDto, @Req() req: Request) {
     const user = req.user
     const plan = await this.plansService.findOne({ planCode: createSubscriptionDto.planCode })
-    const planCode = plan ? plan.planCode : createSubscriptionDto.planCode
+    if (!plan) throw new NotFoundException("plan not found")
+
     const createSubscription = await this.paymentService.createSubscription({
       amount: createSubscriptionDto.amount,
       email: user.email,
-      plan_code: planCode
+      planCode: plan.planCode
     })
 
     createSubscriptionDto.vendorId = user.id
@@ -47,7 +48,7 @@ export class SubscriptionController {
     const subscription = await this.subscriptionService.create(createSubscriptionDto)
 
     return {
-      subscription,
+      ...subscription,
       payment: createSubscription
     }
   }

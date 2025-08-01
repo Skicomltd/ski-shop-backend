@@ -43,8 +43,9 @@ export class CartsService implements IService<Cart> {
     return await repo.save(updateCart)
   }
 
-  async remove(filter: FindOptionsWhere<Cart>): Promise<number> {
-    const cart = await this.cartRepository.delete(filter)
+  async remove(filter: FindOptionsWhere<Cart>, manager?: EntityManager): Promise<number> {
+    const repo = manager ? manager.getRepository<Cart>(Cart) : this.cartRepository
+    const cart = await repo.delete(filter)
     return cart.affected
   }
 

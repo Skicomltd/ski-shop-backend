@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common"
 import { OrdersService } from "../orders/orders.service"
 import { PaymentsService } from "../services/payments/payments.service"
-import { PaystackChargeSuccess } from "../services/payments/interfaces/paystack.interface"
+import { PaystackChargeSuccess, PaystackTransferData } from "../services/payments/interfaces/paystack.interface"
 import { CartsService } from "../carts/carts.service"
 import { SubscriptionService } from "../subscription/subscription.service"
 import { Subscription, SubscriptionEnum } from "../subscription/entities/subscription.entity"
@@ -10,6 +10,9 @@ import { PromotionAdsService } from "../promotion-ads/promotion-ads.service"
 import { Ads, PromotionAdEnum } from "../promotion-ads/entities/promotion-ad.entity"
 import { Order } from "../orders/entities/order.entity"
 import { StoreService } from "../stores/store.service"
+import { TransactionHelper } from "../services/utils/transactions/transactions.service"
+import { WithdrawalsService } from "../withdrawals/withdrawals.service"
+import { PayoutsService } from "../payouts/payouts.service"
 
 @Injectable()
 export class WebhookService {
@@ -20,7 +23,10 @@ export class WebhookService {
     private readonly subscriptionService: SubscriptionService,
     private readonly userService: UserService,
     private readonly storeService: StoreService,
-    private readonly promotionAdsService: PromotionAdsService
+    private readonly promotionAdsService: PromotionAdsService,
+    private readonly transactionHelper: TransactionHelper,
+    private readonly withdrawalsService: WithdrawalsService,
+    private readonly payoutsService: PayoutsService
   ) {}
 
   async handleChargeSuccess(data: PaystackChargeSuccess) {
@@ -75,13 +81,32 @@ export class WebhookService {
       return
     }
 
-    // clear user cart
-    await this.cartsService.remove({ user: { id: order.buyerId } })
+    await this.transactionHelper.runInTransaction(async (manager) => {
+      // clear user cart
+      await this.cartsService.remove({ user: { id: order.buyerId } }, manager)
 
-    await this.orderService.update(order, {
-      status: "paid",
-      deliveryStatus: "pending",
-      paidAt: data.paidAt
+      await this.orderService.update(
+        order,
+        {
+          status: "paid",
+          deliveryStatus: "pending",
+          paidAt: data.paidAt
+        },
+        manager
+      )
+
+      for (const item of order.items) {
+        const product = item.product
+        const storeId = product.user.business.store.id
+        const total = item.unitPrice * item.quantity
+
+        const payout = await this.payoutsService.findOne({ storeId })
+        if (!payout) {
+          await this.payoutsService.create({ storeId, total, available: total }, manager)
+        } else {
+          await this.payoutsService.update(payout, payout.handleVendorOrder(total), manager)
+        }
+      }
     })
     return
   }
@@ -105,6 +130,33 @@ export class WebhookService {
       startDate: data.period_start,
       endDate: data.period_end,
       subscriptionCode: data.subscription.subscription_code
+    })
+  }
+
+  async handleTransferSuccess(data: PaystackTransferData) {
+    const withdrawal = await this.withdrawalsService.findById(data.reference)
+    if (!withdrawal) return
+
+    // why are we here exactly?
+    if (withdrawal.status !== "pending") return
+
+    return this.transactionHelper.runInTransaction(async (manager) => {
+      const successDto = withdrawal.payout.handleWithdrawSuccess(withdrawal.amount)
+      await this.payoutsService.update(withdrawal.payout, successDto, manager)
+      await this.withdrawalsService.update(withdrawal, { status: "success" }, manager)
+    })
+  }
+
+  async handleTransferFailed(data: PaystackTransferData) {
+    const withdrawal = await this.withdrawalsService.findById(data.reference)
+    if (!withdrawal) return
+
+    // why are we here exactly?
+    if (withdrawal.status !== "pending") return
+
+    return this.transactionHelper.runInTransaction(async (manager) => {
+      await this.payoutsService.update(withdrawal.payout, withdrawal.payout.handleWithdrawFailed(withdrawal.amount), manager)
+      await this.withdrawalsService.update(withdrawal, { status: "failed" }, manager)
     })
   }
 
