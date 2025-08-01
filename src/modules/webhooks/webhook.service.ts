@@ -4,8 +4,11 @@ import { PaymentsService } from "../services/payments/payments.service"
 import { PaystackChargeSuccess, PaystackTransferData } from "../services/payments/interfaces/paystack.interface"
 import { CartsService } from "../carts/carts.service"
 import { SubscriptionService } from "../subscription/subscription.service"
-import { SubscriptionEnum } from "../subscription/entities/subscription.entity"
+import { Subscription, SubscriptionEnum } from "../subscription/entities/subscription.entity"
 import { UserService } from "../users/user.service"
+import { PromotionAdsService } from "../promotion-ads/promotion-ads.service"
+import { Ads, PromotionAdEnum } from "../promotion-ads/entities/promotion-ad.entity"
+import { Order } from "../orders/entities/order.entity"
 import { StoreService } from "../stores/store.service"
 import { TransactionHelper } from "../services/utils/transactions/transactions.service"
 import { WithdrawalsService } from "../withdrawals/withdrawals.service"
@@ -20,37 +23,40 @@ export class WebhookService {
     private readonly subscriptionService: SubscriptionService,
     private readonly userService: UserService,
     private readonly storeService: StoreService,
+    private readonly promotionAdsService: PromotionAdsService,
     private readonly transactionHelper: TransactionHelper,
     private readonly withdrawalsService: WithdrawalsService,
     private readonly payoutsService: PayoutsService
   ) {}
 
   async handleChargeSuccess(data: PaystackChargeSuccess) {
-    const subscription = await this.subscriptionService.findOne({
-      reference: data.reference
-    })
-
-    if (subscription) {
-      await this.handleChargeSuccessForSubscription(data)
-      return
-    }
-
-    await this.handleChargeSuccessForOrders(data)
-  }
-
-  async handleChargeSuccessForSubscription(data: PaystackChargeSuccess) {
-    const subscription = await this.subscriptionService.findOne({
-      reference: data.reference
-    })
-
-    if (!subscription || subscription.status === SubscriptionEnum.ACTIVE) {
-      return
-    }
+    const [subscription, promotionAds, order] = await Promise.all([
+      this.subscriptionService.findOne({ reference: data.reference }),
+      this.promotionAdsService.findOne({ id: data.reference }),
+      this.orderService.findById(data.reference)
+    ])
 
     const isValid = await this.paymentsService.with("paystack").validatePayment(data.reference)
     if (!isValid) {
       return
     }
+
+    if (subscription) {
+      await this.handleChargeSuccessForSubscription(subscription)
+      return
+    } else if (promotionAds) {
+      await this.handleChargeForPromotionAds(promotionAds)
+      return
+    }
+
+    await this.handleChargeSuccessForOrders(order, data)
+  }
+
+  async handleChargeSuccessForSubscription(subscription: Subscription) {
+    if (!subscription || subscription.status === SubscriptionEnum.ACTIVE) {
+      return
+    }
+
     const vendor = await this.userService.findOne({ id: subscription.vendorId })
 
     if (!vendor) return
@@ -70,15 +76,10 @@ export class WebhookService {
     return
   }
 
-  async handleChargeSuccessForOrders(data: PaystackChargeSuccess) {
-    const order = await this.orderService.findById(data.reference)
+  async handleChargeSuccessForOrders(order: Order, data: PaystackChargeSuccess) {
     if (!order || order.status === "paid") {
       return
     }
-
-    // validate payment
-    const isValid = this.paymentsService.with("paystack").validatePayment(order.id)
-    if (!isValid) return
 
     await this.transactionHelper.runInTransaction(async (manager) => {
       // clear user cart
@@ -157,5 +158,11 @@ export class WebhookService {
       await this.payoutsService.update(withdrawal.payout, withdrawal.payout.handleWithdrawFailed(withdrawal.amount), manager)
       await this.withdrawalsService.update(withdrawal, { status: "failed" }, manager)
     })
+  }
+
+  async handleChargeForPromotionAds(data: Ads) {
+    await this.promotionAdsService.update(data, { status: PromotionAdEnum.ACTIVE })
+
+    return
   }
 }

@@ -4,6 +4,7 @@ import { User } from "@/modules/users/entity/user.entity"
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany } from "typeorm"
 import { SavedProduct } from "./saved-product.entity"
 import { Review } from "@/modules/reviews/entities/review.entity"
+import { Ads } from "@/modules/promotion-ads/entities/promotion-ad.entity"
 
 @Entity()
 export class Product {
@@ -51,6 +52,9 @@ export class Product {
 
   @OneToMany(() => Review, (review) => review.product, { eager: true, cascade: true, onDelete: "CASCADE" })
   reviews: Review[]
+
+  @OneToMany(() => Ads, (promotionAds) => promotionAds.product)
+  promotionAds: Ads
 
   @CreateDateColumn()
   createdAt: Date
