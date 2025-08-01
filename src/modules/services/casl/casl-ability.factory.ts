@@ -278,7 +278,7 @@ export class CaslAbilityFactory {
       cannot(Action.Update, Ads)
       cannot(Action.Create, Ads)
     } else {
-      cannot(Action.Read, Ads)
+      can(Action.Read, Ads)
       cannot(Action.Delete, Ads)
       cannot(Action.Update, Ads)
       cannot(Action.Create, Ads)

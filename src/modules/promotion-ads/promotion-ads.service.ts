@@ -16,7 +16,7 @@ export class PromotionAdsService implements IService<Ads> {
     return await repo.save(promotionAd)
   }
 
-  async find({ productId, vendorId, type, limit, page }: IPromotionAdsQuery): Promise<[Ads[], number]> {
+  async find({ productId, vendorId, type, storeId, limit, page }: IPromotionAdsQuery): Promise<[Ads[], number]> {
     const where: FindManyOptions<Ads>["where"] = {}
 
     if (productId) {
@@ -29,6 +29,10 @@ export class PromotionAdsService implements IService<Ads> {
 
     if (type) {
       where.type = type
+    }
+
+    if (storeId) {
+      where.storeId = storeId
     }
 
     return await this.promotionAdRepository.findAndCount({

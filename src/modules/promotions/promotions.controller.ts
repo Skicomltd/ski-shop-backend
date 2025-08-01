@@ -18,6 +18,7 @@ import { PromotionAdsService } from "../promotion-ads/promotion-ads.service"
 import { InitiatePayment } from "../services/payments/interfaces/strategy.interface"
 import { PaymentsService } from "../services/payments/payments.service"
 import { PromotionAdEnum } from "../promotion-ads/entities/promotion-ad.entity"
+import { BadReqException } from "@/exceptions/badRequest.exception"
 
 @Controller("promotions")
 export class PromotionsController {
@@ -63,6 +64,16 @@ export class PromotionsController {
 
     if (!product || !promotion) throw new NotFoundException("Product or promotion does not exist")
 
+    const promotionAdsExist = await this.promotionAdsService.findOne({
+      productId: checkoutDto.productId,
+      status: PromotionAdEnum.ACTIVE,
+      type: promotion.type
+    })
+
+    if (promotionAdsExist) {
+      throw new BadReqException(`An active promotion ad of type '${promotion.type}' already exists for this product`)
+    }
+
     const { startDate, endDate } = await this.promotionAdsService.calculateStartAndEndDate(promotion.duration)
 
     const promotionAds = await this.promotionAdsService.create({
@@ -82,7 +93,7 @@ export class PromotionsController {
       reference: promotionAds.id
     }
 
-    // maybe a scheduler should be handled here to change the status of the promotionAds to expiry when its exipires
+    // TODO: Implement a scheduler to update promotionAds status to expired when endDate is reached
 
     return await this.paymentsService.with(checkoutDto.paymentMethod).initiatePayment(payload)
   }
