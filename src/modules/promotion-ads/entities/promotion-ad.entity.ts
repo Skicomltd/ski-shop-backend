@@ -42,10 +42,10 @@ export class Ads {
   @ManyToOne(() => User, (user) => user.promotionAds)
   vendor: User
 
-  @ManyToOne(() => Product, (product) => product)
+  @ManyToOne(() => Product, (product) => product.promotionAds)
   product: Product
 
-  @ManyToOne(() => Store, (store) => store)
+  @ManyToOne(() => Store, (store) => store.promotionAds)
   store: Store
 
   @CreateDateColumn()
