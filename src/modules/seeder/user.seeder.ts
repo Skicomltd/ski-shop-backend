@@ -28,7 +28,7 @@ export class UserSeeder implements Seeder {
       password: "password1234",
       role: UserRoleEnum.Customer,
       phoneNumber: faker.phone.number(),
-      email: "cutomerone@gmail.com",
+      email: "customerone@gmail.com",
       isEmailVerified: true,
       createdAt: faker.date.past(),
       updatedAt: faker.date.recent()
@@ -40,7 +40,7 @@ export class UserSeeder implements Seeder {
       password: "password1234",
       role: UserRoleEnum.Customer,
       phoneNumber: faker.phone.number(),
-      email: "cutomertwo@gmail.com",
+      email: "customertwo@gmail.com",
       isEmailVerified: true,
       createdAt: faker.date.past(),
       updatedAt: faker.date.recent()
