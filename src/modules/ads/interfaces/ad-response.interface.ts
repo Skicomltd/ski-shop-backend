@@ -1,22 +1,23 @@
 import { PromotionTypeEnum } from "@/modules/promotions/entities/promotion.entity"
-import { PromotionAdEnum } from "../entities/promotion-ad.entity"
+import { AdStatus } from "./ad-status.interface"
+import { IStoreShortResponse } from "@/modules/stores/interface/short-format-response.interface"
 
-export interface IPromotionAdsResponse {
+export interface IAdResponse {
   id: string
   type: PromotionTypeEnum
-  status: PromotionAdEnum
+  status: AdStatus
   startDate: Date
   endDate: Date
   duration: number
+  clicks: number
+  impressions: number
+  conversionRate: string
   vendor: {
     id: string
     fullName: string
     email: string
   }
-  store: {
-    id: string
-    name: string
-  }
+  store: IStoreShortResponse
   product: {
     id: string
     name: string

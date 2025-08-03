@@ -5,7 +5,7 @@ import { PolicyHandler } from "../../auth/interface/policies-interface"
 import { CHECK_POLICIES_KEY } from "../../auth/decorators/policies-handler.decorator"
 
 @Injectable()
-export class PolicyPromotionAdsGuard implements CanActivate {
+export class PolicyAdsGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private caslAbilityFactory: CaslAbilityFactory
@@ -16,7 +16,7 @@ export class PolicyPromotionAdsGuard implements CanActivate {
 
     const { user } = context.switchToHttp().getRequest()
 
-    const ability = this.caslAbilityFactory.createAbilityForPromotionAds(user)
+    const ability = this.caslAbilityFactory.createAbilityForAds(user)
 
     return policyHandlers.every((handler) => this.execPolicyHandler(handler, ability))
   }

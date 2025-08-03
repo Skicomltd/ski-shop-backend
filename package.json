@@ -23,7 +23,7 @@
     "migration:drop": "typeorm-ts-node-commonjs schema:drop -d ./db/typeorm.config.ts",
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d ./db/typeorm.config.ts",
     "migration:migrate": "typeorm-ts-node-commonjs migration:run -d ./db/typeorm.config.ts",
-    "seed": "node dist/src/seeder",
+    "seed": "nest build && node dist/src/seeder",
     "seed:refresh": "node dist/src/seeder --refresh"
   },
   "dependencies": {

@@ -32,8 +32,8 @@ import { SubscriptionModule } from "./modules/subscription/subscription.module"
 import { PayoutsModule } from "./modules/payouts/payouts.module"
 import { WithdrawalsModule } from "./modules/withdrawals/withdrawals.module"
 import { PromotionsModule } from "./modules/promotions/promotions.module"
-import { PromotionAdsModule } from "./modules/promotion-ads/promotion-ads.module"
 import paymentConfig from "./config/payment.config"
+import { AdsModule } from "./modules/ads/ads.module"
 
 @Module({
   imports: [
@@ -66,7 +66,7 @@ import paymentConfig from "./config/payment.config"
     PayoutsModule,
     WithdrawalsModule,
     PromotionsModule,
-    PromotionAdsModule
+    AdsModule
   ],
   controllers: [AppController],
   providers: [

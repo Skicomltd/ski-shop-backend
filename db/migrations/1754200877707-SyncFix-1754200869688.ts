@@ -1,17 +1,17 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class SyncFix17540716651891754071684229 implements MigrationInterface {
-    name = 'SyncFix17540716651891754071684229'
+export class SyncFix17542008696881754200877707 implements MigrationInterface {
+    name = 'SyncFix17542008696881754200877707'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.query(`CREATE TYPE "public"."promotion_type_enum" AS ENUM('banner', 'search', 'featured')`);
-        await queryRunner.query(`CREATE TABLE "promotion" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying NOT NULL, "type" "public"."promotion_type_enum" NOT NULL DEFAULT 'featured', "duration" integer NOT NULL, "amount" double precision NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_fab3630e0789a2002f1cadb7d38" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "bank" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "bankName" character varying NOT NULL, "accountNumber" character varying NOT NULL, "accountName" character varying NOT NULL, "code" character varying NOT NULL, "recipientCode" character varying NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "userId" uuid, CONSTRAINT "UQ_90c0c48a76481f77c68569ab627" UNIQUE ("accountNumber"), CONSTRAINT "PK_7651eaf705126155142947926e8" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "saved_product" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" uuid NOT NULL, "productId" uuid NOT NULL, "isLiked" boolean NOT NULL DEFAULT false, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_c99eb1342e10ffb1eb6ced77230" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "review" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "reviewerId" uuid NOT NULL, "productId" uuid NOT NULL, "comment" text NOT NULL, "rating" integer NOT NULL DEFAULT '0', "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_2e4299a343a81574217255c00ca" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TYPE "public"."ads_type_enum" AS ENUM('banner', 'search', 'featured')`);
-        await queryRunner.query(`CREATE TYPE "public"."ads_status_enum" AS ENUM('active', 'inactive', 'expired')`);
-        await queryRunner.query(`CREATE TABLE "ads" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "duration" integer NOT NULL, "vendorId" uuid NOT NULL, "productId" uuid NOT NULL, "storeId" uuid NOT NULL, "type" "public"."ads_type_enum" NOT NULL, "startDate" TIMESTAMP NOT NULL, "endDate" TIMESTAMP NOT NULL, "status" "public"."ads_status_enum" NOT NULL DEFAULT 'inactive', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_a7af7d1998037a97076f758fc23" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TYPE "public"."promotion_type_enum" AS ENUM('banner', 'search', 'featured')`);
+        await queryRunner.query(`CREATE TABLE "promotion" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying NOT NULL, "type" "public"."promotion_type_enum" NOT NULL DEFAULT 'featured', "duration" integer NOT NULL, "amount" double precision NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_fab3630e0789a2002f1cadb7d38" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TYPE "public"."ad_type_enum" AS ENUM('banner', 'search', 'featured')`);
+        await queryRunner.query(`CREATE TYPE "public"."ad_status_enum" AS ENUM('active', 'inactive', 'expired')`);
+        await queryRunner.query(`CREATE TABLE "ad" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "duration" integer NOT NULL, "productId" uuid NOT NULL, "promotionId" uuid NOT NULL, "clicks" integer NOT NULL DEFAULT '0', "impressions" integer NOT NULL DEFAULT '0', "conversionRate" double precision NOT NULL DEFAULT '0', "type" "public"."ad_type_enum" NOT NULL, "startDate" TIMESTAMP NOT NULL, "endDate" TIMESTAMP NOT NULL, "status" "public"."ad_status_enum" NOT NULL DEFAULT 'inactive', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_0193d5ef09746e88e9ea92c634d" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TYPE "public"."product_category_enum" AS ENUM('clothings', 'gadgets', 'groceries', 'women', 'bodyCreamAndOil', 'furniture', 'tvAndHomeAppliances', 'watchesAndAccessories')`);
         await queryRunner.query(`CREATE TYPE "public"."product_status_enum" AS ENUM('draft', 'published')`);
         await queryRunner.query(`CREATE TABLE "product" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying NOT NULL, "category" "public"."product_category_enum" NOT NULL, "description" character varying NOT NULL, "price" double precision NOT NULL, "discountPrice" double precision, "stockCount" integer NOT NULL, "images" text array NOT NULL, "status" "public"."product_status_enum" NOT NULL DEFAULT 'draft', "storeId" uuid NOT NULL, "userId" uuid NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_bebc9158e480b949565b4dc7a82" PRIMARY KEY ("id"))`);
@@ -39,9 +39,8 @@ export class SyncFix17540716651891754071684229 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "saved_product" ADD CONSTRAINT "FK_2c14b49dad251492928b265942c" FOREIGN KEY ("productId") REFERENCES "product"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "review" ADD CONSTRAINT "FK_2a11d3c0ea1b2b5b1790f762b9a" FOREIGN KEY ("productId") REFERENCES "product"("id") ON DELETE CASCADE ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "review" ADD CONSTRAINT "FK_34413365b39e3bf5bea866569b4" FOREIGN KEY ("reviewerId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "ads" ADD CONSTRAINT "FK_785465fab68fcd1364f60a000c2" FOREIGN KEY ("vendorId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "ads" ADD CONSTRAINT "FK_fb8e40a6953f03ba4157caa6959" FOREIGN KEY ("productId") REFERENCES "product"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
-        await queryRunner.query(`ALTER TABLE "ads" ADD CONSTRAINT "FK_051d6245f04a02c2279231de3c9" FOREIGN KEY ("storeId") REFERENCES "store"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "ad" ADD CONSTRAINT "FK_2dcbd14e7ef0a7b9fc5c6db51b3" FOREIGN KEY ("productId") REFERENCES "product"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
+        await queryRunner.query(`ALTER TABLE "ad" ADD CONSTRAINT "FK_70e20e41dfe1a227fc1a5224c61" FOREIGN KEY ("promotionId") REFERENCES "promotion"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "product" ADD CONSTRAINT "FK_32eaa54ad96b26459158464379a" FOREIGN KEY ("storeId") REFERENCES "store"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "product" ADD CONSTRAINT "FK_329b8ae12068b23da547d3b4798" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "cart" ADD CONSTRAINT "FK_756f53ab9466eb52a52619ee019" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
@@ -71,9 +70,8 @@ export class SyncFix17540716651891754071684229 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "cart" DROP CONSTRAINT "FK_756f53ab9466eb52a52619ee019"`);
         await queryRunner.query(`ALTER TABLE "product" DROP CONSTRAINT "FK_329b8ae12068b23da547d3b4798"`);
         await queryRunner.query(`ALTER TABLE "product" DROP CONSTRAINT "FK_32eaa54ad96b26459158464379a"`);
-        await queryRunner.query(`ALTER TABLE "ads" DROP CONSTRAINT "FK_051d6245f04a02c2279231de3c9"`);
-        await queryRunner.query(`ALTER TABLE "ads" DROP CONSTRAINT "FK_fb8e40a6953f03ba4157caa6959"`);
-        await queryRunner.query(`ALTER TABLE "ads" DROP CONSTRAINT "FK_785465fab68fcd1364f60a000c2"`);
+        await queryRunner.query(`ALTER TABLE "ad" DROP CONSTRAINT "FK_70e20e41dfe1a227fc1a5224c61"`);
+        await queryRunner.query(`ALTER TABLE "ad" DROP CONSTRAINT "FK_2dcbd14e7ef0a7b9fc5c6db51b3"`);
         await queryRunner.query(`ALTER TABLE "review" DROP CONSTRAINT "FK_34413365b39e3bf5bea866569b4"`);
         await queryRunner.query(`ALTER TABLE "review" DROP CONSTRAINT "FK_2a11d3c0ea1b2b5b1790f762b9a"`);
         await queryRunner.query(`ALTER TABLE "saved_product" DROP CONSTRAINT "FK_2c14b49dad251492928b265942c"`);
@@ -101,14 +99,14 @@ export class SyncFix17540716651891754071684229 implements MigrationInterface {
         await queryRunner.query(`DROP TABLE "product"`);
         await queryRunner.query(`DROP TYPE "public"."product_status_enum"`);
         await queryRunner.query(`DROP TYPE "public"."product_category_enum"`);
-        await queryRunner.query(`DROP TABLE "ads"`);
-        await queryRunner.query(`DROP TYPE "public"."ads_status_enum"`);
-        await queryRunner.query(`DROP TYPE "public"."ads_type_enum"`);
+        await queryRunner.query(`DROP TABLE "ad"`);
+        await queryRunner.query(`DROP TYPE "public"."ad_status_enum"`);
+        await queryRunner.query(`DROP TYPE "public"."ad_type_enum"`);
+        await queryRunner.query(`DROP TABLE "promotion"`);
+        await queryRunner.query(`DROP TYPE "public"."promotion_type_enum"`);
         await queryRunner.query(`DROP TABLE "review"`);
         await queryRunner.query(`DROP TABLE "saved_product"`);
         await queryRunner.query(`DROP TABLE "bank"`);
-        await queryRunner.query(`DROP TABLE "promotion"`);
-        await queryRunner.query(`DROP TYPE "public"."promotion_type_enum"`);
     }
 
 }

@@ -12,9 +12,9 @@ import { Review } from "@/modules/reviews/entities/review.entity"
 import { Plan } from "@/modules/plans/entities/plan.entity"
 import { Subscription } from "@/modules/subscription/entities/subscription.entity"
 import { Promotion } from "@/modules/promotions/entities/promotion.entity"
-import { Ads } from "@/modules/promotion-ads/entities/promotion-ad.entity"
 import { Payout } from "@/modules/payouts/entities/payout.entity"
 import { Withdrawal } from "@/modules/withdrawals/entities/withdrawal.entity"
+import { Ad } from "@/modules/ads/entities/ad.entity"
 
 type Subjects = InferSubjects<
   | typeof User
@@ -29,7 +29,7 @@ type Subjects = InferSubjects<
   | typeof Payout
   | typeof Withdrawal
   | typeof Promotion
-  | typeof Ads
+  | typeof Ad
   | "all"
 >
 
@@ -330,21 +330,21 @@ export class CaslAbilityFactory {
     return ability
   }
 
-  createAbilityForPromotionAds(user: User): AppAbility {
+  createAbilityForAds(user: User): AppAbility {
     const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
 
     if (user.role === UserRoleEnum.Admin) {
-      can(Action.Manage, Ads)
+      can(Action.Manage, Ad)
     } else if (user.role === UserRoleEnum.Vendor) {
-      can(Action.Read, Ads)
-      cannot(Action.Delete, Ads)
-      cannot(Action.Update, Ads)
-      cannot(Action.Create, Ads)
+      can(Action.Read, Ad)
+      can(Action.Create, Ad)
+      cannot(Action.Delete, Ad)
+      cannot(Action.Update, Ad)
     } else {
-      can(Action.Read, Ads)
-      cannot(Action.Delete, Ads)
-      cannot(Action.Update, Ads)
-      cannot(Action.Create, Ads)
+      can(Action.Read, Ad)
+      cannot(Action.Delete, Ad)
+      cannot(Action.Update, Ad)
+      cannot(Action.Create, Ad)
     }
 
     const ability = build({
