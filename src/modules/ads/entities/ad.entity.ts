@@ -13,6 +13,9 @@ export class Ad {
   duration: number
 
   @Column()
+  amount: number
+
+  @Column()
   productId: string
 
   @Column()

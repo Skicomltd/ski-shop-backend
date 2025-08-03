@@ -16,7 +16,7 @@ export class AdsService {
     return await repo.save(ad)
   }
 
-  async find({ productId, vendorId, type, storeId, limit, page }: IAdsQuery): Promise<[Ad[], number]> {
+  async find({ productId, vendorId, type, storeId, limit, page, status, createdAt }: IAdsQuery): Promise<[Ad[], number]> {
     const where: FindOptionsWhere<Ad> = {}
 
     if (productId) {
@@ -33,6 +33,14 @@ export class AdsService {
 
     if (storeId) {
       where.product = { storeId }
+    }
+
+    if (status) {
+      where.status = status
+    }
+
+    if (createdAt) {
+      where.createdAt = createdAt
     }
 
     return await this.adRepository.findAndCount({

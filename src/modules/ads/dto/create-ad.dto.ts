@@ -12,6 +12,7 @@ export class CreateAdDto {
   type: PromotionTypeEnum
   startDate: Date
   endDate: Date
+  amount: number
   status?: AdStatus
 }
 

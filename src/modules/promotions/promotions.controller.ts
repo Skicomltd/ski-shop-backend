@@ -38,52 +38,6 @@ export class PromotionsController {
     return await this.promotionsService.findOne({ id: id })
   }
 
-  @Post("/checkout")
-  async checkout(@Body(new JoiValidationPipe(PromotionCheckoutSchema)) checkoutDto: PromotionCheckoutDto, @Req() req: Request) {
-    const user = req.user
-
-    const [product, promotion] = await Promise.all([
-      this.productService.findOne({ id: checkoutDto.productId }),
-      this.promotionsService.findOne({ id: checkoutDto.promotionId })
-    ])
-
-    if (!product || !promotion) throw new NotFoundException("Product or promotion does not exist")
-
-    const promotionAdsExist = await this.promotionAdsService.findOne({
-      productId: checkoutDto.productId,
-      status: PromotionAdEnum.ACTIVE,
-      type: promotion.type
-    })
-
-    if (promotionAdsExist) {
-      throw new BadReqException(`An active promotion ad of type '${promotion.type}' already exists for this product`)
-    }
-
-    const { startDate, endDate } = await this.promotionAdsService.calculateStartAndEndDate(promotion.duration)
-
-    const promotionAds = await this.promotionAdsService.create({
-      duration: promotion.duration,
-      productId: product.id,
-      storeId: user.business?.store.id,
-      vendorId: user.id,
-      type: promotion.type,
-      startDate: startDate,
-      endDate: endDate,
-      status: PromotionAdEnum.INACTIVE,
-      amount: promotion.amount
-    })
-
-    const payload: InitiatePayment = {
-      amount: promotion.amount,
-      email: user.email,
-      reference: promotionAds.id
-    }
-
-    // TODO: Implement a scheduler to update promotionAds status to expired when endDate is reached
-
-    return await this.paymentsService.with(checkoutDto.paymentMethod).initiatePayment(payload)
-  }
-
   @UseInterceptors(PromotionInterceptor)
   @UseGuards(PolicyPromotionGuard)
   @CheckPolicies((ability) => ability.can(Action.Update, Promotion))

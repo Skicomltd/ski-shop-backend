@@ -1,20 +1,19 @@
 import { Controller, Get, Query, UseGuards } from "@nestjs/common"
 import { SubscriptionService } from "../subscription/subscription.service"
-import { PromotionAdsService } from "../promotion-ads/promotion-ads.service"
 import { OrdersService } from "../orders/orders.service"
-import { PromotionAdEnum } from "../promotion-ads/entities/promotion-ad.entity"
 import { IRevenueQuery } from "./interface/query.interface"
 import { Between, In } from "typeorm"
 import { PolicyRevenueGuard } from "./guard/policy-revenue.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { AppAbility } from "../services/casl/casl-ability.factory"
 import { Action } from "../services/casl/actions/action"
+import { AdsService } from "../ads/ads.service"
 
 @Controller("revenue")
-export class RevenueController {
+export class RevenuesController {
   constructor(
     private subscriptionService: SubscriptionService,
-    private promotionAdsService: PromotionAdsService,
+    private adsService: AdsService,
     private ordersService: OrdersService
   ) {}
 
@@ -46,8 +45,8 @@ export class RevenueController {
       createdAt: Between(startDate, endDate)
     })
 
-    const [promotionAds] = await this.promotionAdsService.find({
-      status: In([PromotionAdEnum.ACTIVE, PromotionAdEnum.EXPIRED]),
+    const [ads] = await this.adsService.find({
+      status: In(["active", "expired"]),
       createdAt: Between(startDate, endDate)
     })
 
@@ -58,7 +57,7 @@ export class RevenueController {
 
     const totalSubcriptionAmount = subscriptions.reduce((sum, sub) => sum + sub.amount, 0)
 
-    const totalPromotionAds = promotionAds.reduce((sum, ad) => sum + ad.amount, 0)
+    const totalPromotionAds = ads.reduce((sum, ad) => sum + ad.amount, 0)
 
     const totalRevenue = totalOrderAmount + totalSubcriptionAmount + totalPromotionAds
     return {

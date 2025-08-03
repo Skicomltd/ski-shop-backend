@@ -60,7 +60,8 @@ export class AdsController {
       startDate: startDate,
       endDate: endDate,
       promotionId: promotion.id,
-      paymentMethod: dto.paymentMethod
+      paymentMethod: dto.paymentMethod,
+      amount: promotion.amount
     })
 
     const payload: InitiatePayment = {
