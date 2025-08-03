@@ -32,9 +32,13 @@ import { SubscriptionModule } from "./modules/subscription/subscription.module"
 import { PayoutsModule } from "./modules/payouts/payouts.module"
 import { WithdrawalsModule } from "./modules/withdrawals/withdrawals.module"
 import { PromotionsModule } from "./modules/promotions/promotions.module"
+<<<<<<< HEAD
 import { PromotionAdsModule } from "./modules/promotion-ads/promotion-ads.module"
 import { RevenueModule } from './modules/revenue/revenue.module';
+=======
+>>>>>>> e2161766d2844523195536a82501cfc40585076b
 import paymentConfig from "./config/payment.config"
+import { AdsModule } from "./modules/ads/ads.module"
 
 @Module({
   imports: [
@@ -67,8 +71,12 @@ import paymentConfig from "./config/payment.config"
     PayoutsModule,
     WithdrawalsModule,
     PromotionsModule,
+<<<<<<< HEAD
     PromotionAdsModule,
     RevenueModule
+=======
+    AdsModule
+>>>>>>> e2161766d2844523195536a82501cfc40585076b
   ],
   controllers: [AppController],
   providers: [

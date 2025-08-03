@@ -10,20 +10,10 @@ import { SubscriptionModule } from "../subscription/subscription.module"
 import { StoreModule } from "../stores/store.module"
 import { WithdrawalsModule } from "../withdrawals/withdrawals.module"
 import { PayoutsModule } from "../payouts/payouts.module"
-import { PromotionAdsModule } from "../promotion-ads/promotion-ads.module"
+import { AdsModule } from "../ads/ads.module"
 
 @Module({
-  imports: [
-    OrdersModule,
-    CartsModule,
-    SubscriptionModule,
-    PlansModule,
-    UserModule,
-    StoreModule,
-    WithdrawalsModule,
-    PayoutsModule,
-    PromotionAdsModule
-  ],
+  imports: [OrdersModule, CartsModule, SubscriptionModule, PlansModule, UserModule, StoreModule, WithdrawalsModule, PayoutsModule, AdsModule],
   controllers: [WebhookController],
   providers: [WebhookService, PaymentsService]
 })

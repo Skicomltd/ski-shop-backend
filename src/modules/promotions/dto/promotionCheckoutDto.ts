@@ -1,5 +1,5 @@
 import * as joi from "joi"
-import { PAYMENT_METHODS, PaymentMethod } from "../interface/payment-method"
+import { PAYMENT_METHODS, PaymentMethod } from "../../services/payments/interfaces/payment-method"
 
 export class PromotionCheckoutDto {
   promotionId: string

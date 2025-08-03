@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common"
 import { CreateOrderDto } from "./dto/create-order.dto"
 import { UpdateOrderDto } from "./dto/update-order.dto"
 import { Order } from "./entities/order.entity"
-import { EntityManager, FindManyOptions, FindOptionsWhere, Repository } from "typeorm"
+import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
 import { InjectRepository } from "@nestjs/typeorm"
 import { IOrdersQuery } from "./interfaces/query-filter.interface"
 
@@ -19,48 +19,37 @@ export class OrdersService implements IService<Order> {
     return await repo.save(order)
   }
 
-  async find({ page, limit, buyerId, deliveryStatus, status, storeId, productId, sort = "desc" }: IOrdersQuery): Promise<[Order[], number]> {
-    const where: FindManyOptions<Order>["where"] = {}
+  async find({ page = 1, limit = 10, buyerId, deliveryStatus, status, storeId, productId }: IOrdersQuery): Promise<[Order[], number]> {
+    const query = this.orderRepository
+      .createQueryBuilder("order")
+      .leftJoinAndSelect("order.buyer", "buyer")
+      .leftJoinAndSelect("order.items", "item")
+      .leftJoinAndSelect("item.product", "product")
+      .leftJoinAndSelect("product.user", "vendor")
 
     if (buyerId) {
-      where.buyerId = buyerId
+      query.andWhere("order.buyerId = :buyerId", { buyerId })
     }
 
     if (deliveryStatus) {
-      where.deliveryStatus = deliveryStatus
+      query.andWhere("order.deliveryStatus = :deliveryStatus", { deliveryStatus })
     }
 
     if (status) {
-      where.status = status
+      query.andWhere("order.status = :status", { status })
     }
 
     if (storeId) {
-      where.items = {
-        storeId
-      }
+      query.andWhere("item.storeId = :storeId", { storeId })
     }
 
     if (productId) {
-      where.items = {
-        productId
-      }
+      query.andWhere("item.productId = :productId", { productId })
     }
 
-    const [orders, count] = await this.orderRepository.findAndCount({
-      where,
-      order: { createdAt: sort },
-      take: limit,
-      skip: page ? page - 1 : undefined
-    })
+    query.skip((page - 1) * limit).take(limit)
 
-    // filter out products not from the store
-    const filteredOrders = orders.map((order) => {
-      const filteredItems = storeId ? order.items.filter((item) => item.storeId === storeId) : order.items
-
-      return { ...order, items: filteredItems }
-    })
-
-    return [filteredOrders, count]
+    return await query.getManyAndCount()
   }
 
   async findById(id: string): Promise<Order> {

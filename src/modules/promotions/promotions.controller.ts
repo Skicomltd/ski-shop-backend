@@ -1,37 +1,22 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors, Req } from "@nestjs/common"
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, UseInterceptors } from "@nestjs/common"
 import { PromotionsService } from "./promotions.service"
 import { CreatePromotionDto, createPromotionSchema } from "./dto/create-promotion.dto"
 import { UpdatePromotionDto, updatePromotionSchema } from "./dto/update-promotion.dto"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { PolicyPromotionGuard } from "./guard/policy-promotion.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
-import { AppAbility } from "../services/casl/casl-ability.factory"
 import { Promotion } from "./entities/promotion.entity"
 import { Action } from "../services/casl/actions/action"
 import { PromotionInterceptor } from "./interceptor/promotion.interceptor"
 import { PromotionsInterceptor } from "./interceptor/promotions.interceptor"
-import { PromotionCheckoutDto, PromotionCheckoutSchema } from "./dto/promotionCheckoutDto"
-import { Request } from "express"
-import { ProductsService } from "../products/products.service"
-import { NotFoundException } from "@/exceptions/notfound.exception"
-import { PromotionAdsService } from "../promotion-ads/promotion-ads.service"
-import { InitiatePayment } from "../services/payments/interfaces/strategy.interface"
-import { PaymentsService } from "../services/payments/payments.service"
-import { PromotionAdEnum } from "../promotion-ads/entities/promotion-ad.entity"
-import { BadReqException } from "@/exceptions/badRequest.exception"
 
 @Controller("promotions")
 export class PromotionsController {
-  constructor(
-    private readonly promotionsService: PromotionsService,
-    private productService: ProductsService,
-    private promotionAdsService: PromotionAdsService,
-    private paymentsService: PaymentsService
-  ) {}
+  constructor(private readonly promotionsService: PromotionsService) {}
 
   @UseInterceptors(PromotionInterceptor)
-  @UseGuards(PolicyPromotionGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Promotion))
+  // @UseGuards(PolicyPromotionGuard)
+  // @CheckPolicies((ability) => ability.can(Action.Create, Promotion))
   @Post()
   async create(@Body(new JoiValidationPipe(createPromotionSchema)) createPromotionDto: CreatePromotionDto) {
     return this.promotionsService.create(createPromotionDto)
@@ -39,7 +24,7 @@ export class PromotionsController {
 
   @UseInterceptors(PromotionsInterceptor)
   @UseGuards(PolicyPromotionGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Promotion))
+  @CheckPolicies((ability) => ability.can(Action.Read, Promotion))
   @Get()
   async findAll() {
     return this.promotionsService.find()
@@ -47,7 +32,7 @@ export class PromotionsController {
 
   @UseInterceptors(PromotionInterceptor)
   @UseGuards(PolicyPromotionGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Promotion))
+  @CheckPolicies((ability) => ability.can(Action.Read, Promotion))
   @Get(":id")
   async findOne(@Param("id") id: string) {
     return await this.promotionsService.findOne({ id: id })
@@ -101,7 +86,7 @@ export class PromotionsController {
 
   @UseInterceptors(PromotionInterceptor)
   @UseGuards(PolicyPromotionGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Promotion))
+  @CheckPolicies((ability) => ability.can(Action.Update, Promotion))
   @Patch(":id")
   async update(@Param("id") id: string, @Body(new JoiValidationPipe(updatePromotionSchema)) updatePromotionDto: UpdatePromotionDto) {
     const promotion = await this.promotionsService.findOne({ id: id })
@@ -109,7 +94,7 @@ export class PromotionsController {
   }
 
   @UseGuards(PolicyPromotionGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, Promotion))
+  @CheckPolicies((ability) => ability.can(Action.Delete, Promotion))
   @Delete(":id")
   async remove(@Param("id") id: string) {
     return await this.promotionsService.remove({ id: id })

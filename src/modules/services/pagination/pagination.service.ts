@@ -4,7 +4,7 @@ import { PaginationParams } from "./interfaces/paginationParams.interface"
 
 @Injectable()
 export class PaginationService {
-  paginate<T>(data: T[], total: number, paginationParams: PaginationParams): PaginatedResult<T> {
+  paginate<T>(data: T[], total: number, paginationParams: PaginationParams, metadata: Record<string, any> = {}): PaginatedResult<T> {
     const { page = 1, limit = 10 } = paginationParams
 
     const totalPages = Math.ceil(total / limit)
@@ -17,7 +17,8 @@ export class PaginationService {
         limit,
         totalPages,
         hasNextPage: page < totalPages,
-        hasPreviousPage: page > 1
+        hasPreviousPage: page > 1,
+        ...metadata
       }
     }
   }

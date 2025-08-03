@@ -3,7 +3,6 @@ import { OrderItem } from "./entities/order-item.entity"
 import { InjectRepository } from "@nestjs/typeorm"
 import { EntityManager, FindManyOptions, FindOptionsWhere, Repository } from "typeorm"
 import { IOrderItemQuery } from "./interfaces/orderItem-query"
-import { OrderStatus } from "./interfaces/order-status"
 
 @Injectable()
 export class OrderItemService implements IService<OrderItem> {
@@ -56,29 +55,14 @@ export class OrderItemService implements IService<OrderItem> {
     return result.affected ?? 0
   }
 
-  async getTopSellingProducts(statusFilter: OrderStatus = "paid") {
-    const query = this.orderItemRepository
-      .createQueryBuilder("orderItem")
-      .select("orderItem.productId", "productId")
-      .addSelect("COUNT(orderItem.productId)", "count")
-      .addSelect("product.name", "productName")
-      .addSelect("product.price", "productPrice")
-      .innerJoin("orderItem.order", "order")
-      .innerJoin("orderItem.product", "product")
-      .where("order.status = :status", { status: statusFilter })
-      .groupBy("orderItem.productId")
-      .addGroupBy("product.name")
-      .addGroupBy("product.price")
-      .orderBy("count", "DESC")
-      .limit(10)
+  async totalSales(vendorId: string): Promise<number> {
+    const result = await this.orderItemRepository
+      .createQueryBuilder("item")
+      .innerJoin("item.product", "product")
+      .where("product.userId = :vendorId", { vendorId })
+      .select("SUM(item.unitPrice * item.quantity)", "total")
+      .getRawOne()
 
-    const results = await query.getRawMany()
-
-    return results.map((result) => ({
-      productId: result.productId,
-      productName: result.productName,
-      productPrice: result.productPrice,
-      count: parseInt(result.count, 10)
-    }))
+    return Number(result.total) || 0
   }
 }
