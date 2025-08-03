@@ -337,9 +337,9 @@ export class CaslAbilityFactory {
       can(Action.Manage, Ad)
     } else if (user.role === UserRoleEnum.Vendor) {
       can(Action.Read, Ad)
+      can(Action.Create, Ad)
       cannot(Action.Delete, Ad)
       cannot(Action.Update, Ad)
-      cannot(Action.Create, Ad)
     } else {
       can(Action.Read, Ad)
       cannot(Action.Delete, Ad)

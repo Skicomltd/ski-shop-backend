@@ -24,7 +24,7 @@ export class AdsService {
     }
 
     if (vendorId) {
-      where.vendorId = vendorId
+      where.product = { user: { id: vendorId } }
     }
 
     if (type) {
@@ -38,8 +38,7 @@ export class AdsService {
     return await this.adRepository.findAndCount({
       where,
       take: limit,
-      skip: page ? page - 1 : undefined,
-      relations: ["vendor", "product", "store"]
+      skip: page ? page - 1 : undefined
     })
   }
 
@@ -48,7 +47,7 @@ export class AdsService {
   }
 
   async findOne(filter: FindOptionsWhere<Ad>): Promise<Ad> {
-    return await this.adRepository.findOne({ where: filter, relations: ["vendor", "product", "store"] })
+    return await this.adRepository.findOne({ where: filter })
   }
 
   async exists(filter: FindOptionsWhere<Ad>): Promise<boolean> {

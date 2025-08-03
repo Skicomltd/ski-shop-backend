@@ -19,7 +19,6 @@ import { SavedProduct } from "@/modules/products/entities/saved-product.entity"
 import { Order } from "@/modules/orders/entities/order.entity"
 import { Review } from "@/modules/reviews/entities/review.entity"
 import { Subscription } from "@/modules/subscription/entities/subscription.entity"
-import { Ad } from "@/modules/ads/entities/ad.entity"
 
 export enum UserRoleEnum {
   "Customer" = "customer",
@@ -82,9 +81,6 @@ export class User {
 
   @OneToMany(() => Subscription, (subscription) => subscription.vendor)
   subscriptions: Subscription[]
-
-  @OneToMany(() => Ad, (ad) => ad.vendor)
-  ads: Ad[]
 
   private _previousPassword?: string
 

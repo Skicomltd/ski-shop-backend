@@ -5,4 +5,5 @@ import { PaginationParams } from "@/modules/services/pagination/interfaces/pagin
 
 export interface IAdsQuery extends PaginationParams, FindOptionsWhere<Ad> {
   storeId: string
+  vendorId: string
 }

@@ -30,16 +30,16 @@ export class WebhookService {
   ) {}
 
   async handleChargeSuccess(data: PaystackChargeSuccess) {
+    const isValid = await this.paymentsService.with("paystack").validatePayment(data.reference)
+    if (!isValid) return
+
     const [subscription, ads, order] = await Promise.all([
       this.subscriptionService.findOne({ reference: data.reference }),
-      this.adsService.findOne({ id: data.reference }),
+      this.adsService.findById(data.reference),
       this.orderService.findById(data.reference)
     ])
 
     if (!subscription && !ads && !order) return
-
-    const isValid = await this.paymentsService.with("paystack").validatePayment(data.reference)
-    if (!isValid) return
 
     if (subscription) {
       await this.handleChargeSuccessForSubscription(subscription)

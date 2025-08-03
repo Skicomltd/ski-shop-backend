@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn } from "typeorm"
+import { Ad } from "@/modules/ads/entities/ad.entity"
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from "typeorm"
 
 export enum PromotionTypeEnum {
   "BANNER" = "banner",
@@ -22,6 +23,9 @@ export class Promotion {
 
   @Column({ type: "float" })
   amount: number
+
+  @OneToMany(() => Ad, (ad) => ad.promotion)
+  ads: Ad[]
 
   @CreateDateColumn()
   createdAt: Date

@@ -20,9 +20,9 @@ export abstract class AdsMapper implements IInterceptor {
       },
       store: data.product.store.getShortFormat(),
       vendor: {
-        id: data.vendor.id,
-        email: data.vendor.email,
-        fullName: data.vendor.getFullName()
+        id: data.product.user.id,
+        email: data.product.user.email,
+        fullName: data.product.user.getFullName()
       }
     }
   }

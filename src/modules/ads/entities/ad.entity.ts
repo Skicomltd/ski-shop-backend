@@ -1,8 +1,7 @@
-import { PromotionTypeEnum } from "@/modules/promotions/entities/promotion.entity"
+import { Promotion, PromotionTypeEnum } from "@/modules/promotions/entities/promotion.entity"
 import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
 import { AD_STATUS } from "../enums/ad-status.enum"
 import { AdStatus } from "../interfaces/ad-status.interface"
-import { User } from "@/modules/users/entity/user.entity"
 import { Product } from "@/modules/products/entities/product.entity"
 
 @Entity()
@@ -14,10 +13,10 @@ export class Ad {
   duration: number
 
   @Column()
-  vendorId: string
+  productId: string
 
   @Column()
-  productId: string
+  promotionId: string
 
   @Column("int", { default: 0 })
   clicks: number
@@ -40,11 +39,11 @@ export class Ad {
   @Column({ type: "enum", enum: AD_STATUS, default: "inactive" })
   status: AdStatus
 
-  @ManyToOne(() => User, (user) => user.ads)
-  vendor: User
-
-  @ManyToOne(() => Product, (product) => product.ads)
+  @ManyToOne(() => Product, (product) => product.ads, { eager: true })
   product: Product
+
+  @ManyToOne(() => Promotion, (promotion) => promotion.ads)
+  promotion: Promotion
 
   @CreateDateColumn()
   createdAt: Date
