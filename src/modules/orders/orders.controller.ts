@@ -10,7 +10,7 @@ import { PolicyOrderGuard } from "./guard/policy-order.guard"
 import { Action } from "../services/casl/actions/action"
 import { Order } from "./entities/order.entity"
 import { Request } from "express"
-import { FindOptionsWhere } from "typeorm"
+import { Between, FindOptionsWhere } from "typeorm"
 import { UserRoleEnum } from "../users/entity/user.entity"
 
 @Controller("orders")
@@ -49,5 +49,29 @@ export class OrdersController {
     }
 
     return order
+  }
+
+  @UseGuards(PolicyOrderGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, Order))
+  @Get("/sales")
+  async salesOverview() {
+    return await this.ordersService.getMonthlySales()
+  }
+
+  @UseGuards(PolicyOrderGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, Order))
+  @Get("/totalorder")
+  async totalOrder(@Query() query: IOrdersQuery) {
+    const now = new Date()
+    const currentYear = now.getFullYear()
+    const currentMonth = now.getMonth() + 1
+
+    const targetMonth = query.month ?? currentMonth
+    const targetYear = query.year ?? currentYear
+
+    const startDate = new Date(targetYear, targetMonth - 1, 1)
+    const endDate = new Date(targetYear, targetMonth, 0, 23, 59, 59)
+
+    return await this.ordersService.totalNumberOfOrder({ status: "paid", createdAt: Between(startDate, endDate) })
   }
 }

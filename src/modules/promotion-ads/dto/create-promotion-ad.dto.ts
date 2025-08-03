@@ -10,4 +10,5 @@ export class CreatePromotionAdDto {
   startDate: Date
   endDate: Date
   status: PromotionAdEnum
+  amount: number
 }

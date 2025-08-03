@@ -84,7 +84,8 @@ export class PromotionsController {
       type: promotion.type,
       startDate: startDate,
       endDate: endDate,
-      status: PromotionAdEnum.INACTIVE
+      status: PromotionAdEnum.INACTIVE,
+      amount: promotion.amount
     })
 
     const payload: InitiatePayment = {

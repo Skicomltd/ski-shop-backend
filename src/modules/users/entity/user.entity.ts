@@ -24,7 +24,8 @@ import { Ads } from "@/modules/promotion-ads/entities/promotion-ad.entity"
 export enum UserRoleEnum {
   "Customer" = "customer",
   "Vendor" = "vendor",
-  "Admin" = "admin"
+  "Admin" = "admin",
+  "Rider" = "rider"
 }
 
 @Entity()

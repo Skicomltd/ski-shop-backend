@@ -1,8 +1,9 @@
 import { Injectable } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
-import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
+import { EntityManager, FindManyOptions, FindOptionsWhere, MoreThan, Repository } from "typeorm"
 
 import { Payout } from "./entities/payout.entity"
+import { IPayoutQuery } from "./interfaces/query-filter.interface"
 
 @Injectable()
 export class PayoutsService implements IService<Payout> {
@@ -17,8 +18,18 @@ export class PayoutsService implements IService<Payout> {
     return repo.save(payout)
   }
 
-  async find(where: FindOptionsWhere<Payout>): Promise<[Payout[], number]> {
-    return this.payoutRepository.findAndCount({ where })
+  async find({ limit, page, storeId, isPending }: IPayoutQuery): Promise<[Payout[], number]> {
+    const where: FindManyOptions<Payout>["where"] = {}
+
+    if (storeId) {
+      where.storeId = storeId
+    }
+
+    if (isPending) {
+      where.pending = MoreThan(0)
+    }
+
+    return this.payoutRepository.findAndCount({ where, take: limit, skip: page ? page - 1 : undefined })
   }
 
   async findById(id: string): Promise<Payout> {

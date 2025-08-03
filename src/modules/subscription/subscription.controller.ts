@@ -45,6 +45,8 @@ export class SubscriptionController {
 
     createSubscriptionDto.startDate = startDate
     createSubscriptionDto.endDate = endDate
+    createSubscriptionDto.amount = plan.amount
+    createSubscriptionDto.isPaid = false
     const subscription = await this.subscriptionService.create(createSubscriptionDto)
 
     return {

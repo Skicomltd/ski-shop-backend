@@ -19,7 +19,7 @@ export class OrdersService implements IService<Order> {
     return await repo.save(order)
   }
 
-  async find({ page, limit, buyerId, deliveryStatus, status, storeId, productId }: IOrdersQuery): Promise<[Order[], number]> {
+  async find({ page, limit, buyerId, deliveryStatus, status, storeId, productId, sort = "desc" }: IOrdersQuery): Promise<[Order[], number]> {
     const where: FindManyOptions<Order>["where"] = {}
 
     if (buyerId) {
@@ -48,6 +48,7 @@ export class OrdersService implements IService<Order> {
 
     const [orders, count] = await this.orderRepository.findAndCount({
       where,
+      order: { createdAt: sort },
       take: limit,
       skip: page ? page - 1 : undefined
     })
@@ -95,5 +96,24 @@ export class OrdersService implements IService<Order> {
   async remove(filter: FindOptionsWhere<Order>): Promise<number> {
     const result = await this.orderRepository.delete(filter)
     return result.affected ?? 0
+  }
+
+  async getMonthlySales() {
+    return await this.orderRepository
+      .createQueryBuilder("order")
+      .innerJoin("order.items", "item")
+      .select("EXTRACT(MONTH FROM order.createdAt)::integer", "month")
+      .addSelect("SUM(item.unitPrice * item.quantity)", "total")
+      .where("order.status = :status", { status: "paid" })
+      .andWhere("EXTRACT(YEAR FROM order.createdAt) = :year", { year: new Date().getFullYear() })
+      .groupBy("month")
+      .orderBy("month", "ASC")
+      .getRawMany()
+  }
+
+  async totalNumberOfOrder(filter: FindOptionsWhere<Order>) {
+    return await this.orderRepository.count({
+      where: filter
+    })
   }
 }

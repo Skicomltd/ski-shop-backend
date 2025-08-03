@@ -26,9 +26,17 @@ export class UserService implements IService<User> {
     return await repo.save(createUser)
   }
 
-  async find(data: IUserQuery): Promise<[User[], number]> {
+  async find({ limit, page, role }: IUserQuery): Promise<[User[], number]> {
+    const where: FindOptionsWhere<User> = {}
+
+    if (role) {
+      where.role = role
+    }
+
     return await this.userRepository.findAndCount({
-      where: data,
+      where,
+      take: limit,
+      skip: page ? (page - 1) * limit : undefined,
       relations: ["business", "business.store", "bank", "product", "carts", "savedProducts", "orders", "reviews", "subscriptions"]
     })
   }

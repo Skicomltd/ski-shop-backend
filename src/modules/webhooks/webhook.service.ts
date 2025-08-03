@@ -62,7 +62,8 @@ export class WebhookService {
     if (!vendor) return
 
     await this.subscriptionService.update(subscription, {
-      status: SubscriptionEnum.ACTIVE
+      status: SubscriptionEnum.ACTIVE,
+      isPaid: true
     })
 
     const store = await this.storeService.findOne({ id: vendor.business.store.id })
@@ -129,7 +130,8 @@ export class WebhookService {
       vendorId: user.id,
       startDate: data.period_start,
       endDate: data.period_end,
-      subscriptionCode: data.subscription.subscription_code
+      subscriptionCode: data.subscription.subscription_code,
+      isPaid: false
     })
   }
 
