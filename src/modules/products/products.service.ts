@@ -2,23 +2,20 @@ import { Injectable } from "@nestjs/common"
 import { CreateProductDto } from "./dto/create-product.dto"
 import { UpdateProductDto } from "./dto/update-product.dto"
 import { Product } from "./entities/product.entity"
-import { FindOptionsWhere, Repository, FindManyOptions, Equal, EntityManager, In } from "typeorm"
+import { FindOptionsWhere, Repository, EntityManager } from "typeorm"
 import { InjectRepository } from "@nestjs/typeorm"
 import { BadReqException } from "@/exceptions/badRequest.exception"
 import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.interface"
 import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { IProductsQuery } from "./interfaces/query-filter.interface"
-import { ProductCategoriesEnum } from "../common/types"
 import { SavedProduct } from "./entities/saved-product.entity"
-import { SubscriptionService } from "../subscription/subscription.service"
-import { SubscriptionEnum } from "../subscription/entities/subscription.entity"
+import { PromotionTypeEnum } from "../promotions/entities/promotion.entity"
 
 @Injectable()
 export class ProductsService implements IService<Product> {
   constructor(
     @InjectRepository(Product) private productRepository: Repository<Product>,
     @InjectRepository(SavedProduct) private savedProductRepository: Repository<SavedProduct>,
-    private subscriptionService: SubscriptionService,
     private fileSystem: FileSystemService
   ) {}
 
@@ -54,47 +51,61 @@ export class ProductsService implements IService<Product> {
     return [products, count]
   }
 
-  async find({ page, limit, status, stockCount, storeId, categories, vendor, topSeller }: IProductsQuery) {
-    const where: FindManyOptions<Product>["where"] = {}
+  async find({ page, limit, status, stockCount, storeId, categories, vendor, flag, search }: IProductsQuery) {
+    const query = this.productRepository
+      .createQueryBuilder("product")
+      .leftJoinAndSelect("product.store", "store")
+      .leftJoinAndSelect("product.user", "user")
 
     if (storeId) {
-      where.storeId = storeId
+      query.andWhere("product.storeId = :storeId", { storeId })
     }
 
     if (status) {
-      where.status = status
+      query.andWhere("product.status = :status", { status })
     }
 
     if (stockCount) {
-      where.stockCount = Equal(stockCount)
+      query.andWhere("product.stockCount = :stockCount", { stockCount })
     }
 
     if (categories) {
       const cats = categories.split(",")
-      where.category = In(cats as ProductCategoriesEnum[])
+      query.andWhere("product.category IN (:...cats)", { cats })
     }
 
     if (vendor) {
-      where.store = { type: vendor }
+      query.andWhere("store.type = :vendor", { vendor })
     }
 
-    if (topSeller) {
-      const [subscriptions] = await this.subscriptionService.find({ status: SubscriptionEnum.ACTIVE })
-      const products = subscriptions.map((subscription) => {
-        return subscription.vendor.business.store.product
-      })
-      const productsId = products[0].map((product) => {
-        return product.id
-      })
-      where.id = In(productsId)
+    // subscribed vendors
+    if (flag === "top") {
+      query.andWhere("store.isStarSeller = true")
     }
 
-    return await this.productRepository.findAndCount({
-      where,
-      relations: ["store", "user"],
-      take: limit,
-      skip: page ? page - 1 : undefined
-    })
+    // promoted products
+    if (flag === "featured") {
+      query.innerJoin("product.ads", "ad").andWhere("ad.type = :adType", { adType: PromotionTypeEnum.FEATURED })
+    }
+
+    if (flag === "banner") {
+      query.innerJoin("product.ads", "ad").andWhere("ad.type = :adType", { adType: PromotionTypeEnum.BANNER })
+    }
+
+    if (flag === "search") {
+      query.innerJoin("product.ads", "ad").andWhere("ad.type = :adType", { adType: PromotionTypeEnum.SEARCH })
+    }
+
+    if (search) {
+      query.andWhere("LOWER(product.name) LIKE :search", {
+        search: `%${search.toLowerCase()}%`
+      })
+    }
+
+    return await query
+      .take(limit)
+      .skip(page && page > 0 ? (page - 1) * limit : 0)
+      .getManyAndCount()
   }
 
   async findOne(filter: FindOptionsWhere<Product>): Promise<Product> {

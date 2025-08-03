@@ -7,10 +7,9 @@ import { StoreModule } from "../stores/store.module"
 import { DtoMapper } from "./interfaces/update-product-mapper.interface"
 import { SavedProduct } from "./entities/saved-product.entity"
 import { OrdersModule } from "../orders/orders.module"
-import { SubscriptionModule } from "../subscription/subscription.module"
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Product, SavedProduct]), StoreModule, OrdersModule, SubscriptionModule],
+  imports: [TypeOrmModule.forFeature([Product, SavedProduct]), StoreModule, OrdersModule],
   controllers: [ProductsController],
   providers: [ProductsService, DtoMapper],
   exports: [ProductsService]
