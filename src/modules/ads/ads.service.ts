@@ -1,18 +1,19 @@
+import { CronJob } from "cron"
 import { Injectable } from "@nestjs/common"
+import { InjectRepository } from "@nestjs/typeorm"
+import { SchedulerRegistry } from "@nestjs/schedule"
+import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
+
+import { Ad } from "./entities/ad.entity"
 import { CreateAdDto } from "./dto/create-ad.dto"
 import { UpdateAdDto } from "./dto/update-ad.dto"
-import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
-import { Ad } from "./entities/ad.entity"
-import { InjectRepository } from "@nestjs/typeorm"
 import { IAdsQuery } from "./interfaces/query-interface-filter"
-// import { SchedulerRegistry } from "@nestjs/schedule"
-// import { CronJob } from "cron"
 
 @Injectable()
 export class AdsService {
   constructor(
-    @InjectRepository(Ad) private adRepository: Repository<Ad>
-    // private schedulerRegistry: SchedulerRegistry
+    @InjectRepository(Ad) private adRepository: Repository<Ad>,
+    private schedulerRegistry: SchedulerRegistry
   ) {}
 
   async create(data: CreateAdDto, manager?: EntityManager): Promise<Ad> {
@@ -77,15 +78,17 @@ export class AdsService {
     return { startDate, endDate }
   }
 
-  // addCronJob(name: string, seconds: string) {
-  //   const job = new CronJob(`${seconds} * * * * *`, () => {
-  //     return 0
-  //     // this.logger.warn(`time (${seconds}) for job ${name} to run!`)
-  //   })
+  handleEndAd(ad: Ad) {
+    const job = CronJob.from({
+      name: ad.product.name,
+      cronTime: new Date(ad.endDate),
+      onTick: async () => {
+        await this.update(ad, { status: "expired" })
+      },
+      start: true,
+      timeZone: "Africa/Lagos"
+    })
 
-  //   this.schedulerRegistry.addCronJob(name, job)
-  //   job.start()
-
-  //   // this.logger.warn(`job ${name} added for each minute at ${seconds} seconds!`)
-  // }
+    this.schedulerRegistry.addCronJob("Stop Ads", job)
+  }
 }
