@@ -18,7 +18,7 @@ export class Promotion {
   type: PromotionTypeEnum
 
   @Column()
-  duration: number
+  duration: number // in days
 
   @Column({ type: "float" })
   amount: number

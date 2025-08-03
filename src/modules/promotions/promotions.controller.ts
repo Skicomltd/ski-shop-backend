@@ -15,8 +15,8 @@ export class PromotionsController {
   constructor(private readonly promotionsService: PromotionsService) {}
 
   @UseInterceptors(PromotionInterceptor)
-  @UseGuards(PolicyPromotionGuard)
-  @CheckPolicies((ability) => ability.can(Action.Create, Promotion))
+  // @UseGuards(PolicyPromotionGuard)
+  // @CheckPolicies((ability) => ability.can(Action.Create, Promotion))
   @Post()
   async create(@Body(new JoiValidationPipe(createPromotionSchema)) createPromotionDto: CreatePromotionDto) {
     return this.promotionsService.create(createPromotionDto)

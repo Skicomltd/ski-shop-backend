@@ -28,6 +28,7 @@ import { Plan } from "./modules/plans/entities/plan.entity"
 import { Payout } from "./modules/payouts/entities/payout.entity"
 import { Promotion } from "./modules/promotions/entities/promotion.entity"
 import { Ad } from "./modules/ads/entities/ad.entity"
+import { PromotionSeeder } from "./modules/seeder/promotion.seeder"
 
 seeder({
   imports: [
@@ -55,5 +56,5 @@ seeder({
       Ad
     ])
   ],
-  providers: [UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder]
-}).run([UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder])
+  providers: [UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder, PromotionSeeder]
+}).run([UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder, PromotionSeeder])
