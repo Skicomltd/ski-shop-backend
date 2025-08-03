@@ -64,9 +64,16 @@ export class WebhookService {
 
     if (!vendor) return
 
+    const { startDate, endDate } = await this.subscriptionService.getStartAndEndDate(subscription.planType.toLowerCase())
+
     await this.subscriptionService.update(subscription, {
-      status: SubscriptionEnum.ACTIVE
+      status: SubscriptionEnum.ACTIVE,
+      startDate,
+      endDate
     })
+
+    // dispatch job to end subscription
+    await this.subscriptionService.dispatch({ name: subscription.id, data: subscription })
 
     const store = await this.storeService.findOne({ id: vendor.business.store.id })
 
