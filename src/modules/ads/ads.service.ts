@@ -1,19 +1,20 @@
-import { CronJob } from "cron"
 import { Injectable } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
-import { SchedulerRegistry } from "@nestjs/schedule"
-import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
+import { EntityManager, FindOptionsWhere, Not, Repository } from "typeorm"
 
 import { Ad } from "./entities/ad.entity"
 import { CreateAdDto } from "./dto/create-ad.dto"
 import { UpdateAdDto } from "./dto/update-ad.dto"
 import { IAdsQuery } from "./interfaces/query-interface-filter"
+import { InjectQueue } from "@nestjs/bullmq"
+import { AppQueues } from "@/constants"
+import { Queue } from "bullmq"
 
 @Injectable()
-export class AdsService {
+export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
   constructor(
     @InjectRepository(Ad) private adRepository: Repository<Ad>,
-    private schedulerRegistry: SchedulerRegistry
+    @InjectQueue(AppQueues.END_ADS) private queue: Queue
   ) {}
 
   async create(data: CreateAdDto, manager?: EntityManager): Promise<Ad> {
@@ -23,7 +24,7 @@ export class AdsService {
   }
 
   async find({ productId, vendorId, type, storeId, limit, page }: IAdsQuery): Promise<[Ad[], number]> {
-    const where: FindOptionsWhere<Ad> = {}
+    const where: FindOptionsWhere<Ad> = { status: Not("inactive") }
 
     if (productId) {
       where.productId = productId
@@ -71,24 +72,14 @@ export class AdsService {
     return result.affected || 0
   }
 
+  async dispatch({ name, data }: QueueDispatch<string, Ad>) {
+    this.queue.add(name, data, { delay: data.duration * 24 * 60 * 60 * 1000 })
+  }
+
   async calculateStartAndEndDate(duration: number): Promise<{ startDate: Date; endDate: Date }> {
     const startDate = new Date()
     const endDate = new Date(startDate)
     endDate.setDate(startDate.getDate() + (duration - 1))
     return { startDate, endDate }
-  }
-
-  handleEndAd(ad: Ad) {
-    const job = CronJob.from({
-      name: ad.product.name,
-      cronTime: new Date(ad.endDate),
-      onTick: async () => {
-        await this.update(ad, { status: "expired" })
-      },
-      start: true,
-      timeZone: "Africa/Lagos"
-    })
-
-    this.schedulerRegistry.addCronJob("Stop Ads", job)
   }
 }

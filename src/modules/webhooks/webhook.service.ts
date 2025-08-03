@@ -164,7 +164,9 @@ export class WebhookService {
   }
 
   async handleChargeForAds(data: Ad) {
-    await this.adsService.update(data, { status: "active" })
+    const { startDate, endDate } = await this.adsService.calculateStartAndEndDate(data.duration)
+    await this.adsService.update(data, { status: "active", startDate, endDate })
+    await this.adsService.dispatch({ name: data.id, data })
     return
   }
 }
