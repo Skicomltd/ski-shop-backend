@@ -68,7 +68,7 @@ export class AdsController {
       email: user.email,
       reference: ad.id
     }
-    // // TODO: Implement a scheduler to update promotionAds status to expired when endDate is reached
+    // // TODO: Implement a scheduler to update promotionAds status to expired when endDate
     return await this.paymentsService.with(dto.paymentMethod).initiatePayment(payload)
   }
 
