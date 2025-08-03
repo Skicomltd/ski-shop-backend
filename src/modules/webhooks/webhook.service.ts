@@ -13,6 +13,7 @@ import { WithdrawalsService } from "../withdrawals/withdrawals.service"
 import { PayoutsService } from "../payouts/payouts.service"
 import { AdsService } from "../ads/ads.service"
 import { Ad } from "../ads/entities/ad.entity"
+import { vendonEnumType } from "../stores/entities/store.entity"
 
 @Injectable()
 export class WebhookService {
@@ -73,7 +74,7 @@ export class WebhookService {
       return
     }
 
-    await this.storeService.update(store, { isStarSeller: true })
+    await this.storeService.update(store, { isStarSeller: true, type: vendonEnumType.PREMIUM })
 
     return
   }

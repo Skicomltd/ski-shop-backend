@@ -5,10 +5,15 @@ import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
 import { Ad } from "./entities/ad.entity"
 import { InjectRepository } from "@nestjs/typeorm"
 import { IAdsQuery } from "./interfaces/query-interface-filter"
+// import { SchedulerRegistry } from "@nestjs/schedule"
+// import { CronJob } from "cron"
 
 @Injectable()
 export class AdsService {
-  constructor(@InjectRepository(Ad) private adRepository: Repository<Ad>) {}
+  constructor(
+    @InjectRepository(Ad) private adRepository: Repository<Ad>
+    // private schedulerRegistry: SchedulerRegistry
+  ) {}
 
   async create(data: CreateAdDto, manager?: EntityManager): Promise<Ad> {
     const repo = manager ? manager.getRepository(Ad) : this.adRepository
@@ -71,4 +76,16 @@ export class AdsService {
     endDate.setDate(startDate.getDate() + (duration - 1))
     return { startDate, endDate }
   }
+
+  // addCronJob(name: string, seconds: string) {
+  //   const job = new CronJob(`${seconds} * * * * *`, () => {
+  //     return 0
+  //     // this.logger.warn(`time (${seconds}) for job ${name} to run!`)
+  //   })
+
+  //   this.schedulerRegistry.addCronJob(name, job)
+  //   job.start()
+
+  //   // this.logger.warn(`job ${name} added for each minute at ${seconds} seconds!`)
+  // }
 }
