@@ -8,7 +8,7 @@ import { PolicyPayoutGuard } from "./guards/policy-payout.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { PayoutResponseInterceptor } from "./interceptors/payout-response.interceptor"
 import { IPayoutQuery } from "./interfaces/query-filter.interface"
-import { PayoutResponsesInterceptor } from "./interceptors/payout-reponses.interceptor"
+import { PayoutsResponseInterceptor } from "./interceptors/payout-reponses.interceptor"
 
 @Controller("payouts")
 export class PayoutsController {
@@ -26,7 +26,7 @@ export class PayoutsController {
   }
 
   @UseGuards(PolicyPayoutGuard)
-  @UseInterceptors(PayoutResponsesInterceptor)
+  @UseInterceptors(PayoutsResponseInterceptor)
   @CheckPolicies((ability) => ability.can(Action.Manage, Payout))
   @Get()
   async findAll(@Query() query: IPayoutQuery) {
