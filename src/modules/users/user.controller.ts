@@ -21,7 +21,7 @@ export class UserController {
   @UseInterceptors(UserInterceptor)
   @Patch("/:id")
   async update(@Param("id", ParseUUIDPipe) id: string, @Body(new JoiValidationPipe(updateUserSchema)) updateUser: UpdateUserDto) {
-    const user = await this.userService.findOne({ id })
+    const user = await this.userService.findById(id)
     if (!user) {
       throw new NotFoundException("User does not exist")
     }

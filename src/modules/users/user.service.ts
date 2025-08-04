@@ -15,6 +15,8 @@ export class UserService implements IService<User> {
     private userRepository: Repository<User>
   ) {}
 
+  private readonly relations = ["business", "business.store", "bank", "product", "carts", "savedProducts", "orders", "reviews", "subscriptions"]
+
   async create(data: CreateUserDto, manager?: EntityManager): Promise<User> {
     const exist = await this.exists({ email: data.email })
 
@@ -37,21 +39,21 @@ export class UserService implements IService<User> {
       where,
       take: limit,
       skip: page ? (page - 1) * limit : undefined,
-      relations: ["business", "business.store", "bank", "product", "carts", "savedProducts", "orders", "reviews", "subscriptions"]
+      relations: this.relations
     })
   }
 
   async findById(id: string): Promise<User> {
     return await this.userRepository.findOne({
       where: { id: id },
-      relations: ["business", "business.store", "bank", "product", "carts", "savedProducts", "orders", "reviews", "subscriptions"]
+      relations: this.relations
     })
   }
 
   async findOne(filter: FindOptionsWhere<User>): Promise<User> {
     const user = await this.userRepository.findOne({
       where: filter,
-      relations: ["business", "business.store", "bank", "product", "carts", "savedProducts", "orders", "reviews", "subscriptions"]
+      relations: this.relations
     })
     if (!user) throw new BadReqException("User not found")
     return user

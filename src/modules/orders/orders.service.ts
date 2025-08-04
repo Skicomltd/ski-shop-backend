@@ -89,6 +89,7 @@ export class OrdersService implements IService<Order> {
   }
 
   async getMonthlySales() {
+    // PLEASE TYPE
     return await this.orderRepository
       .createQueryBuilder("order")
       .innerJoin("order.items", "item")
