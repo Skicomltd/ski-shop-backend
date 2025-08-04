@@ -34,6 +34,7 @@ import { WithdrawalsModule } from "./modules/withdrawals/withdrawals.module"
 import { PromotionsModule } from "./modules/promotions/promotions.module"
 import paymentConfig from "./config/payment.config"
 import { AdsModule } from "./modules/ads/ads.module"
+import { ScheduleModule } from "@nestjs/schedule"
 import { RevenuesModule } from "./modules/revenues/revenues.module"
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { RevenuesModule } from "./modules/revenues/revenues.module"
       }
     }),
     TypeOrmModule.forRootAsync(databaseConfigAsync),
+    ScheduleModule.forRoot(),
     ServicesModule,
     UtilsModule,
     StoreModule,

@@ -33,10 +33,10 @@ export class Ad {
   @Column({ type: "enum", enum: PromotionTypeEnum })
   type: PromotionTypeEnum
 
-  @Column({ type: "timestamp" })
+  @Column({ type: "timestamp", nullable: true })
   startDate: Date
 
-  @Column({ type: "timestamp" })
+  @Column({ type: "timestamp", nullable: true })
   endDate: Date
 
   @Column({ type: "enum", enum: AD_STATUS, default: "inactive" })
