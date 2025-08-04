@@ -19,13 +19,14 @@ export class OrdersService implements IService<Order> {
     return await repo.save(order)
   }
 
-  async find({ page = 1, limit = 10, buyerId, deliveryStatus, status, storeId, productId }: IOrdersQuery): Promise<[Order[], number]> {
+  async find({ page = 1, limit = 10, buyerId, deliveryStatus, status, storeId, productId, sort = "ASC" }: IOrdersQuery): Promise<[Order[], number]> {
     const query = this.orderRepository
       .createQueryBuilder("order")
       .leftJoinAndSelect("order.buyer", "buyer")
       .leftJoinAndSelect("order.items", "item")
       .leftJoinAndSelect("item.product", "product")
       .leftJoinAndSelect("product.user", "vendor")
+      .orderBy("order.createdAt", sort)
 
     if (buyerId) {
       query.andWhere("order.buyerId = :buyerId", { buyerId })

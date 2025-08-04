@@ -6,7 +6,7 @@ import { JoiValidationPipe } from "@/validations/joi.validation"
 import { IUserQuery } from "./interfaces/users-query.interface"
 import { UserInterceptor } from "./interceptor/user.interceptor"
 import { UsersInterceptor } from "./interceptor/users.interceptor"
-import { User, UserRoleEnum } from "./entity/user.entity"
+import { User } from "./entity/user.entity"
 import { Action } from "../services/casl/actions/action"
 import { PolicyUsersGuard } from "./guard/policy-user.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
@@ -46,22 +46,7 @@ export class UserController {
   }
 
   @UseGuards(PolicyUsersGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, User))
-  @Get("/total")
-  async totalNumberOfUsersType() {
-    const buyer = await this.userService.find({ role: UserRoleEnum.Customer })
-    const vendor = await this.userService.find({ role: UserRoleEnum.Vendor })
-    const rider = await this.userService.find({ role: UserRoleEnum.Rider })
-
-    return {
-      buyerCount: buyer[1],
-      vendorCount: vendor[1],
-      riderCount: rider[1]
-    }
-  }
-
-  @UseGuards(PolicyUsersGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, User))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, User))
   @UseInterceptors(UserInterceptor)
   @Get("/:id")
   async findOne(@Param("id", ParseUUIDPipe) id: string) {

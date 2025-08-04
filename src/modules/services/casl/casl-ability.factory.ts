@@ -175,7 +175,7 @@ export class CaslAbilityFactory {
       can(Action.Update, Order, { buyerId: user.id })
       can(Action.Delete, Order, { buyerId: user.id })
     } else if (user.role === UserRoleEnum.Admin) {
-      can(Action.Manage, "Order")
+      can(Action.Manage, Order)
     }
 
     return build({

@@ -8,8 +8,9 @@ import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { AppAbility } from "../services/casl/casl-ability.factory"
 import { Action } from "../services/casl/actions/action"
 import { AdsService } from "../ads/ads.service"
+import { IOrdersQuery } from "../orders/interfaces/query-filter.interface"
 
-@Controller("revenue")
+@Controller("revenues")
 export class RevenuesController {
   constructor(
     private subscriptionService: SubscriptionService,
@@ -66,5 +67,32 @@ export class RevenuesController {
       promotionAds: totalPromotionAds,
       totalRevenue
     }
+  }
+
+  @UseGuards(PolicyRevenueGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, "REVENUE"))
+  @Get("/sales")
+  async salesOverview() {
+    return await this.ordersService.getMonthlySales()
+  }
+
+  @UseGuards(PolicyRevenueGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, "REVENUE"))
+  @Get("/totalorders")
+  async totalOrder(@Query() query: IOrdersQuery) {
+    const now = new Date()
+    const currentYear = now.getFullYear()
+
+    const targetYear = query.year ?? currentYear
+
+    const [startDate, endDate] =
+      query.month != null
+        ? [new Date(targetYear, query.month - 1, 1), new Date(targetYear, query.month, 0, 23, 59, 59)]
+        : [new Date(targetYear, 0, 1), new Date(targetYear, 11, 31, 23, 59, 59)]
+
+    return this.ordersService.totalNumberOfOrder({
+      status: "paid",
+      createdAt: Between(startDate, endDate)
+    })
   }
 }

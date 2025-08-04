@@ -8,5 +8,5 @@ export interface IOrdersQuery extends PaginationParams, FindOptionsWhere<Order> 
   productId?: string
   month?: number
   year?: number
-  sort?: "asc" | "desc"
+  sort?: "ASC" | "DESC"
 }
