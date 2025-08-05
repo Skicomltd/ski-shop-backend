@@ -10,6 +10,7 @@ export class CreateAdDto {
   paymentMethod: PaymentMethod
   duration: number
   type: PromotionTypeEnum
+  amount: number
   startDate?: Date
   endDate?: Date
   status?: AdStatus

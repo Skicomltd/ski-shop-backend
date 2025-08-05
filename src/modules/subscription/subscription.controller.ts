@@ -42,6 +42,8 @@ export class SubscriptionController {
     createSubscriptionDto.vendorId = user.id
     createSubscriptionDto.reference = createSubscription.reference
 
+    createSubscriptionDto.amount = plan.amount
+    createSubscriptionDto.isPaid = false
     const subscription = await this.subscriptionService.create(createSubscriptionDto)
 
     return {

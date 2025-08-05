@@ -34,6 +34,12 @@ export class Subscription {
   @Column({ type: "enum", enum: SubscriptionEnum, default: SubscriptionEnum.INACTIVE })
   status: SubscriptionEnum
 
+  @Column({ type: "boolean", default: false })
+  isPaid: boolean
+
+  @Column()
+  amount: number
+
   @ManyToOne(() => User, (user) => user.subscriptions)
   vendor: User
 

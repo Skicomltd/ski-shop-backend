@@ -2,13 +2,14 @@ import { Injectable } from "@nestjs/common"
 import { CreateSubscriptionDto } from "./dto/create-subscription.dto"
 import { UpdateSubscriptionDto } from "./dto/update-subscription.dto"
 import { Subscription } from "./entities/subscription.entity"
-import { EntityManager, FindManyOptions, FindOptionsWhere, Repository } from "typeorm"
+import { Between, EntityManager, FindManyOptions, FindOptionsWhere, LessThanOrEqual, MoreThanOrEqual, Repository } from "typeorm"
 import { InjectRepository } from "@nestjs/typeorm"
 import { GetSubscriptionPayload, ISubscriptionsQuery } from "./interface/query-filter.interface"
 import { PaymentsService } from "../services/payments/payments.service"
 import { Queue } from "bullmq"
 import { InjectQueue } from "@nestjs/bullmq"
 import { AppQueues } from "@/constants"
+import { SubscriptionRevenueInterface } from "./interface/subcription-revenue.interface"
 
 @Injectable()
 export class SubscriptionService implements IService<Subscription>, UseQueue<string, Subscription> {
@@ -28,7 +29,7 @@ export class SubscriptionService implements IService<Subscription>, UseQueue<str
     return subscription
   }
 
-  async find({ page, limit, planType, status, vendorId }: ISubscriptionsQuery): Promise<[Subscription[], number]> {
+  async find({ page, limit, planType, status, vendorId, startDate, endDate }: ISubscriptionsQuery): Promise<[Subscription[], number]> {
     const where: FindManyOptions<Subscription>["where"] = {}
 
     if (planType) {
@@ -41,6 +42,18 @@ export class SubscriptionService implements IService<Subscription>, UseQueue<str
 
     if (vendorId) {
       where.vendorId = vendorId
+    }
+
+    if (startDate && endDate) {
+      where.createdAt = Between(startDate, endDate)
+    }
+
+    if (startDate) {
+      where.createdAt = MoreThanOrEqual(startDate)
+    }
+
+    if (endDate) {
+      where.createdAt = LessThanOrEqual(endDate)
     }
 
     return await this.subscriptionRepository.findAndCount({
@@ -109,5 +122,19 @@ export class SubscriptionService implements IService<Subscription>, UseQueue<str
   async getSubscription({ code }: GetSubscriptionPayload) {
     const getSubscription = await this.paymentService.getSubscription({ code })
     return getSubscription
+  }
+
+  async calculateSubscriptionsTotalRevenue({ startDate, endDate, isPaid }: SubscriptionRevenueInterface): Promise<number> {
+    const result = await this.subscriptionRepository
+      .createQueryBuilder("subscription")
+      .select("SUM(subscription.amount)", "total")
+      .where("subscription.isPaid = :isPaid", { isPaid })
+      .andWhere("subscription.createdAt BETWEEN :startDate AND :endDate", {
+        startDate,
+        endDate
+      })
+      .getRawOne()
+
+    return parseFloat(result.total) || 0
   }
 }

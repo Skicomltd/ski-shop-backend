@@ -11,6 +11,7 @@ export class CreateSubscriptionDto {
   status: SubscriptionEnum
   amount: number
   subscriptionCode: string
+  isPaid: boolean
 }
 
 export const createSubcriptionSchema = joi.object({

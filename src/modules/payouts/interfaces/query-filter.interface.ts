@@ -2,4 +2,6 @@ import { PaginationParams } from "@/modules/services/pagination/interfaces/pagin
 import { FindOptionsWhere } from "typeorm"
 import { Payout } from "../entities/payout.entity"
 
-export interface IPayoutQuery extends PaginationParams, FindOptionsWhere<Payout> {}
+export interface IPayoutQuery extends PaginationParams, FindOptionsWhere<Payout> {
+  isPending: boolean
+}

@@ -68,6 +68,7 @@ export class WebhookService {
 
     await this.subscriptionService.update(subscription, {
       status: SubscriptionEnum.ACTIVE,
+      isPaid: true,
       startDate,
       endDate
     })
@@ -142,7 +143,8 @@ export class WebhookService {
       vendorId: user.id,
       startDate: data.period_start,
       endDate: data.period_end,
-      subscriptionCode: data.subscription.subscription_code
+      subscriptionCode: data.subscription.subscription_code,
+      isPaid: false
     })
   }
 

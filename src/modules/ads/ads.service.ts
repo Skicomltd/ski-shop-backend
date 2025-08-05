@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
-import { EntityManager, FindOptionsWhere, Not, Repository } from "typeorm"
+import { Between, EntityManager, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, Not, Repository } from "typeorm"
 
 import { Ad } from "./entities/ad.entity"
 import { CreateAdDto } from "./dto/create-ad.dto"
@@ -9,6 +9,7 @@ import { IAdsQuery } from "./interfaces/query-interface-filter"
 import { InjectQueue } from "@nestjs/bullmq"
 import { AppQueues } from "@/constants"
 import { Queue } from "bullmq"
+import { AdRevenueInterface } from "./interfaces/ad-revenue.interface"
 
 @Injectable()
 export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
@@ -23,7 +24,7 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
     return await repo.save(ad)
   }
 
-  async find({ productId, vendorId, type, storeId, limit, page }: IAdsQuery): Promise<[Ad[], number]> {
+  async find({ productId, vendorId, type, storeId, limit, page, startDate, endDate, status }: IAdsQuery): Promise<[Ad[], number]> {
     const where: FindOptionsWhere<Ad> = { status: Not("inactive") }
 
     if (productId) {
@@ -40,6 +41,23 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
 
     if (storeId) {
       where.product = { storeId }
+    }
+
+    if (status) {
+      const stats = status.toString().split(",")
+      where.status = In(stats)
+    }
+
+    if (startDate && endDate) {
+      where.createdAt = Between(startDate, endDate)
+    }
+
+    if (startDate) {
+      where.createdAt = MoreThanOrEqual(startDate)
+    }
+
+    if (endDate) {
+      where.createdAt = LessThanOrEqual(endDate)
     }
 
     return await this.adRepository.findAndCount({
@@ -81,5 +99,19 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
     const endDate = new Date(startDate)
     endDate.setDate(startDate.getDate() + (duration - 1))
     return { startDate, endDate }
+  }
+
+  async calculateAdsTotalRevenue({ startDate, endDate, status }: AdRevenueInterface): Promise<number> {
+    const result = await this.adRepository
+      .createQueryBuilder("ad")
+      .select("SUM(ad.amount)", "totalAmount")
+      .where("ad.status IN (:...statuses)", { statuses: status })
+      .andWhere("ad.createdAt BETWEEN :startDate AND :endDate", {
+        startDate,
+        endDate
+      })
+      .getRawOne()
+
+    return parseFloat(result.totalAmount) || 0
   }
 }

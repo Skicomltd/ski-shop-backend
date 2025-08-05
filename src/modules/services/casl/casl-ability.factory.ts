@@ -30,6 +30,7 @@ type Subjects = InferSubjects<
   | typeof Withdrawal
   | typeof Promotion
   | typeof Ad
+  | "REVENUE"
   | "all"
 >
 
@@ -174,7 +175,7 @@ export class CaslAbilityFactory {
       can(Action.Update, Order, { buyerId: user.id })
       can(Action.Delete, Order, { buyerId: user.id })
     } else if (user.role === UserRoleEnum.Admin) {
-      can(Action.Manage, "Order")
+      can(Action.Manage, Order)
     }
 
     return build({
@@ -345,6 +346,48 @@ export class CaslAbilityFactory {
       cannot(Action.Delete, Ad)
       cannot(Action.Update, Ad)
       cannot(Action.Create, Ad)
+    }
+
+    const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
+  }
+
+  createAbilityForRevenue(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, "REVENUE")
+    } else if (user.role) {
+      cannot(Action.Read, "REVENUE")
+      cannot(Action.Delete, "REVENUE")
+      cannot(Action.Update, "REVENUE")
+      cannot(Action.Create, "REVENUE")
+    }
+
+    const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
+  }
+
+  createAbilityForUsers(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, User)
+    } else if (user.role) {
+      can(Action.Read, User)
+      can(Action.Delete, User, { id: user.id })
+      can(Action.Update, User, { id: user.id })
+      cannot(Action.Create, User)
     }
 
     const ability = build({

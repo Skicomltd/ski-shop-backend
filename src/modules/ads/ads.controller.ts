@@ -55,7 +55,8 @@ export class AdsController {
       productId: product.id,
       type: promotion.type,
       promotionId: promotion.id,
-      paymentMethod: dto.paymentMethod
+      paymentMethod: dto.paymentMethod,
+      amount: promotion.amount
     })
 
     const payload: InitiatePayment = {

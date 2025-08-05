@@ -23,7 +23,8 @@ import { Subscription } from "@/modules/subscription/entities/subscription.entit
 export enum UserRoleEnum {
   "Customer" = "customer",
   "Vendor" = "vendor",
-  "Admin" = "admin"
+  "Admin" = "admin",
+  "Rider" = "rider"
 }
 
 @Entity()

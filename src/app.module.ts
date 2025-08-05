@@ -35,7 +35,7 @@ import { PromotionsModule } from "./modules/promotions/promotions.module"
 import paymentConfig from "./config/payment.config"
 import { AdsModule } from "./modules/ads/ads.module"
 import { ScheduleModule } from "@nestjs/schedule"
-
+import { RevenuesModule } from "./modules/revenues/revenues.module"
 @Module({
   imports: [
     UserModule,
@@ -68,7 +68,8 @@ import { ScheduleModule } from "@nestjs/schedule"
     PayoutsModule,
     WithdrawalsModule,
     PromotionsModule,
-    AdsModule
+    AdsModule,
+    RevenuesModule
   ],
   controllers: [AppController],
   providers: [
