@@ -4,6 +4,7 @@ import { UpdateStoreDto } from "./dto/update-store.dto"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Store } from "./entities/store.entity"
 import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
+import { IStoresQuery } from "./interface/query-filter.interface"
 
 @Injectable()
 export class StoreService implements IService<Store> {
@@ -20,8 +21,21 @@ export class StoreService implements IService<Store> {
     return await repo.save(store)
   }
 
-  async find(data?: FindOptionsWhere<Store>): Promise<[Store[], number]> {
-    return await this.storeRepository.findAndCount({ where: data })
+  async find({ topVendor, limit, page, isStarSeller }: IStoresQuery): Promise<[Store[], number]> {
+    const query = this.storeRepository.createQueryBuilder("store")
+
+    if (isStarSeller) {
+      query.andWhere("store.isStarSeller = :isStarSeller", { isStarSeller })
+    }
+
+    if (topVendor) {
+      query.orderBy("store.numberOfSales", "DESC")
+    }
+
+    return await query
+      .take(limit)
+      .skip(page && page > 0 ? (page - 1) * limit : 0)
+      .getManyAndCount()
   }
 
   async findById(id: string): Promise<Store> {

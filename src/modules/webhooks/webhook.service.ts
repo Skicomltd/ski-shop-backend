@@ -104,6 +104,10 @@ export class WebhookService {
         const total = item.unitPrice * item.quantity
 
         const payout = await this.payoutsService.findOne({ storeId })
+        const store = await this.storeService.findOne({ id: storeId })
+        const totalNoOfSales = item.quantity * 1
+
+        await this.storeService.update(store, { numberOfSales: store.numberOfSales + totalNoOfSales }, manager)
         if (!payout) {
           await this.payoutsService.create({ storeId, total, available: total }, manager)
         } else {

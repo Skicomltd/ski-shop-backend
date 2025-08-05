@@ -1,4 +1,4 @@
-import { Controller, Get, Body, Patch, Param, Delete, UseGuards, UseInterceptors, Post, UploadedFile, Req } from "@nestjs/common"
+import { Controller, Get, Body, Patch, Param, Delete, UseGuards, UseInterceptors, Post, UploadedFile, Req, Query } from "@nestjs/common"
 import { StoreService } from "./store.service"
 import { UpdateStoreDto, updateStoreSchema } from "./dto/update-store.dto"
 import { PoliciesGuard } from "../auth/guard/policies-handler.guard"
@@ -20,6 +20,7 @@ import { FileSystemService } from "../services/filesystem/filesystem.service"
 import { UpdateStoreMapper } from "./interface/update-store-mapper-interface"
 import { Request } from "express"
 import { BusinessService } from "../business/business.service"
+import { IStoresQuery } from "./interface/query-filter.interface"
 @Controller("stores")
 export class StoreController {
   constructor(
@@ -59,8 +60,8 @@ export class StoreController {
   @UseGuards(PoliciesGuard)
   @UseInterceptors(StoresInterceptor)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Store))
-  findAll() {
-    return this.storeService.find()
+  findAll(@Query() query: IStoresQuery) {
+    return this.storeService.find(query)
   }
 
   @Get("current")

@@ -9,6 +9,7 @@ export class CreateStoreDto {
   type: vendonEnumType
   business: Business
   isStarSeller?: boolean
+  numberOfSales?: number
 }
 
 export const createStoreSchema = Joi.object({
