@@ -14,7 +14,7 @@ export class UserSeeder implements Seeder {
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       password: "password1234",
-      role: faker.helpers.arrayElement(Object.values(UserRoleEnum)),
+      role: faker.helpers.arrayElement([UserRoleEnum.Customer, UserRoleEnum.Vendor]),
       phoneNumber: faker.phone.number(),
       email: faker.internet.email(),
       isEmailVerified: faker.datatype.boolean(),
@@ -77,6 +77,18 @@ export class UserSeeder implements Seeder {
       role: UserRoleEnum.Vendor,
       phoneNumber: faker.phone.number(),
       email: "tobiolanitori@gmail.com",
+      isEmailVerified: true,
+      createdAt: faker.date.past(),
+      updatedAt: faker.date.recent()
+    })
+
+    users.push({
+      firstName: "admin",
+      lastName: "Account",
+      password: "password1234",
+      role: UserRoleEnum.Admin,
+      phoneNumber: faker.phone.number(),
+      email: "adminaccount@gmail.com",
       isEmailVerified: true,
       createdAt: faker.date.past(),
       updatedAt: faker.date.recent()

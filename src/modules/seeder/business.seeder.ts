@@ -46,6 +46,25 @@ export class BusinessSeeder implements Seeder {
       user // Link to the vendor user
     }))
 
+    const admin = await this.userRepository.findOne({ where: { role: UserRoleEnum.Admin } })
+
+    if (admin) {
+      // create admin business
+      businesses.push({
+        type: faker.company.buzzVerb(),
+        businessRegNumber: faker.string.alphanumeric(10),
+        contactNumber: faker.phone.number(),
+        address: faker.location.streetAddress(),
+        country: faker.location.country(),
+        state: faker.location.state(),
+        kycVerificationType: faker.helpers.arrayElement(["NATIONAL_ID_CARD", "PASSPORT", "DRIVER_LICENSE"]),
+        identificationNumber: faker.string.uuid(), // Unique identifier
+        createdAt: faker.date.past(),
+        updatedAt: faker.date.recent(),
+        user: admin
+      })
+    }
+
     // Create and save business entities
     const businessEntities = this.businessRepository.create(businesses)
     await this.businessRepository.save(businessEntities)

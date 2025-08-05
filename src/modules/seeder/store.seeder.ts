@@ -1,11 +1,12 @@
 import { Injectable } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
 import { Seeder } from "nestjs-seeder"
-import { Repository } from "typeorm"
+import { Not, Repository } from "typeorm"
 import { faker } from "@faker-js/faker"
 import { Store, vendonEnumType } from "../stores/entities/store.entity"
 import { CreateStoreDto } from "../stores/dto/create-store.dto"
 import Business from "../business/entities/business.entity"
+import { UserRoleEnum } from "../users/entity/user.entity"
 
 @Injectable()
 export class StoreSeeder implements Seeder {
@@ -19,7 +20,8 @@ export class StoreSeeder implements Seeder {
   async seed(): Promise<any> {
     // Fetch all businesses without an associated store
     const businesses = await this.businessRepository.find({
-      relations: ["store"]
+      relations: ["store"],
+      where: { user: { role: Not(UserRoleEnum.Admin) } }
     })
 
     if (businesses.length === 0) {
@@ -37,10 +39,23 @@ export class StoreSeeder implements Seeder {
       logo: faker.image.url({ width: 200, height: 200 }),
       business,
       isStarSeller: false,
-      type: faker.helpers.enumValue(vendonEnumType),
+      type: faker.helpers.arrayElement([vendonEnumType.BASIC, vendonEnumType.PREMIUM]),
       createdAt: faker.date.past(),
       updateAt: faker.date.recent()
     }))
+
+    const adminBusiness = await this.businessRepository.findOne({ where: { user: { role: UserRoleEnum.Admin } } })
+
+    if (adminBusiness) {
+      stores.push({
+        name: "Skishop",
+        description: faker.lorem.sentence(),
+        logo: faker.image.url({ width: 200, height: 200 }),
+        business: adminBusiness,
+        isStarSeller: false,
+        type: vendonEnumType.SKISHOP
+      })
+    }
 
     // Create and save store entities
     const storeEntities = this.storeRepository.create(stores)
