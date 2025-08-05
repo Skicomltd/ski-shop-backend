@@ -9,7 +9,6 @@ import { ProductsService } from "../products/products.service"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { PolicyReviewGuard } from "./guard/policy-review.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
-import { AppAbility } from "../services/casl/casl-ability.factory"
 import { Action } from "../services/casl/actions/action"
 import { Review } from "./entities/review.entity"
 import { Request } from "express"
@@ -17,18 +16,22 @@ import { OrdersService } from "../orders/orders.service"
 import { BadReqException } from "@/exceptions/badRequest.exception"
 import { ConflictException } from "@/exceptions/conflict.exception"
 import { ReviewsInterceptor } from "./interceptor/reviews.interceptor"
+import { StoreService } from "../stores/store.service"
+import { TransactionHelper } from "../services/utils/transactions/transactions.service"
 
 @Controller("reviews")
 export class ReviewsController {
   constructor(
     private readonly reviewsService: ReviewsService,
     private productService: ProductsService,
-    private orderService: OrdersService
+    private orderService: OrdersService,
+    private storeService: StoreService,
+    private transactionHelper: TransactionHelper
   ) {}
 
   @UseInterceptors(ReviewInterceptor)
   @UseGuards(PolicyReviewGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Create, Review))
+  @CheckPolicies((ability) => ability.can(Action.Create, Review))
   @Post()
   async create(@Body(new JoiValidationPipe(CreateReviewSchema)) createReviewDto: CreateReviewDto, @Req() req: Request) {
     const user = req.user
@@ -50,12 +53,23 @@ export class ReviewsController {
     createReviewDto.reviewerId = user.id
     createReviewDto.productId = product.id
 
-    return await this.reviewsService.create(createReviewDto)
+    return this.transactionHelper.runInTransaction(async (manager) => {
+      await this.storeService.update(
+        product.store,
+        {
+          totalStoreRatingCount: product.store.totalStoreRatingCount + 1,
+          totalStoreRatingSum: product.store.totalStoreRatingSum + createReviewDto.rating
+        },
+        manager
+      )
+
+      return await this.reviewsService.create(createReviewDto, manager)
+    })
   }
 
   @UseInterceptors(ReviewsInterceptor)
   @UseGuards(PolicyReviewGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Review))
+  @CheckPolicies((ability) => ability.can(Action.Read, Review))
   @Get()
   async findAll(@Query() query: IReviewQuery) {
     return await this.reviewsService.find(query)
@@ -63,7 +77,7 @@ export class ReviewsController {
 
   @UseInterceptors(ReviewInterceptor)
   @UseGuards(PolicyReviewGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Review))
+  @CheckPolicies((ability) => ability.can(Action.Read, Review))
   @Get(":id")
   async findOne(@Param("id", ParseUUIDPipe) id: string) {
     return await this.reviewsService.findOne({ id })
@@ -71,7 +85,7 @@ export class ReviewsController {
 
   @UseInterceptors(ReviewInterceptor)
   @UseGuards(PolicyReviewGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Review))
+  @CheckPolicies((ability) => ability.can(Action.Update, Review))
   @Patch(":id")
   async update(@Param("id", ParseUUIDPipe) id: string, @Body(new JoiValidationPipe(UpdateReviewSchema)) updateReviewDto: UpdateReviewDto) {
     const review = await this.reviewsService.findById(id)
@@ -82,7 +96,7 @@ export class ReviewsController {
   }
 
   @UseGuards(PolicyReviewGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, Review))
+  @CheckPolicies((ability) => ability.can(Action.Delete, Review))
   @Delete(":id")
   async remove(@Param("id", ParseUUIDPipe) id: string) {
     return await this.reviewsService.remove({ id })

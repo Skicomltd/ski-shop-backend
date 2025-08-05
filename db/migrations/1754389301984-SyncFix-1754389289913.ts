@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm"
 
-export class SyncFix17543850775641754385081821 implements MigrationInterface {
-  name = "SyncFix17543850775641754385081821"
+export class SyncFix17543892899131754389301984 implements MigrationInterface {
+  name = "SyncFix17543892899131754389301984"
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.query(
@@ -19,7 +19,7 @@ export class SyncFix17543850775641754385081821 implements MigrationInterface {
     )
     await queryRunner.query(`CREATE TYPE "public"."store_type_enum" AS ENUM('premium', 'skishop', 'basic')`)
     await queryRunner.query(
-      `CREATE TABLE "store" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying NOT NULL, "description" character varying NOT NULL, "logo" character varying NOT NULL, "isStarSeller" boolean NOT NULL DEFAULT false, "numberOfSales" integer NOT NULL DEFAULT '0', "type" "public"."store_type_enum" NOT NULL DEFAULT 'basic', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updateAt" TIMESTAMP NOT NULL DEFAULT now(), "businessId" uuid, "payoutId" uuid, CONSTRAINT "REL_bc7ec2c93335da88571ae84fbe" UNIQUE ("businessId"), CONSTRAINT "REL_780e516e3a34d53e9510b43d3e" UNIQUE ("payoutId"), CONSTRAINT "PK_f3172007d4de5ae8e7692759d79" PRIMARY KEY ("id"))`
+      `CREATE TABLE "store" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying NOT NULL, "description" character varying NOT NULL, "logo" character varying NOT NULL, "isStarSeller" boolean NOT NULL DEFAULT false, "numberOfSales" integer NOT NULL DEFAULT '0', "totalStoreRatingSum" integer NOT NULL DEFAULT '0', "totalStoreRatingCount" integer NOT NULL DEFAULT '0', "type" "public"."store_type_enum" NOT NULL DEFAULT 'basic', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updateAt" TIMESTAMP NOT NULL DEFAULT now(), "businessId" uuid, "payoutId" uuid, CONSTRAINT "REL_bc7ec2c93335da88571ae84fbe" UNIQUE ("businessId"), CONSTRAINT "REL_780e516e3a34d53e9510b43d3e" UNIQUE ("payoutId"), CONSTRAINT "PK_f3172007d4de5ae8e7692759d79" PRIMARY KEY ("id"))`
     )
     await queryRunner.query(
       `CREATE TABLE "saved_product" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" uuid NOT NULL, "productId" uuid NOT NULL, "isLiked" boolean NOT NULL DEFAULT false, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_c99eb1342e10ffb1eb6ced77230" PRIMARY KEY ("id"))`

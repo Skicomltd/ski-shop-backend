@@ -21,6 +21,7 @@ import { UpdateStoreMapper } from "./interface/update-store-mapper-interface"
 import { Request } from "express"
 import { BusinessService } from "../business/business.service"
 import { IStoresQuery } from "./interface/query-filter.interface"
+import { Public } from "../auth/decorators/public.decorator"
 @Controller("stores")
 export class StoreController {
   constructor(
@@ -57,9 +58,8 @@ export class StoreController {
   }
 
   @Get()
-  @UseGuards(PoliciesGuard)
+  @Public()
   @UseInterceptors(StoresInterceptor)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Store))
   findAll(@Query() query: IStoresQuery) {
     return this.storeService.find(query)
   }

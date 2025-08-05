@@ -9,6 +9,7 @@ export interface StoreResponse {
   isStarSeller: boolean
   business: Business
   type: vendonEnumType
+  rating: number
   createdAt: Date
   updatedAt: Date
 }

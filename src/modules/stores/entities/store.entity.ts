@@ -31,6 +31,12 @@ export class Store {
   @Column({ type: "int", default: 0 })
   numberOfSales: number
 
+  @Column({ type: "int", default: 0 })
+  totalStoreRatingSum: number
+
+  @Column({ type: "int", default: 0 })
+  totalStoreRatingCount: number
+
   @OneToOne(() => Business, (business) => business.store)
   @JoinColumn()
   business: Business
@@ -40,7 +46,7 @@ export class Store {
   payout: Payout
 
   @OneToMany(() => Product, (product) => product.store)
-  product: Product[]
+  products: Product[]
 
   @Column({ type: "enum", enum: vendonEnumType, default: vendonEnumType.BASIC })
   type: vendonEnumType

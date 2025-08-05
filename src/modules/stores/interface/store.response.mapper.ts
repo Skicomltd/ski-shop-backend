@@ -9,6 +9,7 @@ export abstract class StoreResponseMapper implements IInterceptor {
       description: data.description,
       logo: data.logo,
       business: data.business,
+      rating: data?.totalStoreRatingSum / data?.totalStoreRatingCount || 0,
       isStarSeller: data.isStarSeller,
       createdAt: data.createdAt,
       updatedAt: data.updateAt,

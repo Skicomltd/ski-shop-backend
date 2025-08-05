@@ -10,6 +10,8 @@ export class CreateStoreDto {
   business: Business
   isStarSeller?: boolean
   numberOfSales?: number
+  totalStoreRatingSum?: number
+  totalStoreRatingCount?: number
 }
 
 export const createStoreSchema = Joi.object({
