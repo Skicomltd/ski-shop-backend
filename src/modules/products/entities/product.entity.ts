@@ -41,7 +41,7 @@ export class Product {
   @Column()
   userId: string
 
-  @ManyToOne(() => Store, (store) => store.product, { eager: true })
+  @ManyToOne(() => Store, (store) => store.products, { eager: true })
   store: Store
 
   @ManyToOne(() => User, (user) => user.product, { eager: true })
