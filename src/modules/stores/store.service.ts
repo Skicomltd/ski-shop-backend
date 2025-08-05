@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common"
 import { CreateStoreDto } from "./dto/create-store.dto"
 import { UpdateStoreDto } from "./dto/update-store.dto"
 import { InjectRepository } from "@nestjs/typeorm"
-import { Store } from "./entities/store.entity"
+import { Store, vendonEnumType } from "./entities/store.entity"
 import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
 import { IStoresQuery } from "./interface/query-filter.interface"
 
@@ -21,14 +21,14 @@ export class StoreService implements IService<Store> {
     return await repo.save(store)
   }
 
-  async find({ topVendor, limit, page, isStarSeller }: IStoresQuery): Promise<[Store[], number]> {
+  async find({ limit, page, type, flag }: IStoresQuery): Promise<[Store[], number]> {
     const query = this.storeRepository.createQueryBuilder("store")
 
-    if (isStarSeller) {
-      query.andWhere("store.isStarSeller = :isStarSeller", { isStarSeller })
+    if (type === vendonEnumType.PREMIUM) {
+      query.andWhere("store.type = :type", { type })
     }
 
-    if (topVendor) {
+    if (flag === "top") {
       query.orderBy("store.numberOfSales", "DESC")
     }
 
