@@ -6,7 +6,12 @@ import { PaginationParams } from "@/modules/services/pagination/interfaces/pagin
 export interface IOrdersQuery extends PaginationParams, FindOptionsWhere<Order> {
   storeId?: string
   productId?: string
-  month?: number
-  year?: number
-  sort?: "ASC" | "DESC"
+  startDate?: Date
+  endDate?: Date
+  orderBy?: "ASC" | "DESC"
+}
+
+export interface MonthlySalesData {
+  month: number
+  total: string
 }

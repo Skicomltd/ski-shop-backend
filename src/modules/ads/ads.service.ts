@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
-import { EntityManager, FindOptionsWhere, Not, Repository } from "typeorm"
+import { Between, EntityManager, FindOptionsWhere, In, LessThanOrEqual, MoreThanOrEqual, Not, Repository } from "typeorm"
 
 import { Ad } from "./entities/ad.entity"
 import { CreateAdDto } from "./dto/create-ad.dto"
@@ -23,7 +23,7 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
     return await repo.save(ad)
   }
 
-  async find({ productId, vendorId, type, storeId, limit, page, status, createdAt }: IAdsQuery): Promise<[Ad[], number]> {
+  async find({ productId, vendorId, type, storeId, limit, page, status, startDate, endDate }: IAdsQuery): Promise<[Ad[], number]> {
     const where: FindOptionsWhere<Ad> = { status: Not("inactive") }
 
     if (productId) {
@@ -43,11 +43,23 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
     }
 
     if (status) {
-      where.status = status
+      if (Array.isArray(status)) {
+        where.status = In(status)
+      } else {
+        where.status = status
+      }
     }
 
-    if (createdAt) {
-      where.createdAt = createdAt
+    if (startDate && endDate) {
+      where.createdAt = Between(startDate, endDate)
+    }
+
+    if (startDate) {
+      where.createdAt = MoreThanOrEqual(startDate)
+    }
+
+    if (endDate) {
+      where.createdAt = LessThanOrEqual(endDate)
     }
 
     return await this.adRepository.findAndCount({
@@ -89,5 +101,9 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
     const endDate = new Date(startDate)
     endDate.setDate(startDate.getDate() + (duration - 1))
     return { startDate, endDate }
+  }
+
+  async calculateTotalAds(ads: Ad[]): Promise<number> {
+    return ads.reduce((sum, ad) => sum + ad.amount, 0)
   }
 }

@@ -4,7 +4,7 @@ import { UpdateOrderDto } from "./dto/update-order.dto"
 import { Order } from "./entities/order.entity"
 import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
 import { InjectRepository } from "@nestjs/typeorm"
-import { IOrdersQuery } from "./interfaces/query-filter.interface"
+import { IOrdersQuery, MonthlySalesData } from "./interfaces/query-filter.interface"
 
 @Injectable()
 export class OrdersService implements IService<Order> {
@@ -19,14 +19,25 @@ export class OrdersService implements IService<Order> {
     return await repo.save(order)
   }
 
-  async find({ page = 1, limit = 10, buyerId, deliveryStatus, status, storeId, productId, sort = "ASC" }: IOrdersQuery): Promise<[Order[], number]> {
+  async find({
+    page = 1,
+    limit = 10,
+    buyerId,
+    deliveryStatus,
+    status,
+    storeId,
+    productId,
+    orderBy = "ASC",
+    startDate,
+    endDate
+  }: IOrdersQuery): Promise<[Order[], number]> {
     const query = this.orderRepository
       .createQueryBuilder("order")
       .leftJoinAndSelect("order.buyer", "buyer")
       .leftJoinAndSelect("order.items", "item")
       .leftJoinAndSelect("item.product", "product")
       .leftJoinAndSelect("product.user", "vendor")
-      .orderBy("order.createdAt", sort)
+      .orderBy("order.createdAt", orderBy)
 
     if (buyerId) {
       query.andWhere("order.buyerId = :buyerId", { buyerId })
@@ -46,6 +57,21 @@ export class OrdersService implements IService<Order> {
 
     if (productId) {
       query.andWhere("item.productId = :productId", { productId })
+    }
+
+    if (startDate && endDate) {
+      query.andWhere("order.createdAt BETWEEN :startDate AND :endDate", {
+        startDate,
+        endDate
+      })
+    }
+
+    if (startDate) {
+      query.andWhere("order.createdAt >= :startDate", { startDate })
+    }
+
+    if (endDate) {
+      query.andWhere("order.createdAt <= :endDate", { endDate })
     }
 
     query.skip((page - 1) * limit).take(limit)
@@ -88,8 +114,7 @@ export class OrdersService implements IService<Order> {
     return result.affected ?? 0
   }
 
-  async getMonthlySales() {
-    // PLEASE TYPE
+  async getMonthlySales(): Promise<MonthlySalesData[]> {
     return await this.orderRepository
       .createQueryBuilder("order")
       .innerJoin("order.items", "item")
@@ -102,9 +127,9 @@ export class OrdersService implements IService<Order> {
       .getRawMany()
   }
 
-  async totalNumberOfOrder(filter: FindOptionsWhere<Order>) {
-    return await this.orderRepository.count({
-      where: filter
-    })
+  async calculateTotalOrder(orders: Order[]): Promise<number> {
+    return orders.reduce((total, order) => {
+      return total + order.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
+    }, 0)
   }
 }
