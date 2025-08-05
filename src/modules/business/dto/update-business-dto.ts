@@ -12,5 +12,6 @@ export const updateBusinessSchema = joi.object({
   country: joi.string().optional(),
   state: joi.string().optional(),
   kycVerificationType: joi.string().optional(),
-  identificationNumber: joi.string().optional()
+  identificationNumber: joi.string().optional(),
+  kycStatus: joi.string().valid("pending", "verified").optional()
 })

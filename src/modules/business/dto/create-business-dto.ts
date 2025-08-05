@@ -1,5 +1,6 @@
 import { User } from "@/modules/users/entity/user.entity"
 import * as joi from "joi"
+import { KYC_ENUM_STATUS } from "../enum/kyc-status-enum"
 
 export class CreateBusinessDto {
   type: string
@@ -11,6 +12,7 @@ export class CreateBusinessDto {
   kycVerificationType: string
   identificationNumber: string
   user: User
+  kycStatus: KYC_ENUM_STATUS
 }
 
 export const createBusinessSchema = joi.object({
