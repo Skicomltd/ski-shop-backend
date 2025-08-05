@@ -9,6 +9,7 @@ import { IAdsQuery } from "./interfaces/query-interface-filter"
 import { InjectQueue } from "@nestjs/bullmq"
 import { AppQueues } from "@/constants"
 import { Queue } from "bullmq"
+import { AdRevenueInterface } from "./interfaces/ad-revenue.interface"
 
 @Injectable()
 export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
@@ -23,7 +24,7 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
     return await repo.save(ad)
   }
 
-  async find({ productId, vendorId, type, storeId, limit, page, status, startDate, endDate }: IAdsQuery): Promise<[Ad[], number]> {
+  async find({ productId, vendorId, type, storeId, limit, page, startDate, endDate, status }: IAdsQuery): Promise<[Ad[], number]> {
     const where: FindOptionsWhere<Ad> = { status: Not("inactive") }
 
     if (productId) {
@@ -43,11 +44,8 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
     }
 
     if (status) {
-      if (Array.isArray(status)) {
-        where.status = In(status)
-      } else {
-        where.status = status
-      }
+      const stats = status.toString().split(",")
+      where.status = In(stats)
     }
 
     if (startDate && endDate) {
@@ -103,7 +101,17 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
     return { startDate, endDate }
   }
 
-  async calculateTotalAds(ads: Ad[]): Promise<number> {
-    return ads.reduce((sum, ad) => sum + ad.amount, 0)
+  async calculateAdsTotalRevenue({ startDate, endDate, status }: AdRevenueInterface): Promise<number> {
+    const result = await this.adRepository
+      .createQueryBuilder("ad")
+      .select("SUM(ad.amount)", "totalAmount")
+      .where("ad.status IN (:...statuses)", { statuses: status })
+      .andWhere("ad.createdAt BETWEEN :startDate AND :endDate", {
+        startDate,
+        endDate
+      })
+      .getRawOne()
+
+    return parseFloat(result.totalAmount) || 0
   }
 }

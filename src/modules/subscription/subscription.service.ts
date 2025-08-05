@@ -9,6 +9,7 @@ import { PaymentsService } from "../services/payments/payments.service"
 import { Queue } from "bullmq"
 import { InjectQueue } from "@nestjs/bullmq"
 import { AppQueues } from "@/constants"
+import { SubscriptionRevenueInterface } from "./interface/subcription-revenue.interface"
 
 @Injectable()
 export class SubscriptionService implements IService<Subscription>, UseQueue<string, Subscription> {
@@ -123,7 +124,17 @@ export class SubscriptionService implements IService<Subscription>, UseQueue<str
     return getSubscription
   }
 
-  async calculateTotalSubscriptions(subscriptions: Subscription[]): Promise<number> {
-    return subscriptions.reduce((sum, sub) => sum + sub.amount, 0)
+  async calculateSubscriptionsTotalRevenue({ startDate, endDate, isPaid }: SubscriptionRevenueInterface): Promise<number> {
+    const result = await this.subscriptionRepository
+      .createQueryBuilder("subscription")
+      .select("SUM(subscription.amount)", "total")
+      .where("subscription.isPaid = :isPaid", { isPaid })
+      .andWhere("subscription.createdAt BETWEEN :startDate AND :endDate", {
+        startDate,
+        endDate
+      })
+      .getRawOne()
+
+    return parseFloat(result.total) || 0
   }
 }

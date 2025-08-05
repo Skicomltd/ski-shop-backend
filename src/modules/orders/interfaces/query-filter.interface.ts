@@ -10,8 +10,3 @@ export interface IOrdersQuery extends PaginationParams, FindOptionsWhere<Order> 
   endDate?: Date
   orderBy?: "ASC" | "DESC"
 }
-
-export interface MonthlySalesData {
-  month: number
-  total: string
-}

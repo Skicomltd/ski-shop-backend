@@ -8,7 +8,7 @@ import { PolicyPayoutGuard } from "./guards/policy-payout.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { PayoutResponseInterceptor } from "./interceptors/payout-response.interceptor"
 import { IPayoutQuery } from "./interfaces/query-filter.interface"
-import { PayoutsResponseInterceptor } from "./interceptors/payouts-reponse.interceptor"
+import { PayoutsResponseInterceptor } from "./interceptors/payouts-response.interceptor"
 
 @Controller("payouts")
 export class PayoutsController {

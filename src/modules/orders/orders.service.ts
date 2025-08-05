@@ -4,7 +4,9 @@ import { UpdateOrderDto } from "./dto/update-order.dto"
 import { Order } from "./entities/order.entity"
 import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
 import { InjectRepository } from "@nestjs/typeorm"
-import { IOrdersQuery, MonthlySalesData } from "./interfaces/query-filter.interface"
+import { IOrdersQuery } from "./interfaces/query-filter.interface"
+import { OrderRevenueInterface } from "./interfaces/order-revenue.interface"
+import { MonthlySalesData } from "./interfaces/order-monthlystats.interface"
 
 @Injectable()
 export class OrdersService implements IService<Order> {
@@ -115,7 +117,7 @@ export class OrdersService implements IService<Order> {
   }
 
   async getMonthlySales(): Promise<MonthlySalesData[]> {
-    return await this.orderRepository
+    const result = await this.orderRepository
       .createQueryBuilder("order")
       .innerJoin("order.items", "item")
       .select("EXTRACT(MONTH FROM order.createdAt)::integer", "month")
@@ -125,11 +127,25 @@ export class OrdersService implements IService<Order> {
       .groupBy("month")
       .orderBy("month", "ASC")
       .getRawMany()
+
+    return result.map((row) => ({
+      month: row.month,
+      total: parseFloat(row.total) || 0
+    }))
   }
 
-  async calculateTotalOrder(orders: Order[]): Promise<number> {
-    return orders.reduce((total, order) => {
-      return total + order.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0)
-    }, 0)
+  async calculateOrdersTotalRevenue({ startDate, endDate, status }: OrderRevenueInterface): Promise<number> {
+    const result = await this.orderRepository
+      .createQueryBuilder("order")
+      .leftJoinAndSelect("order.items", "item")
+      .select("SUM(item.unitPrice * item.quantity)", "total")
+      .where("order.status = :status", { status })
+      .andWhere("order.createdAt BETWEEN :startDate AND :endDate", {
+        startDate,
+        endDate
+      })
+      .getRawOne()
+
+    return parseFloat(result.total)
   }
 }

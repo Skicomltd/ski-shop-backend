@@ -31,32 +31,14 @@ export class RevenuesController {
       endDate = query.endDate
     }
 
-    const [orders] = await this.ordersService.find({
-      status: "paid",
-      startDate,
-      endDate
-    })
+    const totalPromotionAds = await this.adsService.calculateAdsTotalRevenue({ startDate, endDate, status: ["active", "expired"] })
 
-    const [subscriptions] = await this.subscriptionService.find({
-      isPaid: true,
-      startDate,
-      endDate
-    })
+    const totalSubcriptionAmount = await this.subscriptionService.calculateSubscriptionsTotalRevenue({ startDate, endDate, isPaid: true })
 
-    const [ads] = await this.adsService.find({
-      status: ["active", "expired"],
-      startDate,
-      endDate
-    })
-
-    // Calculate amounts
-    const totalOrderAmount = await this.ordersService.calculateTotalOrder(orders)
-
-    const totalSubcriptionAmount = await this.subscriptionService.calculateTotalSubscriptions(subscriptions)
-
-    const totalPromotionAds = await this.adsService.calculateTotalAds(ads)
+    const totalOrderAmount = await this.ordersService.calculateOrdersTotalRevenue({ startDate, endDate, status: "paid" })
 
     const totalRevenue = totalOrderAmount + totalSubcriptionAmount + totalPromotionAds
+
     return {
       order: totalOrderAmount,
       subscription: totalSubcriptionAmount,
