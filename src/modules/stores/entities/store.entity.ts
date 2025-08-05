@@ -28,6 +28,9 @@ export class Store {
   @Column({ type: "boolean", default: false })
   isStarSeller: boolean
 
+  @Column({ type: "int", default: 0 })
+  numberOfSales: number
+
   @OneToOne(() => Business, (business) => business.store)
   @JoinColumn()
   business: Business
