@@ -9,7 +9,7 @@ import { IAdsQuery } from "./interfaces/query-interface-filter"
 import { InjectQueue } from "@nestjs/bullmq"
 import { AppQueues } from "@/constants"
 import { Queue } from "bullmq"
-import { AdRevenueInterface } from "./interfaces/ad-revenue.interface"
+import { AdRevenueInterface, MonthlyAdRevenue } from "./interfaces/ad-revenue.interface"
 
 @Injectable()
 export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
@@ -104,7 +104,7 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
   async calculateAdsTotalRevenue({ startDate, endDate, status }: AdRevenueInterface): Promise<number> {
     const result = await this.adRepository
       .createQueryBuilder("ad")
-      .select("SUM(ad.amount)", "totalAmount")
+      .select("SUM(ad.amount)", "total")
       .where("ad.status IN (:...statuses)", { statuses: status })
       .andWhere("ad.createdAt BETWEEN :startDate AND :endDate", {
         startDate,
@@ -112,6 +112,28 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
       })
       .getRawOne()
 
-    return parseFloat(result.totalAmount) || 0
+    return parseFloat(result.total) || 0
+  }
+
+  async getAdsMonthlyRevenue({ startDate, endDate, status }: AdRevenueInterface): Promise<MonthlyAdRevenue[]> {
+    const result = await this.adRepository
+      .createQueryBuilder("ad")
+      .select("EXTRACT(YEAR FROM ad.createdAt)::integer", "year")
+      .addSelect("EXTRACT(MONTH FROM ad.createdAt)::integer", "month")
+      .addSelect("SUM(ad.amount)", "totalAmount")
+      .where("ad.status IN (:...statuses)", { statuses: status })
+      .andWhere("ad.createdAt BETWEEN :startDate AND :endDate", {
+        startDate,
+        endDate
+      })
+      .groupBy("year, month")
+      .orderBy("year, month", "ASC")
+      .getRawMany()
+
+    return result.map((row) => ({
+      year: row.year,
+      month: row.month,
+      total: parseFloat(row.totalAmount) || 0
+    }))
   }
 }

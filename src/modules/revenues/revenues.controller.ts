@@ -7,13 +7,18 @@ import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { AppAbility } from "../services/casl/casl-ability.factory"
 import { Action } from "../services/casl/actions/action"
 import { AdsService } from "../ads/ads.service"
+import { StoreService } from "../stores/store.service"
+import { NotFoundException } from "@/exceptions/notfound.exception"
+import { RevenuesService } from "./revenues.service"
 
 @Controller("revenues")
 export class RevenuesController {
   constructor(
     private subscriptionService: SubscriptionService,
     private adsService: AdsService,
-    private ordersService: OrdersService
+    private ordersService: OrdersService,
+    private storeService: StoreService,
+    private revenueService: RevenuesService
   ) {}
 
   @UseGuards(PolicyRevenueGuard)
@@ -50,7 +55,25 @@ export class RevenuesController {
   @UseGuards(PolicyRevenueGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, "REVENUE"))
   @Get("/sales")
-  async salesOverview() {
-    return await this.ordersService.getMonthlySales()
+  async salesOverview(@Query() query: IRevenueQuery) {
+    return await this.ordersService.getOrderMonthlyRevenue({ startDate: query.startDate, endDate: query.endDate, status: "paid" })
+  }
+
+  @Get("/store")
+  async getStoreRevenueMetrics(@Query() query: IRevenueQuery) {
+    const storeId = query.storeId
+
+    const store = await this.storeService.findById(storeId)
+
+    if (!store) throw new NotFoundException("Store does not exist")
+
+    return await this.ordersService.getStoreRevenueMetrics(storeId)
+  }
+
+  @Get("/trend")
+  async getRevenueTrend(@Query() query: IRevenueQuery) {
+    const startDate = query.startDate
+    const endDate = query.endDate
+    return await this.revenueService.getCombineRevenue({ startDate, endDate })
   }
 }

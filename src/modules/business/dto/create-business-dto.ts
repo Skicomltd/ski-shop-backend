@@ -12,7 +12,7 @@ export class CreateBusinessDto {
   kycVerificationType: string
   identificationNumber: string
   user: User
-  kycStatus: KYC_ENUM_STATUS
+  kycStatus?: KYC_ENUM_STATUS
 }
 
 export const createBusinessSchema = joi.object({

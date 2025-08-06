@@ -9,7 +9,7 @@ import { PaymentsService } from "../services/payments/payments.service"
 import { Queue } from "bullmq"
 import { InjectQueue } from "@nestjs/bullmq"
 import { AppQueues } from "@/constants"
-import { SubscriptionRevenueInterface } from "./interface/subcription-revenue.interface"
+import { MonthlySubscriptionRevenue, SubscriptionRevenueInterface } from "./interface/subcription-revenue.interface"
 
 @Injectable()
 export class SubscriptionService implements IService<Subscription>, UseQueue<string, Subscription> {
@@ -136,5 +136,29 @@ export class SubscriptionService implements IService<Subscription>, UseQueue<str
       .getRawOne()
 
     return parseFloat(result.total) || 0
+  }
+
+  async getSubscriptionMonthlyRevenue({ startDate, endDate, isPaid }: SubscriptionRevenueInterface): Promise<MonthlySubscriptionRevenue[]> {
+    const result = await this.subscriptionRepository
+      .createQueryBuilder("subscription")
+      .select("EXTRACT(YEAR FROM subscription.createdAt)::integer", "year")
+      .addSelect("EXTRACT(MONTH FROM subscription.createdAt)::integer", "month")
+      .addSelect("SUM(subscription.amount)", "total")
+      .where("subscription.isPaid = :isPaid", { isPaid })
+      .andWhere("subscription.createdAt BETWEEN :startDate AND :endDate", {
+        startDate,
+        endDate
+      })
+      .groupBy("year, month")
+      .orderBy("year, month", "ASC")
+      .getRawMany()
+
+    const monthlyData = result.map((row) => ({
+      year: row.year,
+      month: row.month,
+      total: parseFloat(row.total) || 0
+    }))
+
+    return monthlyData
   }
 }
