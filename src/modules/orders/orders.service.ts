@@ -146,6 +146,6 @@ export class OrdersService implements IService<Order> {
       })
       .getRawOne()
 
-    return parseFloat(result.total)
+    return parseFloat(result.total) || 0
   }
 }

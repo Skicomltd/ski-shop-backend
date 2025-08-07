@@ -40,8 +40,8 @@ export class RevenuesController {
     const totalRevenue = totalOrderAmount + totalSubcriptionAmount + totalPromotionAds
 
     return {
-      order: totalOrderAmount,
-      subscription: totalSubcriptionAmount,
+      orders: totalOrderAmount,
+      subscriptions: totalSubcriptionAmount,
       promotionAds: totalPromotionAds,
       totalRevenue
     }

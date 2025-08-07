@@ -15,7 +15,7 @@ export class UserService implements IService<User> {
     private userRepository: Repository<User>
   ) {}
 
-  private readonly relations = ["business", "business.store", "bank", "product", "carts", "savedProducts", "orders", "reviews", "subscriptions"]
+  private readonly relations = ["business", "business.store"]
 
   async create(data: CreateUserDto, manager?: EntityManager): Promise<User> {
     const exist = await this.exists({ email: data.email })
