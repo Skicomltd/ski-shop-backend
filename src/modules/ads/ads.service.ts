@@ -102,17 +102,28 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
   }
 
   async calculateAdsTotalRevenue({ startDate, endDate, status }: AdRevenueInterface): Promise<number> {
-    const result = await this.adRepository
-      .createQueryBuilder("ad")
-      .select("SUM(ad.amount)", "total")
-      .where("ad.status IN (:...statuses)", { statuses: status })
-      .andWhere("ad.createdAt BETWEEN :startDate AND :endDate", {
-        startDate,
-        endDate
-      })
-      .getRawOne()
+    const where: FindOptionsWhere<Ad> = {}
 
-    return parseFloat(result.total) || 0
+    if (status) {
+      const stats = status.toString().split(",")
+      where.status = In(stats)
+    }
+
+    if (startDate && endDate) {
+      where.createdAt = Between(startDate, endDate)
+    }
+
+    if (startDate) {
+      where.createdAt = MoreThanOrEqual(startDate)
+    }
+
+    if (endDate) {
+      where.createdAt = LessThanOrEqual(endDate)
+    }
+
+    const result = await this.adRepository.sum("amount", where)
+
+    return result
   }
 
   async getAdsMonthlyRevenue({ startDate, endDate, status }: AdRevenueInterface): Promise<MonthlyAdRevenue[]> {

@@ -138,18 +138,30 @@ export class OrdersService implements IService<Order> {
   }
 
   async calculateOrdersTotalRevenue({ startDate, endDate, status }: OrderRevenueInterface): Promise<number> {
-    const result = await this.orderRepository
-      .createQueryBuilder("order")
-      .leftJoinAndSelect("order.items", "item")
-      .select("SUM(item.unitPrice * item.quantity)", "total")
-      .where("order.status = :status", { status })
-      .andWhere("order.createdAt BETWEEN :startDate AND :endDate", {
+    const query = this.orderRepository.createQueryBuilder("order").leftJoinAndSelect("order.items", "item")
+
+    if (startDate && endDate) {
+      query.andWhere("order.createdAt BETWEEN :startDate AND :endDate", {
         startDate,
         endDate
       })
-      .getRawOne()
+    }
 
-    return parseFloat(result.total) || 0
+    if (startDate) {
+      query.andWhere("order.createdAt >= :startDate", { startDate })
+    }
+
+    if (endDate) {
+      query.andWhere("order.createdAt <= :endDate", { endDate })
+    }
+
+    if (status) {
+      query.andWhere("order.status = :status", { status })
+    }
+
+    query.select("SUM(item.unitPrice * item.quantity)", "total")
+
+    return (await query.getRawOne())?.total || 0
   }
 
   async getStoreRevenueMetrics(storeId: string): Promise<StoreOrderRevenueSummary> {

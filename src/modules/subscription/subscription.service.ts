@@ -124,17 +124,23 @@ export class SubscriptionService implements IService<Subscription>, UseQueue<str
   }
 
   async calculateSubscriptionsTotalRevenue({ startDate, endDate, isPaid }: SubscriptionRevenueInterface): Promise<number> {
-    const result = await this.subscriptionRepository
-      .createQueryBuilder("subscription")
-      .select("SUM(subscription.amount)", "total")
-      .where("subscription.isPaid = :isPaid", { isPaid })
-      .andWhere("subscription.createdAt BETWEEN :startDate AND :endDate", {
-        startDate,
-        endDate
-      })
-      .getRawOne()
+    const where: FindOptionsWhere<Subscription> = {}
+    if (startDate && endDate) {
+      where.createdAt = Between(startDate, endDate)
+    }
 
-    return parseFloat(result.total) || 0
+    if (startDate) {
+      where.createdAt = MoreThanOrEqual(startDate)
+    }
+
+    if (endDate) {
+      where.createdAt = LessThanOrEqual(endDate)
+    }
+    if (isPaid) {
+      where.isPaid = isPaid
+    }
+
+    return await this.subscriptionRepository.sum("amount", where)
   }
 
   async getSubscriptionMonthlyRevenue({ startDate, endDate, isPaid }: SubscriptionRevenueInterface): Promise<MonthlySubscriptionRevenue[]> {
