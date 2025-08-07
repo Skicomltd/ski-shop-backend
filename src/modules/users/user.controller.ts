@@ -6,13 +6,14 @@ import { JoiValidationPipe } from "@/validations/joi.validation"
 import { IUserQuery } from "./interfaces/users-query.interface"
 import { UserInterceptor } from "./interceptor/user.interceptor"
 import { UsersInterceptor } from "./interceptor/users.interceptor"
-import { User, UserRoleEnum } from "./entity/user.entity"
+import { User } from "./entity/user.entity"
 import { Action } from "../services/casl/actions/action"
 import { PolicyUsersGuard } from "./guard/policy-user.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { AppAbility } from "../services/casl/casl-ability.factory"
 import { Response } from "express"
 import { CsvService } from "../services/utils/csv/csv.service"
+import { BadReqException } from "@/exceptions/badRequest.exception"
 
 @Controller("users")
 export class UserController {
@@ -52,24 +53,13 @@ export class UserController {
 
   @Get("download")
   async download(@Query() query: IUserQuery, @Res() res: Response) {
-    const [users] = await this.userService.find(query)
-    const role = query.role
-    // for now will ignore status, we not tracking status, we could use the isEmailVerified flag to confirm or add a new data type of status
-    const headers = [
-      { key: "name", header: "Name" },
-      { key: "phoneNumber", header: "Phone Number" },
-      { key: "emailAddress", header: "Email Address" },
-      { key: "orders", header: "Orders" }
-    ]
+    if (!query.role) throw new BadReqException("Role is Required")
 
-    const records = users.map((user) => {
-      return {
-        name: user.getFullName(),
-        phoneNumber: user.phoneNumber,
-        emailAddress: user.email,
-        orders: role === UserRoleEnum.Customer ? user.ordersCount : user.itemsCount
-      }
-    })
+    const [users] = await this.userService.find(query)
+
+    // for now will ignore status, we not tracking status, we could use the isEmailVerified flag to confirm or add a new data type of status
+    // on figma, user with a status of inactive could still have orders, how does that work???
+    const { headers, records } = await this.userService.headersRecords(query, users)
 
     const data = await this.csvService.writeCsvToBuffer({ headers, records })
 

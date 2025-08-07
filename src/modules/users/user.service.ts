@@ -5,8 +5,9 @@ import { CreateUserDto } from "./dto/create-user-dto"
 import { ConflictException } from "@/exceptions/conflict.exception"
 import { BadReqException } from "@/exceptions/badRequest.exception"
 import { UpdateUserDto } from "./dto/update-user-dto"
-import { User } from "./entity/user.entity"
+import { User, UserRoleEnum } from "./entity/user.entity"
 import { IUserQuery } from "./interfaces/users-query.interface"
+import { HeadersRecordsInterface } from "./interfaces/user-headers-records"
 
 @Injectable()
 export class UserService implements IService<User> {
@@ -82,5 +83,49 @@ export class UserService implements IService<User> {
     const result = await this.userRepository.delete(filter)
 
     return result.affected
+  }
+
+  async headersRecords(query: IUserQuery, users: User[]): Promise<HeadersRecordsInterface> {
+    const role = query.role
+
+    if (role === UserRoleEnum.Customer) {
+      const headers = [
+        { key: "name", header: "Name" },
+        { key: "phoneNumber", header: "Phone Number" },
+        { key: "emailAddress", header: "Email Address" },
+        { key: "orders", header: "Orders" }
+      ]
+
+      const records = users.map((user) => {
+        return {
+          name: user.getFullName(),
+          phoneNumber: user.phoneNumber,
+          emailAddress: user.email,
+          orders: user.ordersCount
+        }
+      })
+
+      return { headers, records }
+    } else if (role === UserRoleEnum.Vendor) {
+      const headers = [
+        { key: "name", header: "Name" },
+        { key: "phoneNumber", header: "Phone Number" },
+        { key: "emailAddress", header: "Email Address" },
+        { key: "kycStatus", header: "Kyc Status" },
+        { key: "orders", header: "Orders" }
+      ]
+
+      const records = users.map((user) => {
+        return {
+          name: user.getFullName(),
+          phoneNumber: user.phoneNumber,
+          emailAddress: user.email,
+          orders: user.itemsCount,
+          kycStatus: user.business.kycStatus
+        }
+      })
+
+      return { headers, records }
+    }
   }
 }
