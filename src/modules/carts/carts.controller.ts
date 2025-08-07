@@ -15,6 +15,7 @@ import { PaymentsService } from "../services/payments/payments.service"
 import { InitiatePayment } from "../services/payments/interfaces/strategy.interface"
 import { OrdersService } from "../orders/orders.service"
 import { TransactionHelper } from "../services/utils/transactions/transactions.service"
+import { UserService } from "../users/user.service"
 
 @Controller("carts")
 export class CartsController {
@@ -23,7 +24,8 @@ export class CartsController {
     private productService: ProductsService,
     private readonly paymentsService: PaymentsService,
     private readonly ordersService: OrdersService,
-    private readonly transactionHelper: TransactionHelper
+    private readonly transactionHelper: TransactionHelper,
+    private readonly userService: UserService
   ) {}
 
   @Post()
@@ -63,6 +65,21 @@ export class CartsController {
           }))
         },
         manager
+      )
+
+      // to help track the order and item counts for user and vendor
+      // question: does this make sense here or in the order webhooks
+      await this.userService.update(user, { ordersCount: user.ordersCount + 1 }, manager)
+      const storeIds = carts.map((cart) => cart.product.storeId)
+      const vendors = await Promise.all(
+        storeIds.map(async (storeId) => {
+          const vendor = await this.userService.findOne({ business: { store: { id: storeId } } })
+          const itemCount = carts.filter((cart) => cart.product.storeId === storeId).length
+          return { vendor, itemCount }
+        })
+      )
+      await Promise.all(
+        vendors.map(({ vendor, itemCount }) => this.userService.update(vendor, { itemsCount: vendor.itemsCount + itemCount }, manager))
       )
 
       const payload: InitiatePayment = {

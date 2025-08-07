@@ -9,6 +9,8 @@ import { IcartQuery } from "./interfaces/cart.interface"
 export class CartsService implements IService<Cart> {
   constructor(@InjectRepository(Cart) private cartRepository: Repository<Cart>) {}
 
+  private readonly relations = ["product"]
+
   async create(data: Partial<Cart>, manager?: EntityManager): Promise<Cart> {
     const repo = manager ? manager.getRepository(Cart) : this.cartRepository
     const cart = repo.create(data)
@@ -21,20 +23,21 @@ export class CartsService implements IService<Cart> {
     return await this.cartRepository.findAndCount({
       where,
       take: limit,
-      skip: page ? page - 1 : undefined
+      skip: page ? page - 1 : undefined,
+      relations: this.relations
     })
   }
 
   async findById(id: string): Promise<Cart> {
-    return await this.cartRepository.findOne({ where: { id } })
+    return await this.cartRepository.findOne({ where: { id }, relations: this.relations })
   }
 
   async findOne(filter: FindOptionsWhere<Cart>): Promise<Cart> {
-    return await this.cartRepository.findOne({ where: filter })
+    return await this.cartRepository.findOne({ where: filter, relations: this.relations })
   }
 
   async exists(filter: FindOptionsWhere<Cart>): Promise<boolean> {
-    return await this.cartRepository.exists({ where: filter })
+    return await this.cartRepository.exists({ where: filter, relations: this.relations })
   }
 
   async update(cart: Cart, data: UpdateCartDto, manager?: EntityManager): Promise<Cart> {

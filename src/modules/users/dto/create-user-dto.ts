@@ -8,6 +8,8 @@ export class CreateUserDto {
   role: UserRoleEnum
   email: string
   isEmailVerified?: boolean
+  itemsCount?: number
+  ordersCount?: number
 }
 
 export const createUserSchema = joi.object({

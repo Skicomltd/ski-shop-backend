@@ -28,19 +28,28 @@ export class UserService implements IService<User> {
     return await repo.save(createUser)
   }
 
-  async find({ limit, page, role }: IUserQuery): Promise<[User[], number]> {
-    const where: FindOptionsWhere<User> = {}
+  async find({ limit, page, role, search }: IUserQuery): Promise<[User[], number]> {
+    const query = this.userRepository
+      .createQueryBuilder("user")
+      .leftJoinAndSelect("user.business", "business")
+      .leftJoinAndSelect("business.store", "store")
+      .leftJoinAndSelect("user.orders", "orders")
+      .leftJoinAndSelect("orders.items", "items")
 
     if (role) {
-      where.role = role
+      query.andWhere("user.role = :role", { role })
     }
 
-    return await this.userRepository.findAndCount({
-      where,
-      take: limit,
-      skip: page ? (page - 1) * limit : undefined,
-      relations: this.relations
-    })
+    if (search) {
+      query.andWhere("LOWER(user.firstName) LIKE :search OR LOWER(user.lastName) LIKE :search", {
+        search: `%${search.toLowerCase()}%`
+      })
+    }
+
+    return await query
+      .take(limit)
+      .skip(page && page > 0 ? (page - 1) * limit : 0)
+      .getManyAndCount()
   }
 
   async findById(id: string): Promise<User> {

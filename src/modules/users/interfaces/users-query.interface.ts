@@ -5,4 +5,6 @@ import { User } from "../entity/user.entity"
 export interface IUserQuery extends PaginationParams, FindOptionsWhere<User> {
   startDate?: string
   endDate?: string
+  search?: string
+  flag?: "customer" | "vendor" | "rider"
 }

@@ -59,6 +59,12 @@ export class User {
   @UpdateDateColumn()
   updatedAt: Date
 
+  @Column({ type: "int", default: 0 })
+  itemsCount: number
+
+  @Column({ type: "int", default: 0 })
+  ordersCount: number
+
   @OneToOne(() => Business, (business) => business.user, { eager: true })
   business: Business
 
