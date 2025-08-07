@@ -117,7 +117,7 @@ export class OrdersService implements IService<Order> {
     return result.affected ?? 0
   }
 
-  async getOrderMonthlyRevenue({ startDate, endDate, status }: MonthlySalesQuery): Promise<MonthlySalesData[]> {
+  async getOrderMonthlyRevenue({}: MonthlySalesQuery): Promise<MonthlySalesData[]> {
     const result = await this.orderRepository
       .createQueryBuilder("order")
       .innerJoin("order.items", "item")
