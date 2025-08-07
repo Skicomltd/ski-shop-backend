@@ -9,4 +9,5 @@ export interface IOrdersQuery extends PaginationParams, FindOptionsWhere<Order> 
   startDate?: Date
   endDate?: Date
   orderBy?: "ASC" | "DESC"
+  search?: string
 }

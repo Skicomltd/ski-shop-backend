@@ -19,7 +19,7 @@ import { BadReqException } from "@/exceptions/badRequest.exception"
 export class UserController {
   constructor(
     private readonly userService: UserService,
-    private csvService: CsvService
+    private readonly csvService: CsvService
   ) {}
 
   @UseGuards(PolicyUsersGuard)
@@ -51,6 +51,8 @@ export class UserController {
     return await this.userService.find(query)
   }
 
+  @UseGuards(PolicyUsersGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, User))
   @Get("download")
   async download(@Query() query: IUserQuery, @Res() res: Response) {
     if (!query.role) throw new BadReqException("Role is Required")
