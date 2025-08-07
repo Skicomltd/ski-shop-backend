@@ -36,6 +36,8 @@ export class OrdersController {
     return this.ordersService.find(query)
   }
 
+  @UseGuards(PolicyOrderGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, Order))
   @Get("download")
   async download(@Query() query: IOrdersQuery, @Res() res: Response) {
     const [orders] = await this.ordersService.find(query)
