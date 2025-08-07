@@ -18,14 +18,14 @@ export class PayoutsService implements IService<Payout> {
     return repo.save(payout)
   }
 
-  async find({ limit, page, storeId, isPending }: IPayoutQuery): Promise<[Payout[], number]> {
+  async find({ limit, page, storeId, flag }: IPayoutQuery): Promise<[Payout[], number]> {
     const where: FindManyOptions<Payout>["where"] = {}
 
     if (storeId) {
       where.storeId = storeId
     }
 
-    if (isPending) {
+    if (flag === "isPending") {
       where.pending = MoreThan(0)
     }
 

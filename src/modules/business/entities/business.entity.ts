@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from "typeorm"
 import { Store } from "@/modules/stores/entities/store.entity"
 import { User } from "@/modules/users/entity/user.entity"
+import { KYC_ENUM_STATUS } from "../enum/kyc-status-enum"
 
 @Entity()
 export default class Business {
@@ -27,6 +28,9 @@ export default class Business {
 
   @Column()
   state: string
+
+  @Column({ type: "enum", enum: KYC_ENUM_STATUS, default: KYC_ENUM_STATUS.PENDING })
+  kycStatus: KYC_ENUM_STATUS
 
   @Column()
   kycVerificationType: string

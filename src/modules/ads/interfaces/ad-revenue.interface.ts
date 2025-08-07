@@ -3,3 +3,9 @@ export interface AdRevenueInterface {
   endDate: Date
   status: string[]
 }
+
+export interface MonthlyAdRevenue {
+  year: number
+  month: number
+  total: number
+}
