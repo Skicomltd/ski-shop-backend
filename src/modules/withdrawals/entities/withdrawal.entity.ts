@@ -13,6 +13,9 @@ export class Withdrawal {
   @Column("float")
   amount: number
 
+  @Column("float")
+  currentWalletBalance: number // snapshot of wallet balance before withdrawal was initiated
+
   @Column()
   bankId: string
 

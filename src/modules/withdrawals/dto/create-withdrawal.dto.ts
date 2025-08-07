@@ -7,6 +7,7 @@ export class CreateWithdrawalDto {
   bankId: string
   payout: Payout
   bank: Bank
+  currentWalletBalance: number
 }
 
 export const createWithdrawalSchema = Joi.object({

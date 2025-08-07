@@ -3,6 +3,7 @@ import { Withdrawal } from "./entities/withdrawal.entity"
 import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
 import { InjectRepository } from "@nestjs/typeorm"
 import { CreateWithdrawalDto } from "./dto/create-withdrawal.dto"
+import { IWithdrawalQuery } from "./interfaces/query-filter.interface"
 
 @Injectable()
 export class WithdrawalsService implements IService<Withdrawal> {
@@ -17,10 +18,17 @@ export class WithdrawalsService implements IService<Withdrawal> {
     return repo.save(withdrawal)
   }
 
-  async find(where: FindOptionsWhere<Withdrawal>): Promise<[Withdrawal[], number]> {
+  async find(filter: IWithdrawalQuery): Promise<[Withdrawal[], number]> {
+    const where: FindOptionsWhere<Withdrawal> = {}
+
+    if (filter.payoutId) {
+      where.payout = { id: filter.payoutId }
+    }
+
     const [items, count] = await this.withdrawalRepository.findAndCount({
       where
     })
+
     return [items, count]
   }
 
@@ -29,7 +37,7 @@ export class WithdrawalsService implements IService<Withdrawal> {
   }
 
   async findOne(filter: FindOptionsWhere<Withdrawal>): Promise<Withdrawal> {
-    return this.withdrawalRepository.findOne({ where: filter, relations: ["payout"] })
+    return await this.withdrawalRepository.findOne({ where: filter, relations: ["payout"] })
   }
 
   async exists(filter: FindOptionsWhere<Withdrawal>): Promise<boolean> {

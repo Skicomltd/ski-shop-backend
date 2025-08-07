@@ -1,4 +1,4 @@
-import { Body, Controller, Get, NotFoundException, Param, ParseUUIDPipe, Post, Req, UseGuards, UseInterceptors } from "@nestjs/common"
+import { Body, Controller, Get, NotFoundException, Param, ParseUUIDPipe, Post, Query, Req, UseGuards, UseInterceptors } from "@nestjs/common"
 import { WithdrawalsService } from "./withdrawals.service"
 import { PolicyWithdrawalGuard } from "./guards/policy-withdrawal.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
@@ -15,6 +15,8 @@ import { BadReqException } from "@/exceptions/badRequest.exception"
 import { PayoutsService } from "../payouts/payouts.service"
 import { ApiException } from "@/exceptions/api.exception"
 import { WithdrawalsResponseInterceptor } from "./interceptors/withdrawals.interceptor"
+import { WithdrawalDecision, withdrawalDecisionSchema } from "./dto/withdrawal-decision.dto"
+import { IWithdrawalQuery } from "./interfaces/query-filter.interface"
 
 @Controller("withdrawals")
 export class WithdrawalsController {
@@ -41,36 +43,55 @@ export class WithdrawalsController {
       const payout = await this.payoutsService.findOne({ storeId })
       if (!payout) throw new NotFoundException("payout not found")
 
-      if (dto.amount > payout.available) throw new BadReqException("Insufficient fund")
+      const currentBalance = payout.available
 
-      const balance = await this.paymentsService.checkBalance()
-      // ADMIN SHOULD BE NOTIFIED OF THIS!
-      if (dto.amount > balance.amount) throw new ApiException("service unavailable", 503)
+      if (dto.amount > currentBalance) throw new BadReqException("Insufficient fund")
 
       const updatePayoutDto = payout.handleWithdaw(dto.amount)
 
       const updatedPayout = await this.payoutsService.update(payout, updatePayoutDto, manager)
 
-      const withdrawal = await this.withdrawalsService.create({ amount: dto.amount, payout: updatedPayout, bank, bankId: bank.id }, manager)
-
-      await this.paymentsService.transfer({
-        amount: dto.amount,
-        reference: withdrawal.id,
-        recipient: bank.recipientCode,
-        reason: `${req.user.getFullName()} initiated withdrawal`
-      })
+      const withdrawal = await this.withdrawalsService.create(
+        { amount: dto.amount, payout: updatedPayout, bank, bankId: bank.id, currentWalletBalance: currentBalance },
+        manager
+      )
 
       return withdrawal
     })
   }
 
+  @Post("/decision")
+  @UseGuards(PolicyWithdrawalGuard)
+  @CheckPolicies((ability) => ability.can(Action.Manage, Withdrawal))
+  async decision(@Body(new JoiValidationPipe(withdrawalDecisionSchema)) dto: WithdrawalDecision) {
+    const withdrawal = await this.withdrawalsService.findOne({ id: dto.withdrawalId, status: "pending" })
+    if (!withdrawal) throw new NotFoundException("withdrawal not found")
+
+    if (dto.decision === "approve") {
+      const balance = await this.paymentsService.checkBalance()
+      // ADMIN SHOULD BE NOTIFIED OF THIS!
+      if (withdrawal.amount > balance.amount) throw new ApiException("service unavailable", 503)
+      await this.paymentsService.transfer({
+        amount: withdrawal.amount,
+        reference: withdrawal.id,
+        recipient: withdrawal.bank.recipientCode,
+        reason: `${withdrawal.bank.user.getFullName()} initiated withdrawal`
+      })
+    } else if (dto.decision === "reject") {
+      return this.transactionHelper.runInTransaction(async (manager) => {
+        await this.payoutsService.update(withdrawal.payout, withdrawal.payout.handleWithdrawFailed(withdrawal.amount), manager)
+        await this.withdrawalsService.update(withdrawal, { status: "rejected" }, manager)
+      })
+    }
+
+    return
+  }
+
   @Get("")
   @CheckPolicies((ability) => ability.can(Action.Read, Withdrawal))
   @UseInterceptors(WithdrawalsResponseInterceptor)
-  async find(@Req() req: Request) {
-    const storeId = req.user.business.store.id
-    const payout = await this.payoutsService.findOne({ storeId })
-    return await this.withdrawalsService.find({ payout: { id: payout.id } })
+  async find(@Query() query: IWithdrawalQuery) {
+    return await this.withdrawalsService.find(query)
   }
 
   @Get(":id")

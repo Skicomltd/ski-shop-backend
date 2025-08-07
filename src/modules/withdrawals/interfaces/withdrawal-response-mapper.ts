@@ -8,6 +8,7 @@ export abstract class WithdrawalResponseMapper implements IInterceptor {
       amount: data.amount,
       date: data.createdAt.toISOString(),
       status: data.status,
+      walletBalance: data.currentWalletBalance,
       bank: {
         id: data.bank.id,
         name: data.bank.bankName,

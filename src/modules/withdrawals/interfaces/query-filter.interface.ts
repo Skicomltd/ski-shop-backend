@@ -2,4 +2,6 @@ import { PaginationParams } from "@/modules/services/pagination/interfaces/pagin
 import { FindOptionsWhere } from "typeorm"
 import { Withdrawal } from "../entities/withdrawal.entity"
 
-export interface IWithdrawalQuery extends PaginationParams, FindOptionsWhere<Withdrawal> {}
+export interface IWithdrawalQuery extends PaginationParams, FindOptionsWhere<Withdrawal> {
+  payoutId?: string
+}

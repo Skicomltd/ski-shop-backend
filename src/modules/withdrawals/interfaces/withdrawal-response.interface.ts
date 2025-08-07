@@ -5,6 +5,7 @@ export interface IWithdrawalResponse {
   amount: number
   date: string
   status: WithdrawalStatus
+  walletBalance: number
   bank: {
     id: string
     name: string
