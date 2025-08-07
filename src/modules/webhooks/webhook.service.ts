@@ -66,7 +66,7 @@ export class WebhookService {
 
     const { startDate, endDate } = await this.subscriptionService.getStartAndEndDate(subscription.planType.toLowerCase())
 
-    await this.subscriptionService.update(subscription, {
+    const updatedSubscription = await this.subscriptionService.update(subscription, {
       status: SubscriptionEnum.ACTIVE,
       isPaid: true,
       startDate,
@@ -74,7 +74,7 @@ export class WebhookService {
     })
 
     // dispatch job to end subscription
-    await this.subscriptionService.dispatch({ name: subscription.id, data: subscription })
+    await this.subscriptionService.dispatch({ name: subscription.id, data: updatedSubscription })
 
     const store = await this.storeService.findOne({ id: vendor.business.store.id })
 
@@ -177,8 +177,8 @@ export class WebhookService {
 
   async handleChargeForAds(data: Ad) {
     const { startDate, endDate } = await this.adsService.calculateStartAndEndDate(data.duration)
-    await this.adsService.update(data, { status: "active", startDate, endDate })
-    await this.adsService.dispatch({ name: data.id, data })
+    const updated = await this.adsService.update(data, { status: "active", startDate, endDate })
+    await this.adsService.dispatch({ name: data.id, data: updated })
     return
   }
 }

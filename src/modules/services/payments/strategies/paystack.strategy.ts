@@ -116,7 +116,7 @@ export class PaystackStrategy implements IPaymentService {
     return { interval: data.interval, amount: data.amount, planCode: data.plan_code, name: data.name }
   }
 
-  async createSubscription({ amount, planCode, email }: CreateSubscription): Promise<SubscriptionResponse> {
+  async createSubscription({ amount, planCode, email, reference }: CreateSubscription): Promise<SubscriptionResponse> {
     const headers = {
       Authorization: `Bearer ${this.secret}`,
       "Content-Type": "application/json"
@@ -124,7 +124,7 @@ export class PaystackStrategy implements IPaymentService {
 
     const observable = this.httpService.post<PaystackInitiatePaymentResponse>(
       `${this.url}/transaction/initialize`,
-      { email, plan: planCode, amount: amount * 100 },
+      { email, plan: planCode, amount: amount * 100, reference },
       { headers }
     )
 

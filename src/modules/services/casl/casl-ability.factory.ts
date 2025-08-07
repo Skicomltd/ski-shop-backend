@@ -232,6 +232,7 @@ export class CaslAbilityFactory {
 
     if (user.role === UserRoleEnum.Admin) {
       can(Action.Manage, Subscription)
+      cannot(Action.Create, Subscription)
     } else if (user.role === UserRoleEnum.Vendor) {
       can(Action.Read, Subscription)
       can(Action.Create, Subscription)

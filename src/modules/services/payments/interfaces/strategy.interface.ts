@@ -75,6 +75,7 @@ export interface CreateSubscription {
   email: string
   amount: number
   planCode: string
+  reference: string
 }
 
 export interface CreatePlan {

@@ -15,6 +15,7 @@ import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { AppAbility } from "../services/casl/casl-ability.factory"
 import { Action } from "../services/casl/actions/action"
 import { Subscription } from "./entities/subscription.entity"
+import { v4 as uuidv4 } from "uuid"
 
 @Controller("subscriptions")
 export class SubscriptionController {
@@ -36,7 +37,8 @@ export class SubscriptionController {
     const createSubscription = await this.paymentService.createSubscription({
       amount: createSubscriptionDto.amount,
       email: user.email,
-      planCode: plan.planCode
+      planCode: plan.planCode,
+      reference: uuidv4()
     })
 
     createSubscriptionDto.vendorId = user.id

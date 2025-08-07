@@ -91,7 +91,6 @@ export class SubscriptionService implements IService<Subscription>, UseQueue<str
 
   async dispatch({ name, data }: QueueDispatch<string, Subscription>) {
     const delay = new Date(data.endDate).getTime() - Date.now()
-
     if (delay > 0) {
       await this.queue.add(name, data, { delay })
     } else {
