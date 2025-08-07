@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing'
-import { CsvService } from './csv.service'
+import { Test, TestingModule } from "@nestjs/testing"
+import { CsvService } from "./csv.service"
 
-describe('CsvService', () => {
+describe("CsvService", () => {
   let service: CsvService
 
   beforeEach(async () => {
@@ -12,7 +12,7 @@ describe('CsvService', () => {
     service = module.get<CsvService>(CsvService)
   })
 
-  it('should be defined', () => {
+  it("should be defined", () => {
     expect(service).toBeDefined()
   })
 })

@@ -1,4 +1,4 @@
-import { Options } from 'csv-parse/.'
+import { Options } from "csv-parse/."
 
 export interface CsvWriteToFileOptions {
   outputPath: string
