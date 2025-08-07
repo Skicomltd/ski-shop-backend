@@ -37,7 +37,7 @@ export class PayoutsService implements IService<Payout> {
   }
 
   async findOne(filter: FindOptionsWhere<Payout>): Promise<Payout> {
-    return this.payoutRepository.findOne({ where: filter })
+    return await this.payoutRepository.findOne({ where: filter })
   }
 
   async exists(filter: FindOptionsWhere<Payout>): Promise<boolean> {
