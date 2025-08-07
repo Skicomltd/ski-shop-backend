@@ -25,7 +25,7 @@ export class PayoutsService implements IService<Payout> {
       where.storeId = storeId
     }
 
-    if (flag === "isPending") {
+    if (flag === "pending") {
       where.pending = MoreThan(0)
     }
 
