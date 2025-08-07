@@ -12,6 +12,7 @@ export abstract class BusinessResponseMapper implements IInterceptor {
       identificationNumber: data.identificationNumber,
       kycVerificationType: data.kycVerificationType,
       createdAt: data.createdAt,
+      kycStatus: data.kycStatus,
       name: data.name,
       state: data.state,
       type: data.type,

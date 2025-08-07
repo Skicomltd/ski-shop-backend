@@ -6,7 +6,8 @@ import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
 import { InjectRepository } from "@nestjs/typeorm"
 import { IOrdersQuery } from "./interfaces/query-filter.interface"
 import { OrderRevenueInterface } from "./interfaces/order-revenue.interface"
-import { MonthlySalesData } from "./interfaces/order-monthlystats.interface"
+import { MonthlySalesData, MonthlySalesQuery } from "./interfaces/order-monthlystats.interface"
+import { StoreOrderRevenueSummary } from "./interfaces/store-order.interface"
 
 @Injectable()
 export class OrdersService implements IService<Order> {
@@ -116,19 +117,21 @@ export class OrdersService implements IService<Order> {
     return result.affected ?? 0
   }
 
-  async getMonthlySales(): Promise<MonthlySalesData[]> {
+  async getOrderMonthlyRevenue({ startDate, endDate, status }: MonthlySalesQuery): Promise<MonthlySalesData[]> {
     const result = await this.orderRepository
       .createQueryBuilder("order")
       .innerJoin("order.items", "item")
-      .select("EXTRACT(MONTH FROM order.createdAt)::integer", "month")
+      .select("EXTRACT(YEAR FROM order.createdAt)::integer", "year")
+      .addSelect("EXTRACT(MONTH FROM order.createdAt)::integer", "month")
       .addSelect("SUM(item.unitPrice * item.quantity)", "total")
-      .where("order.status = :status", { status: "paid" })
-      .andWhere("EXTRACT(YEAR FROM order.createdAt) = :year", { year: new Date().getFullYear() })
-      .groupBy("month")
-      .orderBy("month", "ASC")
+      .where("order.status = :status", { status })
+      .andWhere("order.createdAt BETWEEN :startDate AND :endDate", { startDate, endDate })
+      .groupBy("year, month")
+      .orderBy("year, month", "ASC")
       .getRawMany()
 
     return result.map((row) => ({
+      year: row.year,
       month: row.month,
       total: parseFloat(row.total) || 0
     }))
@@ -147,5 +150,22 @@ export class OrdersService implements IService<Order> {
       .getRawOne()
 
     return parseFloat(result.total)
+  }
+
+  async getStoreRevenueMetrics(storeId: string): Promise<StoreOrderRevenueSummary> {
+    const result = await this.orderRepository
+      .createQueryBuilder("order")
+      .innerJoin("order.items", "item")
+      .select("SUM(item.unitPrice * item.quantity)", "totalSales")
+      .addSelect("COUNT(DISTINCT order.id)", "totalOrder")
+      .addSelect("AVG(item.unitPrice * item.quantity)", "averageOrderValue")
+      .where("order.status = :status AND item.storeId = :storeId", { status: "paid", storeId })
+      .getRawOne()
+
+    return {
+      totalSales: parseFloat(result?.totalSales || 0),
+      totalOrder: parseInt(result?.totalOrder || 0, 10),
+      averageOrderValue: parseFloat(result?.averageOrderValue || 0)
+    }
   }
 }

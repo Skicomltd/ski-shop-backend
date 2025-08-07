@@ -1,3 +1,5 @@
+import { KYC_ENUM_STATUS } from "../enum/kyc-status-enum"
+
 export interface IBusinessResponse {
   id: string
   type: string
@@ -9,6 +11,7 @@ export interface IBusinessResponse {
   state: string
   kycVerificationType: string
   identificationNumber: string
+  kycStatus: KYC_ENUM_STATUS
   createdAt: Date
   user: {
     id: string
