@@ -57,7 +57,7 @@ export class CartsController {
           paymentMethod: createCartDto.paymentMethod,
           items: carts.map((cart) => ({
             quantity: cart.quantity,
-            unitPrice: cart.product.discountPrice ?? cart.product.price,
+            unitPrice: cart.product.discountPrice && cart.product.discountPrice > 0 ? cart.product.discountPrice : cart.product.price,
             productId: cart.product.id,
             storeId: cart.product.storeId
           }))
