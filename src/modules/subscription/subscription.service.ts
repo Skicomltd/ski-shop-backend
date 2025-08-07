@@ -13,6 +13,7 @@ import { MonthlySubscriptionRevenue, SubscriptionRevenueInterface } from "./inte
 
 @Injectable()
 export class SubscriptionService implements IService<Subscription>, UseQueue<string, Subscription> {
+  private relations = ["vendor", "vendor.business", "vendor.business.store"]
   constructor(
     @InjectRepository(Subscription) private subscriptionRepository: Repository<Subscription>,
     @InjectQueue(AppQueues.END_SUBSCRIPTION) private queue: Queue,
@@ -60,20 +61,20 @@ export class SubscriptionService implements IService<Subscription>, UseQueue<str
       where,
       take: limit,
       skip: page ? page - 1 : undefined,
-      relations: ["vendor", "vendor.business", "vendor.business.store", "vendor.business.store.product"]
+      relations: this.relations
     })
   }
 
   async findById(id: string): Promise<Subscription> {
-    return await this.subscriptionRepository.findOne({ where: { id: id } })
+    return await this.subscriptionRepository.findOne({ where: { id: id }, relations: this.relations })
   }
 
   async findOne(filter: FindOptionsWhere<Subscription>): Promise<Subscription> {
-    return await this.subscriptionRepository.findOne({ where: filter, relations: ["vendor", "vendor.business", "vendor.business.store"] })
+    return await this.subscriptionRepository.findOne({ where: filter, relations: this.relations })
   }
 
   async exists(filter: FindOptionsWhere<Subscription>): Promise<boolean> {
-    return await this.subscriptionRepository.exists({ where: filter, relations: ["vendor", "vendor.business", "vendor.business.store"] })
+    return await this.subscriptionRepository.exists({ where: filter, relations: this.relations })
   }
 
   async update(entity: Subscription, data: UpdateSubscriptionDto, manager?: EntityManager): Promise<Subscription> {
