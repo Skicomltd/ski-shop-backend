@@ -85,8 +85,10 @@ export class ProductsController {
     return await this.productsService.create({ ...createProductDto, user: user, store: store })
   }
 
-  @Get("download")
-  async download(@Query() query: IProductsQuery, @Res() res: Response) {
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, Product))
+  @Get("downloads")
+  async downloads(@Query() query: IProductsQuery, @Res() res: Response) {
     const [products] = await this.productsService.find(query)
 
     const headers = [

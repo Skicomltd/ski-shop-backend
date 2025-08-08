@@ -53,14 +53,12 @@ export class UserController {
 
   @UseGuards(PolicyUsersGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, User))
-  @Get("download")
-  async download(@Query() query: IUserQuery, @Res() res: Response) {
+  @Get("downloads")
+  async downloads(@Query() query: IUserQuery, @Res() res: Response) {
     if (!query.role) throw new BadReqException("Role is Required")
 
     const [users] = await this.userService.find(query)
 
-    // for now will ignore status, we not tracking status, we could use the isEmailVerified flag to confirm or add a new data type of status
-    // on figma, user with a status of inactive could still have orders, how does that work???
     const { headers, records } = await this.userService.headersRecords(query, users)
 
     const data = await this.csvService.writeCsvToBuffer({ headers, records })

@@ -19,6 +19,8 @@ import { SavedProduct } from "@/modules/products/entities/saved-product.entity"
 import { Order } from "@/modules/orders/entities/order.entity"
 import { Review } from "@/modules/reviews/entities/review.entity"
 import { Subscription } from "@/modules/subscription/entities/subscription.entity"
+import { userStatus } from "../interfaces/user.status.interface"
+import { USER_STATUS } from "../enum/user-status"
 
 export enum UserRoleEnum {
   "Customer" = "customer",
@@ -52,6 +54,9 @@ export class User {
 
   @Column({ default: false })
   isEmailVerified: boolean
+
+  @Column({ type: "enum", enum: USER_STATUS, default: "inactive" })
+  status: userStatus
 
   @CreateDateColumn()
   createdAt: Date

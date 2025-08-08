@@ -75,7 +75,7 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
   }
 
   async findOne(filter: FindOptionsWhere<Ad>): Promise<Ad> {
-    return await this.adRepository.findOne({ where: filter })
+    return await this.adRepository.findOne({ where: filter, relations: this.relations })
   }
 
   async exists(filter: FindOptionsWhere<Ad>): Promise<boolean> {

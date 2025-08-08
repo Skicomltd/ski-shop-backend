@@ -29,7 +29,7 @@ export class UserService implements IService<User> {
     return await repo.save(createUser)
   }
 
-  async find({ limit, page, role, search }: IUserQuery): Promise<[User[], number]> {
+  async find({ limit, page, role, search, status }: IUserQuery): Promise<[User[], number]> {
     const query = this.userRepository
       .createQueryBuilder("user")
       .leftJoinAndSelect("user.business", "business")
@@ -39,6 +39,10 @@ export class UserService implements IService<User> {
 
     if (role) {
       query.andWhere("user.role = :role", { role })
+    }
+
+    if (status) {
+      query.andWhere("user.status = :status", { status })
     }
 
     if (search) {
@@ -93,7 +97,8 @@ export class UserService implements IService<User> {
         { key: "name", header: "Name" },
         { key: "phoneNumber", header: "Phone Number" },
         { key: "emailAddress", header: "Email Address" },
-        { key: "orders", header: "Orders" }
+        { key: "orders", header: "Orders" },
+        { key: "status", header: "Status" }
       ]
 
       const records = users.map((user) => {
@@ -101,7 +106,8 @@ export class UserService implements IService<User> {
           name: user.getFullName(),
           phoneNumber: user.phoneNumber,
           emailAddress: user.email,
-          orders: user.ordersCount
+          orders: user.ordersCount,
+          status: user.status
         }
       })
 
@@ -112,7 +118,8 @@ export class UserService implements IService<User> {
         { key: "phoneNumber", header: "Phone Number" },
         { key: "emailAddress", header: "Email Address" },
         { key: "kycStatus", header: "Kyc Status" },
-        { key: "orders", header: "Orders" }
+        { key: "orders", header: "Orders" },
+        { key: "status", header: "Status" }
       ]
 
       const records = users.map((user) => {
@@ -121,7 +128,8 @@ export class UserService implements IService<User> {
           phoneNumber: user.phoneNumber,
           emailAddress: user.email,
           orders: user.itemsCount,
-          kycStatus: user.business.kycStatus
+          kycStatus: user.business.kycStatus,
+          status: user.status
         }
       })
 

@@ -43,12 +43,9 @@ export class RevenuesController {
 
     const totalSubcriptionAmount = await this.subscriptionService.calculateSubscriptionsTotalRevenue({ startDate, endDate, isPaid: true })
 
-    const totalOrderAmount = await this.ordersService.calculateOrdersTotalRevenue({ startDate, endDate, status: "paid" })
-
-    const totalRevenue = totalOrderAmount + totalSubcriptionAmount + totalPromotionAds
+    const totalRevenue = totalSubcriptionAmount + totalPromotionAds
 
     return {
-      orders: totalOrderAmount,
       subscriptions: totalSubcriptionAmount,
       promotionAds: totalPromotionAds,
       totalRevenue
@@ -86,15 +83,11 @@ export class RevenuesController {
 
   @UseGuards(PolicyRevenueGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, "REVENUE"))
-  @Get("download")
-  async download(@Res() res: Response, @Query() query: IRevenueQuery) {
+  @Get("downloads")
+  async downloads(@Res() res: Response, @Query() query: IRevenueQuery) {
     const isPaid = query.flag === "paid"
 
-    const [[orders], [subscriptions], [ads]] = await Promise.all([
-      this.ordersService.find({ status: query.orderStatus }),
-      this.subscriptionService.find({ isPaid }),
-      this.adsService.find({ status: query.adsStatus })
-    ])
+    const [[subscriptions], [ads]] = await Promise.all([this.subscriptionService.find({ isPaid }), this.adsService.find({ status: query.adsStatus })])
 
     const headers = [
       { key: "revenueSource", header: "Revenue Source" },
@@ -104,19 +97,6 @@ export class RevenuesController {
       { key: "role", header: "Role" },
       { key: "date", header: "Date" }
     ]
-
-    const ordersRecord = orders.flatMap((order) => {
-      return order.items.map((item) => {
-        return {
-          revenueSource: "order",
-          description: item.product.name,
-          amount: item.unitPrice * item.quantity,
-          user: order.buyer.getFullName(),
-          role: order.buyer.role,
-          date: order.createdAt.toISOString()
-        }
-      })
-    })
 
     const subscriptionsRecord = subscriptions.map((sub) => {
       return {
@@ -139,7 +119,7 @@ export class RevenuesController {
       }
     })
 
-    const records = [...ordersRecord, ...subscriptionsRecord, ...adsRecord]
+    const records = [...subscriptionsRecord, ...adsRecord]
 
     const data = await this.csvService.writeCsvToBuffer({ headers, records })
 
