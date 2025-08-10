@@ -9,7 +9,7 @@ import { IcartQuery } from "./interfaces/cart.interface"
 export class CartsService implements IService<Cart> {
   constructor(@InjectRepository(Cart) private cartRepository: Repository<Cart>) {}
 
-  private readonly relations = ["product"]
+  private readonly relations = ["product", "product.store", "product.store.business", "product.store.business.user"]
 
   async create(data: Partial<Cart>, manager?: EntityManager): Promise<Cart> {
     const repo = manager ? manager.getRepository(Cart) : this.cartRepository
