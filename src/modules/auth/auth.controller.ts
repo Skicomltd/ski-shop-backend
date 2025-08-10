@@ -93,7 +93,7 @@ export class AuthController {
   @UseGuards(JwtShortTimeGuard)
   async verifyEmail(@Req() req: Request, @Body(new JoiValidationPipe(verifyEmailSchema)) verifyEmailDto: VerifyEmailDto) {
     const isVerified = await this.authService.verifyCode({ email: req.user.email, code: verifyEmailDto.code })
-    await this.userService.update(req.user, { isEmailVerified: isVerified })
+    await this.userService.update(req.user, { isEmailVerified: isVerified, status: "active" })
 
     const shortTimeToken = await this.helperService.generateToken(
       { email: req.user.email, id: req.user.id },

@@ -13,13 +13,12 @@ export class RevenuesService {
   ) {}
 
   async getCombineRevenue({ startDate, endDate }: CombineRevenue) {
-    const [ordersRevenue, subscriptionRevenue, adsRevenue] = await Promise.all([
-      this.orderService.getOrderMonthlyRevenue({ startDate, endDate, status: "paid" }),
+    const [subscriptionRevenue, adsRevenue] = await Promise.all([
       this.subscriptionService.getSubscriptionMonthlyRevenue({ startDate, endDate, isPaid: true }),
       this.adsService.getAdsMonthlyRevenue({ startDate, endDate, status: ["active", "expired"] })
     ])
 
-    const combinedRevenue = [...ordersRevenue, ...subscriptionRevenue, ...adsRevenue]
+    const combinedRevenue = [...subscriptionRevenue, ...adsRevenue]
 
     const result = Object.values(
       combinedRevenue.reduce(

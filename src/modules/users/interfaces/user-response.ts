@@ -6,6 +6,8 @@ export interface IUserResponse {
   lastName: string
   role: UserRoleEnum
   email: string
+  itemsCount: number
+  ordersCount: number
   phoneNumber: string
   isEmailVerified: boolean
   createdAt: Date

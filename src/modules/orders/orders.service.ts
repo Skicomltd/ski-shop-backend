@@ -32,7 +32,8 @@ export class OrdersService implements IService<Order> {
     productId,
     orderBy = "ASC",
     startDate,
-    endDate
+    endDate,
+    search
   }: IOrdersQuery): Promise<[Order[], number]> {
     const query = this.orderRepository
       .createQueryBuilder("order")
@@ -75,6 +76,10 @@ export class OrdersService implements IService<Order> {
 
     if (endDate) {
       query.andWhere("order.createdAt <= :endDate", { endDate })
+    }
+
+    if (search) {
+      query.andWhere("LOWER(product.name) LIKE :search", { search: `%${search.toLowerCase()}%` })
     }
 
     query.skip((page - 1) * limit).take(limit)

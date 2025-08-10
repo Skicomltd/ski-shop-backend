@@ -1,7 +1,7 @@
 export interface AdRevenueInterface {
-  startDate: Date
-  endDate: Date
-  status: string[]
+  startDate?: Date
+  endDate?: Date
+  status?: string[]
 }
 
 export interface MonthlyAdRevenue {

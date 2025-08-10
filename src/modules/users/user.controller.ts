@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Query, UseGuards, UseInterceptors } from "@nestjs/common"
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Query, Res, UseGuards, UseInterceptors } from "@nestjs/common"
 import { UserService } from "./user.service"
 import { UpdateUserDto, updateUserSchema } from "./dto/update-user-dto"
 import { NotFoundException } from "@/exceptions/notfound.exception"
@@ -11,10 +11,16 @@ import { Action } from "../services/casl/actions/action"
 import { PolicyUsersGuard } from "./guard/policy-user.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { AppAbility } from "../services/casl/casl-ability.factory"
+import { Response } from "express"
+import { CsvService } from "../services/utils/csv/csv.service"
+import { BadReqException } from "@/exceptions/badRequest.exception"
 
 @Controller("users")
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly csvService: CsvService
+  ) {}
 
   @UseGuards(PolicyUsersGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, User))
@@ -43,6 +49,23 @@ export class UserController {
   @Get()
   async findAll(@Query() query: IUserQuery) {
     return await this.userService.find(query)
+  }
+
+  @UseGuards(PolicyUsersGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, User))
+  @Get("downloads")
+  async downloads(@Query() query: IUserQuery, @Res() res: Response) {
+    if (!query.role) throw new BadReqException("Role is Required")
+
+    const [users] = await this.userService.find(query)
+
+    const { headers, records } = await this.userService.headersRecords(query, users)
+
+    const data = await this.csvService.writeCsvToBuffer({ headers, records })
+
+    res.setHeader("Content-Type", "text/csv")
+    res.setHeader("Content-Disposition", "attachment; filename=users.csv")
+    res.send(data)
   }
 
   @UseGuards(PolicyUsersGuard)

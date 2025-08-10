@@ -1,5 +1,6 @@
 import { UserRoleEnum } from "../entity/user.entity"
 import * as joi from "joi"
+import { userStatus } from "../interfaces/user.status.interface"
 
 export class CreateUserDto {
   firstName: string
@@ -8,6 +9,9 @@ export class CreateUserDto {
   role: UserRoleEnum
   email: string
   isEmailVerified?: boolean
+  itemsCount?: number
+  ordersCount?: number
+  status?: userStatus
 }
 
 export const createUserSchema = joi.object({

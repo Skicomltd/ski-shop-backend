@@ -18,6 +18,8 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
     @InjectQueue(AppQueues.END_ADS) private queue: Queue
   ) {}
 
+  private readonly relations = ["promotion", "product", "product.store", "product.store.business", "product.store.business.user"]
+
   async create(data: CreateAdDto, manager?: EntityManager): Promise<Ad> {
     const repo = manager ? manager.getRepository(Ad) : this.adRepository
     const ad = repo.create(data)
@@ -63,7 +65,8 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
     return await this.adRepository.findAndCount({
       where,
       take: limit,
-      skip: page ? page - 1 : undefined
+      skip: page ? page - 1 : undefined,
+      relations: this.relations
     })
   }
 
@@ -72,7 +75,7 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
   }
 
   async findOne(filter: FindOptionsWhere<Ad>): Promise<Ad> {
-    return await this.adRepository.findOne({ where: filter })
+    return await this.adRepository.findOne({ where: filter, relations: this.relations })
   }
 
   async exists(filter: FindOptionsWhere<Ad>): Promise<boolean> {

@@ -53,6 +53,7 @@
     "compression": "^1.8.0",
     "cron": "^4.3.0",
     "csv-parse": "^6.1.0",
+    "csv-parser": "^3.2.0",
     "csv-stringify": "^6.6.0",
     "csv-writer": "^1.6.0",
     "generate-password-ts": "^1.6.5",

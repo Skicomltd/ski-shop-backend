@@ -11,7 +11,8 @@ import {
   Req,
   ParseUUIDPipe,
   Query,
-  UseGuards
+  UseGuards,
+  Res
 } from "@nestjs/common"
 import { ProductsService } from "./products.service"
 import { CreateProductDto, createProductSchema } from "./dto/create-product.dto"
@@ -37,13 +38,16 @@ import { PoliciesGuard } from "../auth/guard/policies-handler.guard"
 import { Public } from "../auth/decorators/public.decorator"
 import { ProductCategoriesEnum } from "../common/types"
 import { SaveProductDto, saveProductSchema } from "./dto/save-product.dto"
+import { CsvService } from "../services/utils/csv/csv.service"
+import { Response } from "express"
 @Controller("products")
 export class ProductsController {
   constructor(
     private readonly productsService: ProductsService,
     private storeService: StoreService,
     private fileSystem: FileSystemService,
-    private dtoMapper: DtoMapper
+    private dtoMapper: DtoMapper,
+    private readonly csvService: CsvService
   ) {}
 
   @Post()
@@ -79,6 +83,37 @@ export class ProductsController {
     const user = req.user
 
     return await this.productsService.create({ ...createProductDto, user: user, store: store })
+  }
+
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, Product))
+  @Get("downloads")
+  async downloads(@Query() query: IProductsQuery, @Res() res: Response) {
+    const [products] = await this.productsService.find(query)
+
+    const headers = [
+      { key: "productName", header: "Product Name" },
+      { key: "category", header: "Category" },
+      { key: "price", header: "Price" },
+      { key: "stock", header: "Stock" },
+      { key: "dateAdded", header: "Date Added" }
+    ]
+
+    const records = products.map((product) => {
+      return {
+        productName: product.name,
+        category: product.category,
+        price: product.price,
+        stock: product.stockCount,
+        dateAdded: product.createdAt.toISOString()
+      }
+    })
+
+    const data = await this.csvService.writeCsvToBuffer({ headers, records })
+
+    res.setHeader("Content-Type", "text/csv")
+    res.setHeader("Content-Disposition", "attachment; filename=products.csv")
+    res.send(data)
   }
 
   @Post("/saves")
