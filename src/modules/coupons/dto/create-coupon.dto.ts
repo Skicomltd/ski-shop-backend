@@ -3,8 +3,9 @@ import * as joi from "joi"
 
 export class CreateCouponDto {
   title: string
-  code: number
+  code: string
   quantity: number
+  remainingQuantity: number
   couponType: CouponEnumType
   value: number
   startDate: Date
@@ -13,8 +14,7 @@ export class CreateCouponDto {
 
 export const createCouponSchema = joi.object({
   title: joi.string().required(),
-  code: joi.number().required(),
-  couponType: joi.string().valid(["percentage", "amount"]).required(),
+  couponType: joi.string().valid(["discount", "amount"]).required(),
   value: joi.number().required,
   startDate: joi.date().required(),
   endDate: joi.date().required()

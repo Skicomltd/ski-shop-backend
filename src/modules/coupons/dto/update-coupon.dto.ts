@@ -6,7 +6,6 @@ export class UpdateCouponDto extends PartialType(CreateCouponDto) {}
 
 export const updateCouponSchema = joi.object({
   title: joi.string().optional(),
-  code: joi.number().required(),
   couponType: joi.string().valid(["percentage", "amount"]).optional(),
   value: joi.number().optional,
   startDate: joi.date().optional(),

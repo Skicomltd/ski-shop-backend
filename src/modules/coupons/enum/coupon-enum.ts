@@ -1,4 +1,4 @@
 export enum CouponEnumType {
-  "PERCENTAGE" = "percentage",
+  "DISCOUNT" = "discount",
   "AMOUNT" = "amount"
 }

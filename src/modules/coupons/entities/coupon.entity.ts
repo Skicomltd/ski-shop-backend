@@ -9,16 +9,19 @@ export class Coupon {
   @Column()
   title: string
 
-  @Column({ type: "int" })
-  code: number
+  @Column({ type: "varchar", length: 50 })
+  code: string
 
   @Column({ type: "int" })
   quantity: number
 
+  @Column({ type: "int" })
+  remainingQuantity: number
+
   @Column({ type: "enum", enum: CouponEnumType, default: CouponEnumType.AMOUNT })
   couponType: CouponEnumType
 
-  @Column({ type: "int" })
+  @Column({ type: "decimal", precision: 10, scale: 2 })
   value: number
 
   @Column({ type: "timestamp" })

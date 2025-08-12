@@ -21,8 +21,8 @@ export class BusinessService implements IService<Business> {
   async find({ page, limit, ...where }: IBusinessQuery): Promise<[Business[], number]> {
     const [result, count] = await this.businessRepository.findAndCount({
       where,
-      skip: limit,
-      take: page,
+      take: limit,
+      skip: page ? (page - 1) * limit : undefined,
       relations: ["user", "store"]
     })
 
