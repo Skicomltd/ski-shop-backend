@@ -40,6 +40,7 @@ import { ProductCategoriesEnum } from "../common/types"
 import { SaveProductDto, saveProductSchema } from "./dto/save-product.dto"
 import { CsvService } from "../services/utils/csv/csv.service"
 import { Response } from "express"
+import { BadReqException } from "@/exceptions/badRequest.exception"
 @Controller("products")
 export class ProductsController {
   constructor(
@@ -81,6 +82,11 @@ export class ProductsController {
     // attach the arry of string
     createProductDto = { ...createProductDto, images: handleImageUploaded, slug: slug }
     const user = req.user
+    if (createProductDto.discountPrice) {
+      if (createProductDto.discountPrice > createProductDto.price) {
+        throw new BadReqException("Discount price cannot be greater than product price")
+      }
+    }
 
     return await this.productsService.create({ ...createProductDto, user: user, store: store })
   }
