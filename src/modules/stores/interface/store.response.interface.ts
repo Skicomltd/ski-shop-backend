@@ -1,5 +1,5 @@
+import Business from "@/modules/business/entities/business.entity"
 import { vendonEnumType } from "../entities/store.entity"
-import { KYC_ENUM_STATUS } from "@/modules/business/enum/kyc-status-enum"
 
 export interface StoreResponse {
   id: string
@@ -7,20 +7,7 @@ export interface StoreResponse {
   description: string
   logo: string
   isStarSeller: boolean
-  business: {
-    id: string
-    type: string
-    name: string
-    businessRegNumber: string
-    contactNumber: string
-    address: string
-    country: string
-    state: string
-    kycVerificationType: string
-    identificationNumber: string
-    kycStatus: KYC_ENUM_STATUS
-  }
-  vendor: IdName
+  business: Business
   type: vendonEnumType
   rating: number
   createdAt: Date

@@ -52,9 +52,6 @@ export class User {
   @Column({ type: "text", default: "" })
   phoneNumber: string
 
-  @Column({ type: "text", default: "" })
-  address: string
-
   @Column({ default: false })
   isEmailVerified: boolean
 

@@ -8,6 +8,5 @@ export const updateUserSchema = joi.object({
   firstName: joi.string(),
   lastName: joi.string(),
   password: joi.string(),
-  role: joi.string().valid("customer", "vendor", "admin"),
-  address: joi.string().optional()
+  role: joi.string().valid("customer", "vendor", "admin")
 })
