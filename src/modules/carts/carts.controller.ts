@@ -16,6 +16,7 @@ import { InitiatePayment } from "../services/payments/interfaces/strategy.interf
 import { OrdersService } from "../orders/orders.service"
 import { TransactionHelper } from "../services/utils/transactions/transactions.service"
 import { UserService } from "../users/user.service"
+import { HelpersService } from "../services/utils/helpers/helpers.service"
 
 @Controller("carts")
 export class CartsController {
@@ -25,7 +26,8 @@ export class CartsController {
     private readonly paymentsService: PaymentsService,
     private readonly ordersService: OrdersService,
     private readonly transactionHelper: TransactionHelper,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly helperService: HelpersService
   ) {}
 
   @Post()
@@ -53,10 +55,13 @@ export class CartsController {
 
       const amount = await this.cartsService.calculateTotalPrice(user.id)
 
-      const order = await this.ordersService.create(
+      const reference = this.helperService.generateReference("REF-", 11)
+
+      await this.ordersService.create(
         {
           buyerId: user.id,
           paymentMethod: createCartDto.paymentMethod,
+          reference,
           items: carts.map((cart) => ({
             quantity: cart.quantity,
             unitPrice: cart.product.discountPrice && cart.product.discountPrice > 0 ? cart.product.discountPrice : cart.product.price,
@@ -85,7 +90,7 @@ export class CartsController {
       const payload: InitiatePayment = {
         amount,
         email: user.email,
-        reference: order.id
+        reference: reference
       }
 
       return await this.paymentsService.with(createCartDto.paymentMethod).initiatePayment(payload)
