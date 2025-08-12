@@ -66,8 +66,8 @@ export class StoreController {
 
   @Get("current")
   @UseInterceptors(StoreInterceptor)
-  async findCurrent(@Req() req: Request) {
-    return await this.storeService.findById(req.user.business.store.id)
+  findCurrent(@Req() req: Request) {
+    return req.user.business.store
   }
 
   @Get(":id")

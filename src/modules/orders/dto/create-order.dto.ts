@@ -8,7 +8,6 @@ export class CreateOrderDto {
   paymentMethod: PaymentMethod
   paidAt?: string
   buyerId: string
-  reference: string
   items: Array<{
     quantity: number
     unitPrice: number
