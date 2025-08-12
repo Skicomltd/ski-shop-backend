@@ -37,6 +37,7 @@ import { AdsModule } from "./modules/ads/ads.module"
 import { ScheduleModule } from "@nestjs/schedule"
 import { RevenuesModule } from "./modules/revenues/revenues.module"
 import { CouponsModule } from './modules/coupons/coupons.module';
+import { VoucherModule } from './modules/voucher/voucher.module';
 @Module({
   imports: [
     UserModule,
@@ -71,7 +72,8 @@ import { CouponsModule } from './modules/coupons/coupons.module';
     PromotionsModule,
     AdsModule,
     RevenuesModule,
-    CouponsModule
+    CouponsModule,
+    VoucherModule
   ],
   controllers: [AppController],
   providers: [
