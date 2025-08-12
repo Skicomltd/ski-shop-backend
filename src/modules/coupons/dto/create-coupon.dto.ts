@@ -14,8 +14,9 @@ export class CreateCouponDto {
 
 export const createCouponSchema = joi.object({
   title: joi.string().required(),
-  couponType: joi.string().valid(["discount", "amount"]).required(),
-  value: joi.number().required,
+  value: joi.number().required(),
+  quantity: joi.number().required(),
+  couponType: joi.string().valid("discount", "amount").required(),
   startDate: joi.date().required(),
   endDate: joi.date().required()
 })
