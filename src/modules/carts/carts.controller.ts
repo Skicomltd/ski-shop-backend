@@ -1,5 +1,5 @@
 import { Request } from "express"
-import { Controller, Post, Body, Req, Get, Param, ParseUUIDPipe, Delete, Patch, UseInterceptors } from "@nestjs/common"
+import { Controller, Post, Body, Req, Get, Param, ParseUUIDPipe, Delete, Patch, UseInterceptors, Query } from "@nestjs/common"
 import { CartsService } from "./carts.service"
 import { CreateCartDto, createCartSchema } from "./dto/create-cart.dto"
 import { UpdateCartDto, updateCartSchema } from "./dto/update-cart.dto"
@@ -16,6 +16,8 @@ import { InitiatePayment } from "../services/payments/interfaces/strategy.interf
 import { OrdersService } from "../orders/orders.service"
 import { TransactionHelper } from "../services/utils/transactions/transactions.service"
 import { UserService } from "../users/user.service"
+import { IcartQuery } from "./interfaces/cart.interface"
+import { VoucherService } from "../voucher/voucher.service"
 
 @Controller("carts")
 export class CartsController {
@@ -25,7 +27,8 @@ export class CartsController {
     private readonly paymentsService: PaymentsService,
     private readonly ordersService: OrdersService,
     private readonly transactionHelper: TransactionHelper,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly voucherService: VoucherService
   ) {}
 
   @Post()
@@ -43,7 +46,7 @@ export class CartsController {
   }
 
   @Post("checkout")
-  async checkout(@Body(new JoiValidationPipe(checkoutSchema)) createCartDto: CheckoutDto, @Req() req: Request) {
+  async checkout(@Body(new JoiValidationPipe(checkoutSchema)) createCartDto: CheckoutDto, @Query() query: IcartQuery, @Req() req: Request) {
     const user = req.user
 
     return this.transactionHelper.runInTransaction(async (manager) => {
@@ -52,6 +55,13 @@ export class CartsController {
       const [carts] = await this.cartsService.find({ user: { id: user.id } })
 
       const amount = await this.cartsService.calculateTotalPrice(user.id)
+
+      const voucher = query.code ? await this.voucherService.findOne({ userId: user.id, code: query.code }) : null
+
+      let finalAmount = amount
+      if (voucher) {
+        finalAmount = await this.voucherService.applyVoucher(voucher, amount)
+      }
 
       const order = await this.ordersService.create(
         {
@@ -66,9 +76,6 @@ export class CartsController {
         },
         manager
       )
-
-      // to help track the order and item counts for user and vendor
-      // question: does this make sense here or in the order webhooks
       await this.userService.update(user, { ordersCount: user.ordersCount + 1 }, manager)
       const storeIds = carts.map((cart) => cart.product.storeId)
       const vendors = await Promise.all(
@@ -83,7 +90,7 @@ export class CartsController {
       )
 
       const payload: InitiatePayment = {
-        amount,
+        amount: finalAmount,
         email: user.email,
         reference: order.id
       }
@@ -91,6 +98,7 @@ export class CartsController {
       return await this.paymentsService.with(createCartDto.paymentMethod).initiatePayment(payload)
     })
   }
+  // ...existing code...
 
   @Get()
   @UseInterceptors(CartsInterceptor)

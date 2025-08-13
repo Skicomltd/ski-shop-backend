@@ -407,8 +407,13 @@ export class CaslAbilityFactory {
 
     if (user.role === UserRoleEnum.Admin) {
       can(Action.Manage, Coupon)
-    } else {
+    } else if (user.role === UserRoleEnum.Customer) {
       can(Action.Read, Coupon)
+      cannot(Action.Create, Coupon)
+      cannot(Action.Update, Coupon)
+      cannot(Action.Delete, Coupon)
+    } else {
+      cannot(Action.Read, Coupon)
       cannot(Action.Create, Coupon)
       cannot(Action.Update, Coupon)
       cannot(Action.Delete, Coupon)

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseUUIDPipe, UseInterceptors, UseGuards } from "@nestjs/common"
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, ParseUUIDPipe, UseInterceptors, UseGuards, Req } from "@nestjs/common"
 import { CouponsService } from "./coupons.service"
 import { CreateCouponDto, createCouponSchema } from "./dto/create-coupon.dto"
 import { UpdateCouponDto } from "./dto/update-coupon.dto"
@@ -13,12 +13,15 @@ import { Coupon } from "./entities/coupon.entity"
 import { AppAbility } from "../services/casl/casl-ability.factory"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { CouponsResponseInterceptor } from "./interceptor/coupons.interceptor"
+import { VoucherService } from "../voucher/voucher.service"
+import { Request } from "express"
 
 @Controller("coupons")
 export class CouponsController {
   constructor(
     private readonly couponsService: CouponsService,
-    private helperService: HelpersService
+    private helperService: HelpersService,
+    private readonly voucherService: VoucherService
   ) {}
 
   @UseInterceptors(CouponInterceptor)
@@ -33,7 +36,7 @@ export class CouponsController {
 
   @UseInterceptors(CouponsResponseInterceptor)
   @UseGuards(PolicyCouponGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Coupon))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, Coupon))
   @Get()
   findAll(@Query() query: ICouponsQuery) {
     return this.couponsService.find(query)
@@ -41,7 +44,7 @@ export class CouponsController {
 
   @UseInterceptors(CouponInterceptor)
   @UseGuards(PolicyCouponGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Coupon))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, Coupon))
   @Get("stats")
   async getStats() {
     return await this.couponsService.couponStats()
@@ -50,6 +53,30 @@ export class CouponsController {
   @UseInterceptors(CouponInterceptor)
   @UseGuards(PolicyCouponGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Coupon))
+  @Get("draw")
+  async draw(@Req() req: Request) {
+    const user = req.user
+
+    const coupon = await this.couponsService.findRandomCoupon()
+
+    await this.voucherService.create({
+      code: coupon.code,
+      dateWon: new Date(),
+      prizeType: coupon.couponType,
+      prizeWon: coupon.value,
+      userId: user.id,
+      startDate: coupon.startDate,
+      endDate: coupon.endDate
+    })
+
+    await this.couponsService.update(coupon, { remainingQuantity: coupon.remainingQuantity - 1 })
+
+    return coupon
+  }
+
+  @UseInterceptors(CouponInterceptor)
+  @UseGuards(PolicyCouponGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, Coupon))
   @Get(":id")
   findOne(@Param("id", ParseUUIDPipe) id: string) {
     return this.couponsService.findOne({ id: id })

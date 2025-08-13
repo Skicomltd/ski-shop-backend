@@ -6,6 +6,7 @@ import { Between, EntityManager, Equal, FindOptionsWhere, LessThanOrEqual, MoreT
 import { InjectRepository } from "@nestjs/typeorm"
 import { ICouponsQuery } from "./interface/query-filter.interface"
 import { CouponStats } from "./interface/coupon-stats.interface"
+import { NotFoundException } from "@/exceptions/notfound.exception"
 
 @Injectable()
 export class CouponsService implements IService<Coupon> {
@@ -88,5 +89,21 @@ export class CouponsService implements IService<Coupon> {
       totalQuantity: parseInt(query.totalQuantity) || 0,
       totalRemainingQuantity: parseInt(query.totalRemainingQuantity) || 0
     }
+  }
+
+  async findRandomCoupon(): Promise<Coupon> {
+    const now = new Date()
+    const coupon = await this.couponRepository
+      .createQueryBuilder("coupon")
+      .where("coupon.endDate >= :now", { now })
+      .orderBy("RANDOM()")
+      .limit(1)
+      .getOne()
+
+    if (!coupon) {
+      throw new NotFoundException("No coupons available")
+    }
+
+    return coupon
   }
 }

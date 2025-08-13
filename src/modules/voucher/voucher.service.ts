@@ -1,26 +1,73 @@
-import { Injectable } from '@nestjs/common';
-import { CreateVoucherDto } from './dto/create-voucher.dto';
-import { UpdateVoucherDto } from './dto/update-voucher.dto';
+import { Injectable } from "@nestjs/common"
+import { CreateVoucherDto } from "./dto/create-voucher.dto"
+import { UpdateVoucherDto } from "./dto/update-voucher.dto"
+import { Voucher } from "./entities/voucher.entity"
+import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
+import { InjectRepository } from "@nestjs/typeorm"
+import { IVoucherQueryFilter } from "./interface/query-filter"
+import { CouponEnumType } from "../coupons/enum/coupon-enum"
 
 @Injectable()
-export class VoucherService {
-  create(createVoucherDto: CreateVoucherDto) {
-    return 'This action adds a new voucher';
+export class VoucherService implements IService<Voucher> {
+  constructor(
+    @InjectRepository(Voucher)
+    private readonly voucherRepository: Repository<Voucher>
+  ) {}
+
+  async create(data: CreateVoucherDto, manager?: EntityManager): Promise<Voucher> {
+    const repo = manager ? manager.getRepository(Voucher) : this.voucherRepository
+    const voucher = repo.create(data)
+    return await repo.save(voucher)
   }
 
-  findAll() {
-    return `This action returns all voucher`;
+  async find({ limit, page, status, userId }: IVoucherQueryFilter): Promise<[Voucher[], number]> {
+    const where: FindOptionsWhere<Voucher> = {}
+    if (status) {
+      where.status = status
+    }
+
+    if (userId) {
+      where.userId = userId
+    }
+    const skip = page && page > 0 ? (page - 1) * limit : 0
+    const [result, count] = await this.voucherRepository.findAndCount({
+      where,
+      skip,
+      take: limit
+    })
+    return [result, count]
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} voucher`;
+  async findById(id: string): Promise<Voucher> {
+    return await this.voucherRepository.findOne({ where: { id } })
   }
 
-  update(id: number, updateVoucherDto: UpdateVoucherDto) {
-    return `This action updates a #${id} voucher`;
+  async findOne(filter: FindOptionsWhere<Voucher>): Promise<Voucher> {
+    return await this.voucherRepository.findOne({ where: filter })
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} voucher`;
+  async exists(filter: FindOptionsWhere<Voucher>): Promise<boolean> {
+    const count = await this.voucherRepository.count({ where: filter })
+    return count > 0
+  }
+
+  async update(entity: Voucher, data: UpdateVoucherDto, manager?: EntityManager): Promise<Voucher> {
+    const repo = manager ? manager.getRepository(Voucher) : this.voucherRepository
+    const updated = repo.merge(entity, data)
+    return await repo.save(updated)
+  }
+
+  async remove(filter: FindOptionsWhere<Voucher>): Promise<number> {
+    const vouchers = await this.voucherRepository.find({ where: filter })
+    const result = await this.voucherRepository.remove(vouchers)
+    return result.length
+  }
+
+  async applyVoucher(voucher: Voucher, amount: number): Promise<number> {
+    if (voucher.prizeType === CouponEnumType.AMOUNT) {
+      return amount - voucher.prizeWon
+    } else {
+      return amount - (amount * voucher.prizeWon) / 100
+    }
   }
 }
