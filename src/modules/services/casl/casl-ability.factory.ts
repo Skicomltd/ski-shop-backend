@@ -33,6 +33,7 @@ type Subjects = InferSubjects<
   | typeof Ad
   | typeof Coupon
   | "REVENUE"
+  | "VENDOR"
   | "all"
 >
 
@@ -391,6 +392,26 @@ export class CaslAbilityFactory {
       can(Action.Delete, User, { id: user.id })
       can(Action.Update, User, { id: user.id })
       cannot(Action.Create, User)
+    }
+
+    const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
+  }
+
+  createAbilityForVendors(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Vendor) {
+      can(Action.Update, "VENDOR")
+      can(Action.Read, "VENDOR")
+    } else {
+      cannot(Action.Read, "VENDOR")
+      cannot(Action.Update, "VENDOR")
     }
 
     const ability = build({
