@@ -29,7 +29,18 @@ export class VendorController {
     private fileSystemService: FileSystemService
   ) {}
 
-  @Post("/profile")
+
+  // this file should exist
+
+  @UseGuards(PolicyVendorGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, "VENDOR"))
+  @UseInterceptors(VendorInterceptor)
+  @Get("current")
+  findOne(@Req() req: Request) {
+    return req.user
+  }
+
+  @Patch("/profile")
   @UseGuards(PoliciesVerifiedUserGuard, PoliciesHasBusinessGuard, PoliciesHasStoreGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, User))
   @UseInterceptors(FileInterceptor("logo", { ...memoryUpload, fileFilter: imageFilter }))
