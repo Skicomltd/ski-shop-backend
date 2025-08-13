@@ -1,11 +1,15 @@
 import { OrderStatus } from "./order-status"
+import { PaymentMethod } from "./payment-method.interface"
 
 export interface IOrderResponse {
   id: string
   products: OrderItemResponse[]
   status: OrderStatus
-  buyer: IdName
+  buyer: IdName & { address: string; phone: string }
   createdAt: string
+  paidAt: Date
+  reference: string
+  paymentMethod: PaymentMethod
 }
 
 export interface OrderItemResponse {
@@ -13,6 +17,7 @@ export interface OrderItemResponse {
   name: string
   images: string[]
   price: number
+  subtotal: number
   vendor: IdName
   quantity: number
 }

@@ -8,7 +8,23 @@ export abstract class StoreResponseMapper implements IInterceptor {
       name: data.name,
       description: data.description,
       logo: data.logo,
-      business: data.business,
+      business: {
+        id: data.business.id,
+        type: data.business.type,
+        name: data.business.name,
+        businessRegNumber: data.business.businessRegNumber,
+        contactNumber: data.business.contactNumber,
+        address: data.business.address,
+        country: data.business.country,
+        state: data.business.state,
+        kycVerificationType: data.business.kycVerificationType,
+        identificationNumber: data.business.identificationNumber,
+        kycStatus: data.business.kycStatus
+      },
+      vendor: {
+        id: data.business?.user.id,
+        name: data.business?.user.getFullName()
+      },
       rating: data?.totalStoreRatingSum / data?.totalStoreRatingCount || 0,
       isStarSeller: data.isStarSeller,
       createdAt: data.createdAt,
