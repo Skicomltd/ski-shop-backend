@@ -29,7 +29,6 @@ export class VendorController {
     private fileSystemService: FileSystemService
   ) {}
 
-
   // this file should exist
 
   @UseGuards(PolicyVendorGuard)
