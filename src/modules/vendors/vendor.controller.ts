@@ -31,6 +31,8 @@ export class VendorController {
     private fileSystemService: FileSystemService
   ) {}
 
+  // this file should exist
+
   @UseGuards(PolicyVendorGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, "VENDOR"))
   @UseInterceptors(VendorInterceptor)
