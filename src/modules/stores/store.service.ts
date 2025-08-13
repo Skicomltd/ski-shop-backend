@@ -13,6 +13,8 @@ export class StoreService implements IService<Store> {
     private storeRepository: Repository<Store>
   ) {}
 
+  readonly relations = ["business", "business.user"]
+
   async create(createStoreDto: CreateStoreDto, manager?: EntityManager) {
     const repo = manager ? manager.getRepository<Store>(Store) : this.storeRepository
     const store = repo.create({
@@ -22,7 +24,10 @@ export class StoreService implements IService<Store> {
   }
 
   async find({ limit, page, type, flag }: IStoresQuery): Promise<[Store[], number]> {
-    const query = this.storeRepository.createQueryBuilder("store")
+    const query = this.storeRepository
+      .createQueryBuilder("store")
+      .leftJoinAndSelect("store.business", "business")
+      .leftJoinAndSelect("business.user", "user")
 
     if (type === vendonEnumType.PREMIUM) {
       query.andWhere("store.type = :type", { type })
@@ -39,11 +44,11 @@ export class StoreService implements IService<Store> {
   }
 
   async findById(id: string): Promise<Store> {
-    return await this.storeRepository.findOne({ where: { id } })
+    return await this.storeRepository.findOne({ where: { id }, relations: this.relations })
   }
 
   async findOne(filter: FindOptionsWhere<Store>) {
-    return await this.storeRepository.findOne({ where: filter })
+    return await this.storeRepository.findOne({ where: filter, relations: this.relations })
   }
 
   async exists(filter: FindOptionsWhere<Store>): Promise<boolean> {

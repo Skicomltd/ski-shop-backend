@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common"
+import { Body, Controller, Get, Patch, Req, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common"
 import { TransactionHelper } from "../services/utils/transactions/transactions.service"
 import { StoreService } from "../stores/store.service"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
@@ -18,6 +18,8 @@ import { PoliciesVerifiedUserGuard } from "../auth/guard/policies-handler-verife
 import { PoliciesHasBusinessGuard } from "../auth/guard/policy-has-business.guard"
 import { PoliciesHasStoreGuard } from "../auth/guard/policy-has-store.guard"
 import { BusinessService } from "../business/business.service"
+import { PolicyVendorGuard } from "./guard/policy-vendor.guard"
+import { VendorInterceptor } from "./interceptor/vendor.interceptor"
 
 @Controller("vendors")
 export class VendorController {
@@ -28,8 +30,6 @@ export class VendorController {
     private bussinessService: BusinessService,
     private fileSystemService: FileSystemService
   ) {}
-
-  // this file should exist
 
   @UseGuards(PolicyVendorGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, "VENDOR"))
