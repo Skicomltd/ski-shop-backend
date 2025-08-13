@@ -18,7 +18,7 @@ import { TransactionHelper } from "../services/utils/transactions/transactions.s
 import { UserService } from "../users/user.service"
 import { HelpersService } from "../services/utils/helpers/helpers.service"
 import { IcartQuery } from "./interfaces/cart.interface"
-import { VoucherService } from "../voucher/voucher.service"
+import { VoucherService } from "../vouchers/voucher.service"
 
 @Controller("carts")
 export class CartsController {

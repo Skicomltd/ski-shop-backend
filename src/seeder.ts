@@ -30,6 +30,8 @@ import { Promotion } from "./modules/promotions/entities/promotion.entity"
 import { Ad } from "./modules/ads/entities/ad.entity"
 import { PromotionSeeder } from "./modules/seeder/promotion.seeder"
 import { PlanSeeder } from "./modules/seeder/plan.seeder"
+import { Voucher } from "./modules/vouchers/entities/voucher.entity"
+import { Coupon } from "./modules/coupons/entities/coupon.entity"
 
 seeder({
   imports: [
@@ -54,7 +56,9 @@ seeder({
       Plan,
       Payout,
       Promotion,
-      Ad
+      Ad,
+      Voucher,
+      Coupon
     ])
   ],
   providers: [UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder, PromotionSeeder, PlanSeeder]

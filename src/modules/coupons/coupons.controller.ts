@@ -13,7 +13,7 @@ import { Coupon } from "./entities/coupon.entity"
 import { AppAbility } from "../services/casl/casl-ability.factory"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { CouponsResponseInterceptor } from "./interceptor/coupons.interceptor"
-import { VoucherService } from "../voucher/voucher.service"
+import { VoucherService } from "../vouchers/voucher.service"
 import { Request } from "express"
 
 @Controller("coupons")
