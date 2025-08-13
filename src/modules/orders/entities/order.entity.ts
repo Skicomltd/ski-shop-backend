@@ -19,9 +19,6 @@ export class Order {
   @Column({ type: "enum", enum: PAYMENT_METHODS })
   paymentMethod: PaymentMethod
 
-  @Column({ type: "text", default: "" })
-  reference: string
-
   @Column()
   buyerId: string
 
