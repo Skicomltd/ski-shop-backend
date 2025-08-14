@@ -59,6 +59,7 @@ export class CouponsController {
 
     const coupon = await this.couponsService.findRandomCoupon()
 
+    // add a scheduler to update the status of the voucher to expired if after its end date
     await this.voucherService.create({
       code: coupon.code,
       dateWon: new Date(),

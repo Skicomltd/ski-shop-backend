@@ -19,6 +19,7 @@ import { UserService } from "../users/user.service"
 import { HelpersService } from "../services/utils/helpers/helpers.service"
 import { IcartQuery } from "./interfaces/cart.interface"
 import { VoucherService } from "../vouchers/voucher.service"
+import { VoucherEnum } from "../vouchers/enum/voucher-enum"
 
 @Controller("carts")
 export class CartsController {
@@ -63,9 +64,11 @@ export class CartsController {
       let finalAmount = amount
       if (voucher) {
         finalAmount = await this.voucherService.applyVoucher(voucher, amount)
+        // should the voucher be updated here or after payments has being made??
+        await this.voucherService.update(voucher, { status: VoucherEnum.REDEEMED }, manager)
       }
 
-      const reference = this.helperService.generateReference("REF-", 11)
+      const reference = this.helperService.generateReference("REF-", 12)
 
       await this.ordersService.create(
         {
@@ -103,7 +106,6 @@ export class CartsController {
       return await this.paymentsService.with(createCartDto.paymentMethod).initiatePayment(payload)
     })
   }
-  // ...existing code...
 
   @Get()
   @UseInterceptors(CartsInterceptor)

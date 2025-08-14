@@ -26,7 +26,7 @@ export class Voucher {
   @Column({ type: "timestamp" })
   endDate: Date
 
-  @Column()
+  @Column({ type: "decimal", precision: 10, scale: 2 })
   prizeWon: number
 
   @Column({ type: "enum", enum: CouponEnumType, default: CouponEnumType.AMOUNT })

@@ -16,6 +16,7 @@ import { Payout } from "@/modules/payouts/entities/payout.entity"
 import { Withdrawal } from "@/modules/withdrawals/entities/withdrawal.entity"
 import { Ad } from "@/modules/ads/entities/ad.entity"
 import { Coupon } from "@/modules/coupons/entities/coupon.entity"
+import { Voucher } from "@/modules/vouchers/entities/voucher.entity"
 
 type Subjects = InferSubjects<
   | typeof User
@@ -32,6 +33,7 @@ type Subjects = InferSubjects<
   | typeof Promotion
   | typeof Ad
   | typeof Coupon
+  | typeof Voucher
   | "REVENUE"
   | "VENDOR"
   | "all"
@@ -438,6 +440,32 @@ export class CaslAbilityFactory {
       cannot(Action.Create, Coupon)
       cannot(Action.Update, Coupon)
       cannot(Action.Delete, Coupon)
+    }
+
+    const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
+  }
+
+  createAbilityForVouchers(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, Voucher)
+    } else if (user.role === UserRoleEnum.Customer) {
+      can(Action.Read, Voucher)
+      can(Action.Delete, Voucher)
+      cannot(Action.Create, Voucher)
+      cannot(Action.Update, Voucher)
+    } else {
+      cannot(Action.Read, Voucher)
+      cannot(Action.Create, Voucher)
+      cannot(Action.Delete, Voucher)
+      cannot(Action.Update, Voucher)
     }
 
     const ability = build({
