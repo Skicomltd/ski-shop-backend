@@ -63,6 +63,15 @@ export class ReviewsController {
         manager
       )
 
+      await this.productService.update(
+        product,
+        {
+          totalProductRatingCount: product.totalProductRatingCount + 1,
+          totalProductRatingSum: product.totalProductRatingSum + createReviewDto.rating
+        },
+        manager
+      )
+
       return await this.reviewsService.create(createReviewDto, manager)
     })
   }

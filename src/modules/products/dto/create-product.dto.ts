@@ -10,6 +10,8 @@ export class CreateProductDto {
   description: string
   discountPrice?: number
   stockCount: number
+  totalProductRatingSum?: number
+  totalProductRatingCount?: number
   status: ProductStatusEnum
   storeId: string
   userId: string
