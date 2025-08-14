@@ -35,6 +35,12 @@ export class Product {
   @Column({ type: "enum", enum: ProductStatusEnum, default: ProductStatusEnum.draft })
   status: ProductStatusEnum
 
+  @Column({ type: "int", default: 0 })
+  totalProductRatingSum: number
+
+  @Column({ type: "int", default: 0 })
+  totalProductRatingCount: number
+
   @Column()
   storeId: string
 
