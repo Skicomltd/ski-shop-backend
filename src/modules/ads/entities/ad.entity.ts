@@ -19,6 +19,9 @@ export class Ad {
   productId: string
 
   @Column()
+  reference: string
+
+  @Column()
   promotionId: string
 
   @Column("int", { default: 0 })

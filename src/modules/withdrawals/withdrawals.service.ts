@@ -55,4 +55,29 @@ export class WithdrawalsService implements IService<Withdrawal> {
     const result = await this.withdrawalRepository.delete(filter)
     return result.affected || 0
   }
+
+  async getWithdrawalStats(payoutId: string): Promise<{
+    pendingWithdrawalCount: number
+    lastPayout: Date
+  }> {
+    const pendingWithdrawalCount = await this.withdrawalRepository
+      .createQueryBuilder("withdrawal")
+      .leftJoinAndSelect("withdrawal.payout", "payout")
+      .where("payout.id = :payoutId", { payoutId })
+      .andWhere("withdrawal.status = :status", { status: "pending" })
+      .getCount()
+
+    const lastPayout = await this.withdrawalRepository
+      .createQueryBuilder("withdrawal")
+      .leftJoinAndSelect("withdrawal.payout", "payout")
+      .where("payout.id = :payoutId", { payoutId })
+      .andWhere("withdrawal.status = :status", { status: "success" })
+      .orderBy("withdrawal.createdAt", "DESC")
+      .getOne()
+
+    return {
+      pendingWithdrawalCount,
+      lastPayout: lastPayout?.createdAt
+    }
+  }
 }

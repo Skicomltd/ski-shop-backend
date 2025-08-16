@@ -36,7 +36,7 @@ export class WebhookService {
 
     const [subscription, ads, order] = await Promise.all([
       this.subscriptionService.findOne({ reference: data.reference }),
-      this.adsService.findById(data.reference),
+      this.adsService.findOne({ reference: data.reference }),
       this.orderService.findOne({ reference: data.reference })
     ])
 

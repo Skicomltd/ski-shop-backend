@@ -41,6 +41,7 @@ export class OrdersService implements IService<Order> {
       .leftJoinAndSelect("order.items", "item")
       .leftJoinAndSelect("item.product", "product")
       .leftJoinAndSelect("product.user", "vendor")
+      .leftJoinAndSelect("product.store", "store")
       .orderBy("order.createdAt", orderBy)
 
     if (buyerId) {
@@ -184,5 +185,30 @@ export class OrdersService implements IService<Order> {
       totalOrder: parseInt(result?.totalOrder || 0, 10),
       averageOrderValue: parseFloat(result?.averageOrderValue || 0)
     }
+  }
+
+  async getStoreOrders(storeId: string): Promise<
+    Array<{
+      id: string
+      status: string
+      buyerName: string
+      totalAmount: number
+      dateOrdered: Date
+    }>
+  > {
+    const orders = await this.orderRepository
+      .createQueryBuilder("order")
+      .leftJoinAndSelect("order.items", "items")
+      .leftJoinAndSelect("order.buyer", "buyer")
+      .where("items.storeId = :storeId", { storeId })
+      .getMany()
+
+    return orders.map((ord) => ({
+      id: ord.id,
+      status: ord.deliveryStatus,
+      buyerName: ord.buyer.getFullName(),
+      totalAmount: ord.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0),
+      dateOrdered: ord.createdAt
+    }))
   }
 }

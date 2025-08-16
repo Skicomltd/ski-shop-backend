@@ -10,6 +10,7 @@ export class CreateAdDto {
   paymentMethod: PaymentMethod
   duration: number
   type: PromotionTypeEnum
+  reference: string
   amount: number
   startDate?: Date
   endDate?: Date

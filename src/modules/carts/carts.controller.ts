@@ -70,7 +70,7 @@ export class CartsController {
 
       const reference = this.helperService.generateReference("REF-", 12)
 
-      await this.ordersService.create(
+      const order = await this.ordersService.create(
         {
           buyerId: user.id,
           paymentMethod: createCartDto.paymentMethod,
@@ -100,7 +100,7 @@ export class CartsController {
       const payload: InitiatePayment = {
         amount: finalAmount,
         email: user.email,
-        reference: reference
+        reference: order.reference
       }
 
       return await this.paymentsService.with(createCartDto.paymentMethod).initiatePayment(payload)

@@ -21,6 +21,7 @@ import { NotFoundException } from "@/exceptions/notfound.exception"
 import { CsvService } from "../services/utils/csv/csv.service"
 import { AppAbility } from "../services/casl/casl-ability.factory"
 import { Response } from "express"
+import { HelpersService } from "../services/utils/helpers/helpers.service"
 
 @Controller("ads")
 export class AdsController {
@@ -29,7 +30,8 @@ export class AdsController {
     private readonly productsService: ProductsService,
     private readonly promotionsService: PromotionsService,
     private readonly paymentsService: PaymentsService,
-    private readonly csvService: CsvService
+    private readonly csvService: CsvService,
+    private readonly helperService: HelpersService
   ) {}
 
   @Post("")
@@ -54,19 +56,21 @@ export class AdsController {
       throw new BadReqException(`An active promotion ad of type '${promotion.type}' already exists for this product`)
     }
 
+    const reference = await this.helperService.generateReference("REF-", 12)
     const ad = await this.adsService.create({
       duration: promotion.duration,
       productId: product.id,
       type: promotion.type,
       promotionId: promotion.id,
       paymentMethod: dto.paymentMethod,
-      amount: promotion.amount
+      amount: promotion.amount,
+      reference: reference
     })
 
     const payload: InitiatePayment = {
       amount: promotion.amount,
       email: user.email,
-      reference: ad.id
+      reference: ad.reference
     }
 
     return await this.paymentsService.with(dto.paymentMethod).initiatePayment(payload)

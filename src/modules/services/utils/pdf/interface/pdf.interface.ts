@@ -7,6 +7,7 @@ export interface PdfInterface {
     subscriptionStatus: string
     dateJoined: Date
     orders: number
+    lastActivity?: Date
   }
   business: {
     businessName: string
@@ -27,6 +28,7 @@ export interface PdfInterface {
     totalSales: number
     averageNumberOfOrder: number
     totalOrders: number
+    lastOrder?: Date
   }
   payout: {
     walletBalance: number
@@ -38,6 +40,24 @@ export interface PdfInterface {
     id: string
     dateOrdered: Date
     buyerName: string
+    totalAmount: number
+    status: string
+  }[]
+}
+
+export interface pdfBuyerInterface {
+  profile: {
+    fullName: string
+    email: string
+    phoneNumber: string
+    dateJoined: Date
+    status: string
+    lastActivity?: Date | null
+  }
+  orders: {
+    id: string
+    dateOrdered: Date
+    vendorName: string
     totalAmount: number
     status: string
   }[]
