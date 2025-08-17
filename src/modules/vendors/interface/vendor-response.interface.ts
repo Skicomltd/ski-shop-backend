@@ -16,5 +16,6 @@ export interface IVendorResponse {
   store: {
     name: string
     description: string
+    logo: string
   }
 }

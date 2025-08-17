@@ -20,7 +20,8 @@ export abstract class VendorResponseMapper implements IInterceptor {
       },
       store: {
         description: data.business.store.description,
-        name: data.business.store.name
+        name: data.business.store.name,
+        logo: data.business.store.logo
       }
     }
   }
