@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Query, Req, Res, UseGuards, UseInterceptors } from "@nestjs/common"
+import { Controller, Get, Param, ParseUUIDPipe, Query, Req, Res, UseGuards, UseInterceptors } from "@nestjs/common"
 import { OrdersService } from "./orders.service"
 import { IOrdersQuery } from "./interfaces/query-filter.interface"
 import { OrdersInterceptor } from "./interceptors/orders.interceptor"
@@ -75,7 +75,7 @@ export class OrdersController {
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Order))
   @UseInterceptors(OrderInterceptor)
   @Get(":id")
-  async findOne(@Param("id") id: string, @Req() req: Request) {
+  async findOne(@Param("id", ParseUUIDPipe) id: string, @Req() req: Request) {
     const filter: FindOptionsWhere<Order> & { storeId?: string } = { id }
 
     if (req.user.role !== UserRoleEnum.Customer) {
