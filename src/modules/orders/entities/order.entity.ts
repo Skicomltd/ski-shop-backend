@@ -4,6 +4,7 @@ import { ORDER_STATUS, OrderStatus } from "../interfaces/order-status"
 import { User } from "@/modules/users/entity/user.entity"
 import { PAYMENT_METHODS, PaymentMethod } from "../interfaces/payment-method.interface"
 import { ORDER_DELIVERY_STATUS, OrderDeliveryStatus } from "../interfaces/delivery-status"
+import { Commision } from "@/modules/commisions/entities/commision.entity"
 
 @Entity()
 export class Order {
@@ -28,6 +29,9 @@ export class Order {
   @ManyToOne(() => User, (user) => user.orders, { eager: true })
   @JoinColumn()
   buyer: User
+
+  @OneToMany(() => Commision, (commision) => commision.order)
+  commisions: Commision[]
 
   @OneToMany(() => OrderItem, (item) => item.order, { eager: true, cascade: true })
   items: OrderItem[]

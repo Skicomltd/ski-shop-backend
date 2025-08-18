@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors } from "@nestjs/common"
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UseGuards, ParseUUIDPipe } from "@nestjs/common"
 import { SettingsService } from "./settings.service"
 import { CreateGeneralSettingsDto, createSettingSchema } from "./dto/create-setting.dto"
 import { UpdateGeneralSettingDto } from "./dto/update-setting.dto"
@@ -7,6 +7,10 @@ import { RevenueSettingService } from "./revenueSetting.service"
 import { PromotionSettingService } from "./promotionSetting.service"
 import { Play2winSettingService } from "./play2winSetting.service"
 import { SettingInterceptor } from "./interceptor/setting.interceptor"
+import { PolicySettingsGuard } from "./guard/policy-settings.guard"
+import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
+import { Action } from "../services/casl/actions/action"
+import { Setting } from "./entities/setting.entity"
 
 @Controller("settings")
 export class SettingsController {
@@ -18,6 +22,8 @@ export class SettingsController {
   ) {}
 
   @UseInterceptors(SettingInterceptor)
+  @UseGuards(PolicySettingsGuard)
+  @CheckPolicies((ability) => ability.can(Action.Create, Setting))
   @Post()
   async create(@Body(new JoiValidationPipe(createSettingSchema)) createGeneralSettingDto: CreateGeneralSettingsDto) {
     const generalSetting = await this.settingsService.create(createGeneralSettingDto.general)
@@ -30,15 +36,27 @@ export class SettingsController {
     return generalSetting
   }
 
+  @UseGuards(PolicySettingsGuard)
+  @CheckPolicies((ability) => ability.can(Action.Read, Setting))
+  @UseInterceptors(SettingInterceptor)
+  @Get("")
+  async findOnesettings() {
+    return await this.settingsService.findOneSetting()
+  }
+
+  @UseGuards(PolicySettingsGuard)
+  @CheckPolicies((ability) => ability.can(Action.Read, Setting))
   @UseInterceptors(SettingInterceptor)
   @Get(":id")
-  async findOne(@Param("id") id: string) {
+  async findOne(@Param("id", ParseUUIDPipe) id: string) {
     return await this.settingsService.findOne({ id })
   }
 
+  @UseGuards(PolicySettingsGuard)
+  @CheckPolicies((ability) => ability.can(Action.Update, Setting))
   @UseInterceptors(SettingInterceptor)
   @Patch(":id")
-  async update(@Param("id") id: string, @Body() updateGeneralSettingDto: UpdateGeneralSettingDto) {
+  async update(@Param("id", ParseUUIDPipe) id: string, @Body() updateGeneralSettingDto: UpdateGeneralSettingDto) {
     const setting = await this.settingsService.findById(id)
     const [revenueSetting, play2winSetting, promotionSetting] = await Promise.all([
       this.revenueSettingsService.findOne({ settingId: setting.id }),
@@ -53,6 +71,8 @@ export class SettingsController {
     return this.settingsService.update(setting, updateGeneralSettingDto.general)
   }
 
+  @UseGuards(PolicySettingsGuard)
+  @CheckPolicies((ability) => ability.can(Action.Delete, Setting))
   @Delete(":id")
   remove(@Param("id") id: string) {
     return this.settingsService.remove({ id })

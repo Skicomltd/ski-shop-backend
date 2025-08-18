@@ -47,4 +47,25 @@ export class SettingsService implements IService<Setting> {
     const remove = await this.settingRepository.delete(filter)
     return remove.affected || 0
   }
+
+  async getSettings(): Promise<Setting> {
+    const settings = await this.settingRepository.find()
+    return settings[0]
+  }
+
+  async addFulfilmentFeeToOrderAmount(amount: number): Promise<{ totalFee: number; fulfillmentFeePercentage: number; percentageAmount: number }> {
+    const settings = await this.findOneSetting()
+    const percentageAmount = (amount * settings.revenueSetting.fulfillmentFeePercentage) / 100
+    const totalFee = amount + percentageAmount
+    return { totalFee, fulfillmentFeePercentage: settings.revenueSetting.fulfillmentFeePercentage, percentageAmount }
+  }
+
+  async findOneSetting(): Promise<Setting> {
+    return this.settingRepository
+      .createQueryBuilder("setting")
+      .leftJoinAndSelect("setting.revenueSetting", "revenue")
+      .leftJoinAndSelect("setting.promotionSetting", "promotion")
+      .leftJoinAndSelect("setting.play2winSetting", "play2win")
+      .getOne()
+  }
 }

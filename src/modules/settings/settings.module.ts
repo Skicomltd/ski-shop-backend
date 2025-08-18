@@ -13,6 +13,7 @@ import { RevenueSetting } from "./entities/revenueSetting.entity"
 @Module({
   imports: [TypeOrmModule.forFeature([Setting, RevenueSetting, PromotionSetting, Play2winSetting])],
   controllers: [SettingsController],
-  providers: [SettingsService, Play2winSettingService, PromotionSettingService, RevenueSettingService]
+  providers: [SettingsService, Play2winSettingService, PromotionSettingService, RevenueSettingService],
+  exports: [SettingsService]
 })
 export class SettingsModule {}

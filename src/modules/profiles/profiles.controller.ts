@@ -1,5 +1,4 @@
-import { Controller, Get, Query, Res } from "@nestjs/common"
-import { ProfilesService } from "./profiles.service"
+import { Controller, Get, Query, Res, UseGuards } from "@nestjs/common"
 import { IUserQuery } from "../users/interfaces/users-query.interface"
 import { UserService } from "../users/user.service"
 import { NotFoundException } from "@/exceptions/notfound.exception"
@@ -15,11 +14,13 @@ import { Response } from "express"
 import { BadReqException } from "@/exceptions/badRequest.exception"
 import { BuyerProfile } from "./interface/buyer-profile"
 import { UserRoleEnum } from "../users/entity/user.entity"
+import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
+import { PolicyProfilesGuard } from "./guard/policy-profiles.guard"
+import { Action } from "../services/casl/actions/action"
 
 @Controller("profiles")
 export class ProfilesController {
   constructor(
-    private readonly profilesService: ProfilesService,
     private readonly userService: UserService,
     private readonly subscriptionService: SubscriptionService,
     private readonly productService: ProductsService,
@@ -29,73 +30,8 @@ export class ProfilesController {
     private readonly pdfService: PdfService
   ) {}
 
-  @Get("/vendor")
-  async vendorProfile(@Query() query: IUserQuery) {
-    const userId = query.userId
-    if (!userId) {
-      throw new BadReqException("User ID is required")
-    }
-
-    const user = await this.userService.findById(userId)
-    if (!user) {
-      throw new NotFoundException("Vendor not found")
-    }
-
-    if (user.role !== UserRoleEnum.Vendor) throw new BadReqException("User is not a vendor")
-
-    const profile = await this.profilesService.initializeProfile(user)
-    await this.profilesService.populateSubscriptionData(user, profile)
-
-    if (user.business?.store?.id) {
-      await this.profilesService.populateStoreData(user.business.store.id, profile)
-    }
-
-    if (user.business?.store?.id) {
-      await this.profilesService.populatePayoutData(user.business.store.id, profile)
-    }
-
-    return profile
-  }
-
-  @Get("/buyer")
-  async buyerProfile(@Query() query: IUserQuery) {
-    const userId = query.userId
-
-    if (!userId) throw new BadReqException("User ID is required")
-
-    const user = await this.userService.findById(userId)
-
-    if (!user) throw new NotFoundException("User not found")
-
-    if (user.role !== UserRoleEnum.Customer) throw new BadReqException("User is not a customer")
-
-    const [orders, count] = await this.orderService.find({ buyerId: user.id })
-
-    const refinedOrders = orders.flatMap((order) => {
-      return order.items.map((item) => ({
-        id: order.id,
-        vendorName: item.product.store.name,
-        dateOrdered: order.paidAt,
-        totalAmount: order.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0),
-        status: order.deliveryStatus
-      }))
-    })
-
-    const profile: BuyerProfile = {
-      profile: {
-        fullName: user.getFullName(),
-        email: user.email,
-        dateJoined: user.createdAt,
-        phoneNumber: user.phoneNumber,
-        status: user.status,
-        totalOrders: count
-      },
-      orders: refinedOrders
-    }
-
-    return profile
-  }
-
+  @UseGuards(PolicyProfilesGuard)
+  @CheckPolicies((ability) => ability.can(Action.Read, "PROFILE"))
   @Get("/downloads/vendor")
   async downloadVendorProfilePdf(@Query() query: IUserQuery, @Res() res: Response) {
     const userId = query.userId
@@ -179,6 +115,8 @@ export class ProfilesController {
     res.send(pdfBuffer)
   }
 
+  @UseGuards(PolicyProfilesGuard)
+  @CheckPolicies((ability) => ability.can(Action.Read, "PROFILE"))
   @Get("downloads/buyer")
   async downloadBuyerProfile(@Query() query: IUserQuery, @Res() res: Response) {
     const userId = query.userId

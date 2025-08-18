@@ -1,5 +1,4 @@
 import { Module } from "@nestjs/common"
-import { ProfilesService } from "./profiles.service"
 import { ProfilesController } from "./profiles.controller"
 import { SubscriptionModule } from "../subscription/subscription.module"
 import { UserModule } from "../users/user.module"
@@ -10,7 +9,6 @@ import { WithdrawalsModule } from "../withdrawals/withdrawals.module"
 
 @Module({
   imports: [UserModule, SubscriptionModule, ProductsModule, OrdersModule, PayoutsModule, WithdrawalsModule],
-  controllers: [ProfilesController],
-  providers: [ProfilesService]
+  controllers: [ProfilesController]
 })
 export class ProfilesModule {}

@@ -5,6 +5,7 @@ export class CreateVoucherDto {
   userId: string
   code: string
   dateWon: Date
+  orderId?: string
   status?: VoucherEnum
   prizeWon: number
   prizeType: CouponEnumType

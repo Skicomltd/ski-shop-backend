@@ -17,6 +17,7 @@ import { Withdrawal } from "@/modules/withdrawals/entities/withdrawal.entity"
 import { Ad } from "@/modules/ads/entities/ad.entity"
 import { Coupon } from "@/modules/coupons/entities/coupon.entity"
 import { Voucher } from "@/modules/vouchers/entities/voucher.entity"
+import { Setting } from "@/modules/settings/entities/setting.entity"
 
 type Subjects = InferSubjects<
   | typeof User
@@ -34,8 +35,10 @@ type Subjects = InferSubjects<
   | typeof Ad
   | typeof Coupon
   | typeof Voucher
+  | typeof Setting
   | "REVENUE"
   | "VENDOR"
+  | "PROFILE"
   | "all"
 >
 
@@ -466,6 +469,47 @@ export class CaslAbilityFactory {
       cannot(Action.Create, Voucher)
       cannot(Action.Delete, Voucher)
       cannot(Action.Update, Voucher)
+    }
+
+    const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
+  }
+
+  createUserAbilityForSettings(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, Setting)
+    } else {
+      cannot(Action.Create, Setting)
+      cannot(Action.Read, Setting)
+      cannot(Action.Update, Setting)
+      cannot(Action.Delete, Setting)
+    }
+
+    const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
+  }
+  createUserAbilityForProfile(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, "PROFILE")
+    } else {
+      cannot(Action.Create, "PROFILE")
+      cannot(Action.Read, "PROFILE")
+      cannot(Action.Update, "PROFILE")
+      cannot(Action.Delete, "PROFILE")
     }
 
     const ability = build({

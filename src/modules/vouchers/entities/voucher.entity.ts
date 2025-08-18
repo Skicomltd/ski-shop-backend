@@ -17,6 +17,9 @@ export class Voucher {
   @Column()
   code: string
 
+  @Column()
+  orderId: string
+
   @Column({ type: "timestamp" })
   dateWon: Date
 

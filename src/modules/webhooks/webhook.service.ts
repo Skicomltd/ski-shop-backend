@@ -14,6 +14,10 @@ import { PayoutsService } from "../payouts/payouts.service"
 import { AdsService } from "../ads/ads.service"
 import { Ad } from "../ads/entities/ad.entity"
 import { vendonEnumType } from "../stores/entities/store.entity"
+import { CommisionsService } from "../commisions/commisions.service"
+import { CommisionEnum } from "../commisions/enum/commision-enum"
+import { VoucherService } from "../vouchers/voucher.service"
+import { VoucherEnum } from "../vouchers/enum/voucher-enum"
 
 @Injectable()
 export class WebhookService {
@@ -27,7 +31,9 @@ export class WebhookService {
     private readonly adsService: AdsService,
     private readonly transactionHelper: TransactionHelper,
     private readonly withdrawalsService: WithdrawalsService,
-    private readonly payoutsService: PayoutsService
+    private readonly payoutsService: PayoutsService,
+    private readonly commisionService: CommisionsService,
+    private readonly voucherService: VoucherService
   ) {}
 
   async handleChargeSuccess(data: PaystackChargeSuccess) {
@@ -93,7 +99,6 @@ export class WebhookService {
     }
 
     await this.transactionHelper.runInTransaction(async (manager) => {
-      // clear user cart
       await this.cartsService.remove({ user: { id: order.buyerId } }, manager)
 
       await this.orderService.update(
@@ -106,23 +111,31 @@ export class WebhookService {
         manager
       )
 
+      const voucher = await this.voucherService.findOne({ orderId: order.id })
+      if (voucher) {
+        await this.voucherService.update(voucher, { status: VoucherEnum.REDEEMED }, manager)
+      }
+
       for (const item of order.items) {
         const product = item.product
         const storeId = product.user.business.store.id
         const total = item.unitPrice * item.quantity
+        const commission = await this.commisionService.findOne({ orderId: order.id, storeId })
 
+        const totalAfterCommission = total - commission.commisionFee
         const payout = await this.payoutsService.findOne({ storeId })
         const store = await this.storeService.findById(storeId)
 
         await this.storeService.update(store, { numberOfSales: store.numberOfSales + item.quantity }, manager)
         if (!payout) {
-          await this.payoutsService.create({ storeId, total, available: total }, manager)
+          await this.payoutsService.create({ storeId, total: totalAfterCommission, available: totalAfterCommission }, manager)
         } else {
-          await this.payoutsService.update(payout, payout.handleVendorOrder(total), manager)
+          await this.payoutsService.update(payout, payout.handleVendorOrder(totalAfterCommission), manager)
         }
+
+        await this.commisionService.update(commission, { commisionStatus: CommisionEnum.PAID }, manager)
       }
     })
-    return
   }
 
   async handleInvoiceCreate(data: PaystackChargeSuccess) {

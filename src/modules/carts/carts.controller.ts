@@ -19,7 +19,8 @@ import { UserService } from "../users/user.service"
 import { HelpersService } from "../services/utils/helpers/helpers.service"
 import { IcartQuery } from "./interfaces/cart.interface"
 import { VoucherService } from "../vouchers/voucher.service"
-import { VoucherEnum } from "../vouchers/enum/voucher-enum"
+import { SettingsService } from "../settings/settings.service"
+import { CommisionsService } from "../commisions/commisions.service"
 
 @Controller("carts")
 export class CartsController {
@@ -31,7 +32,9 @@ export class CartsController {
     private readonly transactionHelper: TransactionHelper,
     private readonly userService: UserService,
     private readonly helperService: HelpersService,
-    private readonly voucherService: VoucherService
+    private readonly voucherService: VoucherService,
+    private readonly settingService: SettingsService,
+    private readonly commisionService: CommisionsService
   ) {}
 
   @Post()
@@ -53,23 +56,17 @@ export class CartsController {
     const user = req.user
 
     return this.transactionHelper.runInTransaction(async (manager) => {
-      if (!(await this.cartsService.exists({ user: { id: user.id } }))) throw new NotFoundException("empty cart")
+      if (!(await this.cartsService.exists({ user: { id: user.id } }))) {
+        throw new NotFoundException("empty cart")
+      }
 
       const [carts] = await this.cartsService.find({ user: { id: user.id } })
-
       const amount = await this.cartsService.calculateTotalPrice(user.id)
 
       const voucher = query.code ? await this.voucherService.findOne({ userId: user.id, code: query.code }) : null
-
       let finalAmount = amount
-      if (voucher) {
-        finalAmount = await this.voucherService.applyVoucher(voucher, amount)
-        // should the voucher be updated here or after payments has being made??
-        await this.voucherService.update(voucher, { status: VoucherEnum.REDEEMED }, manager)
-      }
 
       const reference = this.helperService.generateReference("REF-", 12)
-
       const order = await this.ordersService.create(
         {
           buyerId: user.id,
@@ -84,21 +81,17 @@ export class CartsController {
         },
         manager
       )
-      await this.userService.update(user, { ordersCount: user.ordersCount + 1 }, manager)
-      const storeIds = carts.map((cart) => cart.product.storeId)
-      const vendors = await Promise.all(
-        storeIds.map(async (storeId) => {
-          const vendor = await this.userService.findOne({ business: { store: { id: storeId } } })
-          const itemCount = carts.filter((cart) => cart.product.storeId === storeId).length
-          return { vendor, itemCount }
-        })
-      )
-      await Promise.all(
-        vendors.map(({ vendor, itemCount }) => this.userService.update(vendor, { itemsCount: vendor.itemsCount + itemCount }, manager))
-      )
+
+      if (voucher) {
+        finalAmount = await this.voucherService.applyVoucher(voucher, amount)
+        await this.voucherService.update(voucher, { orderId: order.id }, manager)
+      }
+
+      const { totalCommissionFee } = await this.cartsService.createCommissions(order.id, carts, manager)
+      const totalFee = finalAmount + totalCommissionFee
 
       const payload: InitiatePayment = {
-        amount: finalAmount,
+        amount: totalFee,
         email: user.email,
         reference: order.reference
       }

@@ -3,6 +3,7 @@ import { Payout } from "@/modules/payouts/entities/payout.entity"
 import { Product } from "@/modules/products/entities/product.entity"
 import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, OneToMany, JoinColumn } from "typeorm"
 import { IStoreShortResponse } from "../interface/short-format-response.interface"
+import { Commision } from "@/modules/commisions/entities/commision.entity"
 
 // TODO: ENDPOINT TO RETURN AN ARRAY OF STORE CATEGORIES ENUM
 
@@ -47,6 +48,9 @@ export class Store {
 
   @OneToMany(() => Product, (product) => product.store)
   products: Product[]
+
+  @OneToMany(() => Commision, (commision) => commision.store)
+  commisions: Commision[]
 
   @Column({ type: "enum", enum: vendonEnumType, default: vendonEnumType.BASIC })
   type: vendonEnumType

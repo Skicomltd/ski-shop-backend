@@ -4,10 +4,17 @@ import { Cart } from "./entities/cart.entity"
 import { EntityManager, FindManyOptions, FindOptionsWhere, Repository } from "typeorm"
 import { InjectRepository } from "@nestjs/typeorm"
 import { IcartQuery } from "./interfaces/cart.interface"
+import { CommisionEnum } from "../commisions/enum/commision-enum"
+import { SettingsService } from "../settings/settings.service"
+import { CommisionsService } from "../commisions/commisions.service"
 
 @Injectable()
 export class CartsService implements IService<Cart> {
-  constructor(@InjectRepository(Cart) private cartRepository: Repository<Cart>) {}
+  constructor(
+    @InjectRepository(Cart) private cartRepository: Repository<Cart>,
+    private readonly settingService: SettingsService,
+    private readonly commisionService: CommisionsService
+  ) {}
 
   private readonly relations = ["product", "product.store", "product.store.business", "product.store.business.user"]
 
@@ -72,5 +79,31 @@ export class CartsService implements IService<Cart> {
       .getRawOne()
 
     return parseFloat(result.total) || 0
+  }
+
+  async createCommissions(orderId: string, carts: Cart[], manager: EntityManager) {
+    const storeIds = [...new Set(carts.map((cart) => cart.product.storeId))]
+    const commissions = await Promise.all(
+      storeIds.map(async (storeId) => {
+        const storeSubtotal = carts
+          .filter((cart) => cart.product.storeId === storeId)
+          .reduce((sum, cart) => sum + cart.quantity * (cart.product.discountPrice || cart.product.price), 0)
+        const { percentageAmount, fulfillmentFeePercentage } = await this.settingService.addFulfilmentFeeToOrderAmount(storeSubtotal)
+        return this.commisionService.create(
+          {
+            storeId,
+            commisionFee: percentageAmount,
+            commisionValue: fulfillmentFeePercentage,
+            orderId,
+            commisionStatus: CommisionEnum.UNPAID
+          },
+          manager
+        )
+      })
+    )
+    return {
+      commissions,
+      totalCommissionFee: commissions.reduce((sum, comm) => sum + comm.commisionFee, 0)
+    }
   }
 }
