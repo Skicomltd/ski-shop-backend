@@ -1,0 +1,60 @@
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors } from "@nestjs/common"
+import { SettingsService } from "./settings.service"
+import { CreateGeneralSettingsDto, createSettingSchema } from "./dto/create-setting.dto"
+import { UpdateGeneralSettingDto } from "./dto/update-setting.dto"
+import { JoiValidationPipe } from "@/validations/joi.validation"
+import { RevenueSettingService } from "./revenueSetting.service"
+import { PromotionSettingService } from "./promotionSetting.service"
+import { Play2winSettingService } from "./play2winSetting.service"
+import { SettingInterceptor } from "./interceptor/setting.interceptor"
+
+@Controller("settings")
+export class SettingsController {
+  constructor(
+    private readonly settingsService: SettingsService,
+    private readonly revenueSettingsService: RevenueSettingService,
+    private readonly promotionSettingService: PromotionSettingService,
+    private readonly play2winSettingService: Play2winSettingService
+  ) {}
+
+  @UseInterceptors(SettingInterceptor)
+  @Post()
+  async create(@Body(new JoiValidationPipe(createSettingSchema)) createGeneralSettingDto: CreateGeneralSettingsDto) {
+    const generalSetting = await this.settingsService.create(createGeneralSettingDto.general)
+
+    await Promise.all([
+      this.revenueSettingsService.create({ ...createGeneralSettingDto.revenue, settingId: generalSetting.id, setting: generalSetting }),
+      this.promotionSettingService.create({ ...createGeneralSettingDto.promotion, settingId: generalSetting.id, setting: generalSetting }),
+      this.play2winSettingService.create({ ...createGeneralSettingDto.play2win, settingId: generalSetting.id, setting: generalSetting })
+    ])
+    return generalSetting
+  }
+
+  @UseInterceptors(SettingInterceptor)
+  @Get(":id")
+  async findOne(@Param("id") id: string) {
+    return await this.settingsService.findOne({ id })
+  }
+
+  @UseInterceptors(SettingInterceptor)
+  @Patch(":id")
+  async update(@Param("id") id: string, @Body() updateGeneralSettingDto: UpdateGeneralSettingDto) {
+    const setting = await this.settingsService.findById(id)
+    const [revenueSetting, play2winSetting, promotionSetting] = await Promise.all([
+      this.revenueSettingsService.findOne({ settingId: setting.id }),
+      this.play2winSettingService.findOne({ settingId: setting.id }),
+      this.promotionSettingService.findOne({ settingId: setting.id })
+    ])
+    await Promise.all([
+      this.revenueSettingsService.update(revenueSetting, updateGeneralSettingDto.revenue),
+      this.play2winSettingService.update(play2winSetting, updateGeneralSettingDto.play2win),
+      this.promotionSettingService.update(promotionSetting, updateGeneralSettingDto.promotion)
+    ])
+    return this.settingsService.update(setting, updateGeneralSettingDto.general)
+  }
+
+  @Delete(":id")
+  remove(@Param("id") id: string) {
+    return this.settingsService.remove({ id })
+  }
+}

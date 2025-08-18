@@ -39,6 +39,7 @@ import { RevenuesModule } from "./modules/revenues/revenues.module"
 import { CouponsModule } from "./modules/coupons/coupons.module"
 import { VoucherModule } from "./modules/vouchers/voucher.module"
 import { ProfilesModule } from './modules/profiles/profiles.module';
+import { SettingsModule } from './modules/settings/settings.module';
 @Module({
   imports: [
     UserModule,
@@ -75,7 +76,8 @@ import { ProfilesModule } from './modules/profiles/profiles.module';
     RevenuesModule,
     CouponsModule,
     VoucherModule,
-    ProfilesModule
+    ProfilesModule,
+    SettingsModule
   ],
   controllers: [AppController],
   providers: [
