@@ -54,21 +54,29 @@ export class SettingsController {
 
   @UseGuards(PolicySettingsGuard)
   @CheckPolicies((ability) => ability.can(Action.Update, Setting))
-  @UseInterceptors(SettingInterceptor)
   @Patch(":id")
   async update(@Param("id", ParseUUIDPipe) id: string, @Body() updateGeneralSettingDto: UpdateGeneralSettingDto) {
     const setting = await this.settingsService.findById(id)
-    const [revenueSetting, play2winSetting, promotionSetting] = await Promise.all([
-      this.revenueSettingsService.findOne({ settingId: setting.id }),
-      this.play2winSettingService.findOne({ settingId: setting.id }),
-      this.promotionSettingService.findOne({ settingId: setting.id })
-    ])
-    await Promise.all([
-      this.revenueSettingsService.update(revenueSetting, updateGeneralSettingDto.revenue),
-      this.play2winSettingService.update(play2winSetting, updateGeneralSettingDto.play2win),
-      this.promotionSettingService.update(promotionSetting, updateGeneralSettingDto.promotion)
-    ])
-    return this.settingsService.update(setting, updateGeneralSettingDto.general)
+    if (updateGeneralSettingDto.general) {
+      this.settingsService.update(setting, updateGeneralSettingDto.general)
+    }
+
+    if (updateGeneralSettingDto.revenue) {
+      const revenueSetting = await this.revenueSettingsService.findOne({ settingId: setting.id })
+      await this.revenueSettingsService.update(revenueSetting, updateGeneralSettingDto.revenue)
+    }
+
+    if (updateGeneralSettingDto.promotion) {
+      const promotionSetting = await this.promotionSettingService.findOne({ settingId: setting.id })
+      await this.promotionSettingService.update(promotionSetting, updateGeneralSettingDto.promotion)
+    }
+
+    if (updateGeneralSettingDto.play2win) {
+      const play2winSetting = await this.play2winSettingService.findOne({ settingId: setting.id })
+      await this.play2winSettingService.update(play2winSetting, updateGeneralSettingDto.play2win)
+    }
+
+    return "Settings updated successfully"
   }
 
   @UseGuards(PolicySettingsGuard)
