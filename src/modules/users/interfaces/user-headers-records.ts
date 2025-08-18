@@ -1,3 +1,5 @@
+import { KYC_ENUM_STATUS } from "@/modules/business/enum/kyc-status-enum"
+
 export interface HeadersRecordsInterface {
   headers: Header[]
   records: Record[]
@@ -12,5 +14,6 @@ type Record = {
   name: string
   phoneNumber: string
   emailAddress: string
-  orders: number
+  orders?: number
+  kycStatus?: KYC_ENUM_STATUS
 }

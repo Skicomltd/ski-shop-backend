@@ -134,6 +134,24 @@ export class UserService implements IService<User> {
       })
 
       return { headers, records }
+    } else {
+      const headers = [
+        { key: "name", header: "Name" },
+        { key: "phoneNumber", header: "Phone Number" },
+        { key: "emailAddress", header: "Email Address" },
+        { key: "status", header: "Status" }
+      ]
+
+      const records = users.map((user) => {
+        return {
+          name: user.getFullName(),
+          phoneNumber: user.phoneNumber,
+          emailAddress: user.email,
+          status: user.status
+        }
+      })
+
+      return { records, headers }
     }
   }
 }
