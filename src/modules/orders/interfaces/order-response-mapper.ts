@@ -12,7 +12,7 @@ export abstract class OrderResponseMapper implements IInterceptor {
       buyer: {
         id: data.buyer.id,
         name: data.buyer.getFullName(),
-        phone: data.buyer.phoneNumber,
+        phoneNumber: data.buyer.phoneNumber,
         address: data.buyer.address
       },
       products: data.items.map((item) => ({

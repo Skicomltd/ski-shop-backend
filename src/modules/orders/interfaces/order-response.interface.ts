@@ -5,7 +5,7 @@ export interface IOrderResponse {
   id: string
   products: OrderItemResponse[]
   status: OrderStatus
-  buyer: IdName & { address: string; phone: string }
+  buyer: IdName & { address: string; phoneNumber: string }
   createdAt: string
   paidAt: Date
   reference: string
