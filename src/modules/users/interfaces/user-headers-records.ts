@@ -1,12 +1,16 @@
 export interface HeadersRecordsInterface {
-  headers: {
-    key: string
-    header: string
-  }[]
-  records: {
-    name: string
-    phoneNumber: string
-    emailAddress: string
-    orders: number
-  }[]
+  headers: Header[]
+  records: Record[]
+}
+
+type Header = {
+  key: string
+  header: string
+}
+
+type Record = {
+  name: string
+  phoneNumber: string
+  emailAddress: string
+  orders: number
 }
