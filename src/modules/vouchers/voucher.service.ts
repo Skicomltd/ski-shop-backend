@@ -63,7 +63,7 @@ export class VoucherService implements IService<Voucher> {
     return result.length
   }
 
-  async applyVoucher(voucher: Voucher, amount: number): Promise<number> {
+  applyVoucher(voucher: Voucher, amount: number): number {
     if (voucher.prizeType === CouponEnumType.AMOUNT) {
       return amount - voucher.prizeWon
     } else {

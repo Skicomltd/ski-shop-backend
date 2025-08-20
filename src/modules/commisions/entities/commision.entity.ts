@@ -1,7 +1,6 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
-import { CommisionEnum } from "../enum/commision-enum"
-import { Order } from "@/modules/orders/entities/order.entity"
+import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm"
 import { Store } from "@/modules/stores/entities/store.entity"
+import { OrderItem } from "@/modules/orders/entities/order-item.entity"
 
 @Entity()
 export class Commision {
@@ -9,22 +8,20 @@ export class Commision {
   id: string
 
   @Column({ type: "float" })
-  commisionFee: number
+  amount: number // amound deducted
 
   @Column()
-  orderId: string
+  orderItemId: string
 
   @Column()
   storeId: string
 
   @Column({ type: "float" })
-  commisionValue: number
+  value: number // % deducted
 
-  @Column({ type: "enum", enum: CommisionEnum, default: CommisionEnum.UNPAID })
-  commisionStatus: CommisionEnum
-
-  @ManyToOne(() => Order, (order) => order.commisions)
-  order: Order
+  @OneToOne(() => OrderItem)
+  @JoinColumn()
+  orderItem: OrderItem
 
   @ManyToOne(() => Store, (store) => store.commisions)
   store: Store

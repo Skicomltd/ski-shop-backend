@@ -15,9 +15,9 @@ import { AdsService } from "../ads/ads.service"
 import { Ad } from "../ads/entities/ad.entity"
 import { vendonEnumType } from "../stores/entities/store.entity"
 import { CommisionsService } from "../commisions/commisions.service"
-import { CommisionEnum } from "../commisions/enum/commision-enum"
 import { VoucherService } from "../vouchers/voucher.service"
 import { VoucherEnum } from "../vouchers/enum/voucher-enum"
+import { SettingsService } from "../settings/settings.service"
 
 @Injectable()
 export class WebhookService {
@@ -33,7 +33,8 @@ export class WebhookService {
     private readonly withdrawalsService: WithdrawalsService,
     private readonly payoutsService: PayoutsService,
     private readonly commisionService: CommisionsService,
-    private readonly voucherService: VoucherService
+    private readonly voucherService: VoucherService,
+    private readonly settingsService: SettingsService
   ) {}
 
   async handleChargeSuccess(data: PaystackChargeSuccess) {
@@ -120,20 +121,31 @@ export class WebhookService {
         const product = item.product
         const storeId = product.user.business.store.id
         const total = item.unitPrice * item.quantity
-        const commission = await this.commisionService.findOne({ orderId: order.id, storeId })
+        const commission = await this.commisionService.calculateOrderItemCommission(item)
 
-        const totalAfterCommission = total - commission.commisionFee
+        const totalAfterCommission = total - commission
         const payout = await this.payoutsService.findOne({ storeId })
-        const store = await this.storeService.findById(storeId)
 
+        const store = await this.storeService.findById(storeId)
         await this.storeService.update(store, { numberOfSales: store.numberOfSales + item.quantity }, manager)
+
         if (!payout) {
           await this.payoutsService.create({ storeId, total: totalAfterCommission, available: totalAfterCommission }, manager)
         } else {
           await this.payoutsService.update(payout, payout.handleVendorOrder(totalAfterCommission), manager)
         }
 
-        await this.commisionService.update(commission, { commisionStatus: CommisionEnum.PAID }, manager)
+        const setting = await this.settingsService.findOneSetting()
+
+        await this.commisionService.create(
+          {
+            amount: commission,
+            value: setting.revenueSetting.fulfillmentFeePercentage,
+            storeId,
+            orderItemId: item.id
+          },
+          manager
+        )
       }
     })
   }

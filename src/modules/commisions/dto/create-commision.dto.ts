@@ -1,9 +1,6 @@
-import { CommisionEnum } from "../enum/commision-enum"
-
 export class CreateCommisionDto {
-  commisionFee: number
-  commisionValue: number
-  orderId: string
+  amount: number
+  value: number
+  orderItemId: string
   storeId: string
-  commisionStatus?: CommisionEnum
 }

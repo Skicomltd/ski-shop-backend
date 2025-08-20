@@ -1,5 +1,5 @@
 import { Request } from "express"
-import { Controller, Post, Body, Req, Get, Param, ParseUUIDPipe, Delete, Patch, UseInterceptors, Query } from "@nestjs/common"
+import { Controller, Post, Body, Req, Get, Param, ParseUUIDPipe, Delete, Patch, UseInterceptors } from "@nestjs/common"
 import { CartsService } from "./carts.service"
 import { CreateCartDto, createCartSchema } from "./dto/create-cart.dto"
 import { UpdateCartDto, updateCartSchema } from "./dto/update-cart.dto"
@@ -17,10 +17,11 @@ import { OrdersService } from "../orders/orders.service"
 import { TransactionHelper } from "../services/utils/transactions/transactions.service"
 import { UserService } from "../users/user.service"
 import { HelpersService } from "../services/utils/helpers/helpers.service"
-import { IcartQuery } from "./interfaces/cart.interface"
 import { VoucherService } from "../vouchers/voucher.service"
 import { SettingsService } from "../settings/settings.service"
 import { CommisionsService } from "../commisions/commisions.service"
+import { BadReqException } from "@/exceptions/badRequest.exception"
+import { VoucherEnum } from "../vouchers/enum/voucher-enum"
 
 @Controller("carts")
 export class CartsController {
@@ -52,25 +53,23 @@ export class CartsController {
   }
 
   @Post("checkout")
-  async checkout(@Body(new JoiValidationPipe(checkoutSchema)) createCartDto: CheckoutDto, @Query() query: IcartQuery, @Req() req: Request) {
+  async checkout(@Body(new JoiValidationPipe(checkoutSchema)) checkoutDto: CheckoutDto, @Req() req: Request) {
     const user = req.user
 
+    const voucher = await this.voucherService.findById(checkoutDto.voucherId)
+    if (checkoutDto.voucherId && !voucher) throw new BadReqException("voucher not found")
+    if (checkoutDto.voucherId && voucher.status === VoucherEnum.REDEEMED) throw new BadReqException("voucher redeemed")
+
     return this.transactionHelper.runInTransaction(async (manager) => {
-      if (!(await this.cartsService.exists({ user: { id: user.id } }))) {
-        throw new NotFoundException("empty cart")
-      }
+      const [carts, count] = await this.cartsService.find({ user: { id: user.id } })
+      if (count <= 0) throw new NotFoundException("empty cart")
 
-      const [carts] = await this.cartsService.find({ user: { id: user.id } })
       const amount = await this.cartsService.calculateTotalPrice(user.id)
-
-      const voucher = query.code ? await this.voucherService.findOne({ userId: user.id, code: query.code }) : null
-      let finalAmount = amount
-
       const reference = this.helperService.generateReference("REF-", 12)
       const order = await this.ordersService.create(
         {
           buyerId: user.id,
-          paymentMethod: createCartDto.paymentMethod,
+          paymentMethod: checkoutDto.paymentMethod,
           reference,
           items: carts.map((cart) => ({
             quantity: cart.quantity,
@@ -82,21 +81,18 @@ export class CartsController {
         manager
       )
 
-      if (voucher) {
-        finalAmount = await this.voucherService.applyVoucher(voucher, amount)
-        await this.voucherService.update(voucher, { orderId: order.id }, manager)
-      }
-
-      const { totalCommissionFee } = await this.cartsService.createCommissions(order.id, carts, manager)
-      const totalFee = finalAmount + totalCommissionFee
-
       const payload: InitiatePayment = {
-        amount: totalFee,
+        amount,
         email: user.email,
         reference: order.reference
       }
 
-      return await this.paymentsService.with(createCartDto.paymentMethod).initiatePayment(payload)
+      if (checkoutDto.voucherId) {
+        payload.amount = this.voucherService.applyVoucher(voucher, amount)
+        await this.voucherService.update(voucher, { orderId: order.id }, manager)
+      }
+
+      return await this.paymentsService.with(checkoutDto.paymentMethod).initiatePayment(payload)
     })
   }
 
