@@ -71,7 +71,7 @@ export class ProfilesController {
         kycStatus: user.business?.kycStatus || "unverified",
         subscriptionStatus: latestSubscription?.status || "inactive",
         dateJoined: user.createdAt,
-        orders: orders.totalOrder || 0
+        orders: 0
       },
       business: {
         businessName: user.business?.name || "N/A",
@@ -89,8 +89,8 @@ export class ProfilesController {
       product: {
         totalProduct: productCounts.totalProduct || 0,
         totalPublishedProduct: productCounts.totalPublishedOrDraftProduct || 0,
-        totalOrders: orders.totalOrder || 0,
-        totalSales: orders.totalSales || 0,
+        totalOrders: 0,
+        totalSales: 0,
         averageNumberOfOrder: orders.averageOrderValue || 0
       },
       payout: {

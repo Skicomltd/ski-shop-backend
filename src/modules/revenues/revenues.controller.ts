@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Res, UseGuards } from "@nestjs/common"
+import { Controller, Get, Param, ParseUUIDPipe, Query, Res, UseGuards } from "@nestjs/common"
 import { SubscriptionService } from "../subscription/subscription.service"
 import { OrdersService } from "../orders/orders.service"
 import { IRevenueQuery } from "./interface/query.interface"
@@ -66,13 +66,10 @@ export class RevenuesController {
   }
 
   @UseGuards(PolicyRevenueGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, "REVENUE"))
-  @Get("/store")
-  async getStoreRevenueMetrics(@Query() query: IRevenueQuery) {
-    const storeId = query.storeId
-
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, "REVENUE"))
+  @Get("/stores/:storeId")
+  async getStoreRevenueMetrics(@Param("storeId", ParseUUIDPipe) storeId: string) {
     const store = await this.storeService.findById(storeId)
-
     if (!store) throw new NotFoundException("Store does not exist")
 
     return await this.ordersService.getStoreRevenueMetrics(storeId)

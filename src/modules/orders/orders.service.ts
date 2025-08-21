@@ -181,8 +181,8 @@ export class OrdersService implements IService<Order> {
       .getRawOne()
 
     return {
-      totalSales: parseFloat(result?.totalSales || 0),
-      totalOrder: parseInt(result?.totalOrder || 0, 10),
+      totalRevenue: parseFloat(result?.totalSales || 0),
+      totalOrders: parseInt(result?.totalOrder || 0, 10),
       averageOrderValue: parseFloat(result?.averageOrderValue || 0)
     }
   }

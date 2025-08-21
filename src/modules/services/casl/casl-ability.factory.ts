@@ -371,6 +371,8 @@ export class CaslAbilityFactory {
 
     if (user.role === UserRoleEnum.Admin) {
       can(Action.Manage, "REVENUE")
+    } else if (user.role === UserRoleEnum.Vendor) {
+      can(Action.Read, "REVENUE")
     } else if (user.role) {
       cannot(Action.Read, "REVENUE")
       cannot(Action.Delete, "REVENUE")

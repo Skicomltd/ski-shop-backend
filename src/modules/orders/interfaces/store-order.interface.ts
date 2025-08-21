@@ -1,5 +1,5 @@
 export interface StoreOrderRevenueSummary {
-  totalSales: number
-  totalOrder: number
+  totalRevenue: number
+  totalOrders: number
   averageOrderValue: number
 }
