@@ -17,7 +17,7 @@ export class Voucher {
   @Column()
   code: string
 
-  @Column()
+  @Column({ nullable: true })
   orderId: string
 
   @Column({ type: "timestamp" })

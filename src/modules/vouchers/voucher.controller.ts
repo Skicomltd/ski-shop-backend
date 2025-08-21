@@ -15,7 +15,7 @@ import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { Voucher } from "./entities/voucher.entity"
 import { Action } from "../services/casl/actions/action"
 
-@Controller("voucher")
+@Controller("vouchers")
 export class VoucherController {
   constructor(private readonly voucherService: VoucherService) {}
 

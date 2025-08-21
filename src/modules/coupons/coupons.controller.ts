@@ -15,13 +15,15 @@ import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { CouponsResponseInterceptor } from "./interceptor/coupons.interceptor"
 import { VoucherService } from "../vouchers/voucher.service"
 import { Request } from "express"
+import { TransactionHelper } from "../services/utils/transactions/transactions.service"
 
 @Controller("coupons")
 export class CouponsController {
   constructor(
     private readonly couponsService: CouponsService,
     private helperService: HelpersService,
-    private readonly voucherService: VoucherService
+    private readonly voucherService: VoucherService,
+    private readonly transactionHelper: TransactionHelper
   ) {}
 
   @UseInterceptors(CouponInterceptor)
@@ -59,18 +61,23 @@ export class CouponsController {
 
     const coupon = await this.couponsService.findRandomCoupon()
 
-    // add a scheduler to update the status of the voucher to expired if after its end date
-    await this.voucherService.create({
-      code: coupon.code,
-      dateWon: new Date(),
-      prizeType: coupon.couponType,
-      prizeWon: coupon.value,
-      userId: user.id,
-      startDate: coupon.startDate,
-      endDate: coupon.endDate
-    })
+    await this.transactionHelper.runInTransaction(async (manager) => {
+      // add a scheduler to update the status of the voucher to expired if after its end date
+      await this.voucherService.create(
+        {
+          code: coupon.code,
+          dateWon: new Date(),
+          prizeType: coupon.couponType,
+          prizeWon: coupon.value,
+          userId: user.id,
+          startDate: coupon.startDate,
+          endDate: coupon.endDate
+        },
+        manager
+      )
 
-    await this.couponsService.update(coupon, { remainingQuantity: coupon.remainingQuantity - 1 })
+      await this.couponsService.update(coupon, { remainingQuantity: coupon.remainingQuantity - 1 }, manager)
+    })
 
     return coupon
   }
