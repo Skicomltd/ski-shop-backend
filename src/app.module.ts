@@ -38,9 +38,9 @@ import { ScheduleModule } from "@nestjs/schedule"
 import { RevenuesModule } from "./modules/revenues/revenues.module"
 import { CouponsModule } from "./modules/coupons/coupons.module"
 import { VoucherModule } from "./modules/vouchers/voucher.module"
-import { ProfilesModule } from './modules/profiles/profiles.module';
-import { SettingsModule } from './modules/settings/settings.module';
-import { CommisionsModule } from './modules/commisions/commisions.module';
+import { ProfilesModule } from "./modules/profiles/profiles.module"
+import { SettingsModule } from "./modules/settings/settings.module"
+import { CommisionsModule } from "./modules/commisions/commisions.module"
 @Module({
   imports: [
     UserModule,
