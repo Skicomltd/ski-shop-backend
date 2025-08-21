@@ -26,7 +26,6 @@ export abstract class StoreResponseMapper implements IInterceptor {
         name: data.business?.user.getFullName()
       },
       rating: data?.totalStoreRatingSum / data?.totalStoreRatingCount || 0,
-      isStarSeller: data.isStarSeller,
       createdAt: data.createdAt,
       updatedAt: data.updateAt,
       type: data.type
