@@ -255,9 +255,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async resetPassword(@Body(new JoiValidationPipe(resetPasswordSchema)) { password, token }: ResetPasswordDto) {
     const userId = await this.authService.validateResetToken(token)
+    console.error("user id", userId)
 
     const user = await this.userService.findById(userId)
-
+    console.error("user", user)
     await this.userService.update(user, { password })
 
     return "Password successfully reset"
