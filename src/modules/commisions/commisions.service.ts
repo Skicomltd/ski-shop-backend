@@ -70,20 +70,21 @@ export class CommisionsService implements IService<Commision> {
     return result
   }
 
-  async getCommisionMonthlyRevenue({ startDate, endDate, status }: CommisionRevenueInterface): Promise<MonthlyCommisionRevenue[]> {
-    const result = await this.commisionRepository
+  async getCommisionMonthlyRevenue({ startDate, endDate }: CommisionRevenueInterface): Promise<MonthlyCommisionRevenue[]> {
+    const query = this.commisionRepository
       .createQueryBuilder("commision")
       .select("EXTRACT(YEAR FROM commision.createdAt)::integer", "year")
       .addSelect("EXTRACT(MONTH FROM commision.createdAt)::integer", "month")
-      .addSelect("SUM(commision.commisionFee)", "total")
-      .where("commision.commisionStatus = :status", { status })
-      .andWhere("commision.createdAt BETWEEN :startDate AND :endDate", {
+      .addSelect("SUM(commision.amount)", "total")
+
+    if (startDate && endDate) {
+      query.andWhere("commision.createdAt BETWEEN :startDate AND :endDate", {
         startDate,
         endDate
       })
-      .groupBy("year, month")
-      .orderBy("year, month", "ASC")
-      .getRawMany()
+    }
+
+    const result = await query.groupBy("year, month").orderBy("year, month", "ASC").getRawMany()
 
     const monthlyData = result.map((row) => ({
       year: row.year,

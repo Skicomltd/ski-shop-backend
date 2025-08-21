@@ -86,7 +86,7 @@ export class RevenuesController {
 
   @UseGuards(PolicyRevenueGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, "REVENUE"))
-  @Get("downloads")
+  @Get("download")
   async downloads(@Res() res: Response, @Query() query: IRevenueQuery) {
     const isPaid = query.flag === "paid"
 
