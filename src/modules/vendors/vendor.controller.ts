@@ -34,7 +34,7 @@ export class VendorController {
   @UseGuards(PolicyVendorGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, "VENDOR"))
   @UseInterceptors(VendorInterceptor)
-  @Get("current")
+  @Get("profile")
   findOne(@Req() req: Request) {
     return req.user
   }

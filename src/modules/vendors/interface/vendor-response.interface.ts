@@ -1,12 +1,14 @@
 export interface IVendorResponse {
   user: {
+    id: string
     fullName: string
     firstName: string
     lastName: string
     email: string
-    phone: string
+    phoneNumber: string
   }
   business: {
+    id: string
     type: string
     name: string
     country: string
@@ -14,7 +16,9 @@ export interface IVendorResponse {
     address: string
   }
   store: {
+    id: string
     name: string
     description: string
+    logo: string
   }
 }

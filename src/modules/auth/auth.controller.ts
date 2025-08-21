@@ -239,7 +239,7 @@ export class AuthController {
 
     const token = await this.authService.forgotPassword(user)
 
-    const link = this.configService.get<IApp>("app").clientUrl + `?token=${token}`
+    const link = this.configService.get<IApp>("app").clientUrl + `/reset-password?token=${token}`
 
     await this.mailService.send({
       to: email,

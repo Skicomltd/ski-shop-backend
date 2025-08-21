@@ -1,1 +1,1 @@
-export const WITHDRAWAL_STATUS = ["success", "pending", "failed", "rejected"] as const
+export const WITHDRAWAL_STATUS = ["pending", "approved", "rejected", "success", "failed"] as const

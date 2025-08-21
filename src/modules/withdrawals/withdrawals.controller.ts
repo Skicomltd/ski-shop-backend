@@ -71,11 +71,15 @@ export class WithdrawalsController {
       const balance = await this.paymentsService.checkBalance()
       // ADMIN SHOULD BE NOTIFIED OF THIS!
       if (withdrawal.amount > balance.amount) throw new ApiException("service unavailable", 503)
-      await this.paymentsService.transfer({
-        amount: withdrawal.amount,
-        reference: withdrawal.id,
-        recipient: withdrawal.bank.recipientCode,
-        reason: `${withdrawal.bank.user.getFullName()} initiated withdrawal`
+
+      await this.transactionHelper.runInTransaction(async (manager) => {
+        await this.withdrawalsService.update(withdrawal, { status: "approved" }, manager)
+        await this.paymentsService.transfer({
+          amount: withdrawal.amount,
+          reference: withdrawal.id,
+          recipient: withdrawal.bank.recipientCode,
+          reason: `${withdrawal.bank.user.getFullName()} initiated withdrawal`
+        })
       })
     } else if (dto.decision === "reject") {
       return this.transactionHelper.runInTransaction(async (manager) => {
