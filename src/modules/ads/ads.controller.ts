@@ -86,8 +86,8 @@ export class AdsController {
 
   @UseGuards(PolicyAdsGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, Ad))
-  @Get("/downloads")
-  async downloads(@Query() query: IAdsQuery, @Res() res: Response) {
+  @Get("/download")
+  async download(@Query() query: IAdsQuery, @Res() res: Response) {
     const [ads] = await this.adsService.find(query)
 
     const headers = [
