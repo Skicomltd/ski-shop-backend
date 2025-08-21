@@ -6,4 +6,5 @@ export interface IUserQuery extends PaginationParams, FindOptionsWhere<User> {
   startDate?: string
   endDate?: string
   search?: string
+  userId?: string
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Query, Res, UseGuards } from "@nestjs/common"
+import { Controller, Get, Param, ParseUUIDPipe, Query, Res, UseGuards } from "@nestjs/common"
 import { SubscriptionService } from "../subscription/subscription.service"
 import { OrdersService } from "../orders/orders.service"
 import { IRevenueQuery } from "./interface/query.interface"
@@ -12,6 +12,8 @@ import { NotFoundException } from "@/exceptions/notfound.exception"
 import { RevenuesService } from "./revenues.service"
 import { Response } from "express"
 import { CsvService } from "../services/utils/csv/csv.service"
+import { CommisionsService } from "../commisions/commisions.service"
+import { CommisionEnum } from "../commisions/enum/commision-enum"
 
 @Controller("revenues")
 export class RevenuesController {
@@ -21,7 +23,8 @@ export class RevenuesController {
     private ordersService: OrdersService,
     private storeService: StoreService,
     private revenueService: RevenuesService,
-    private readonly csvService: CsvService
+    private readonly csvService: CsvService,
+    private readonly commisionService: CommisionsService
   ) {}
 
   @UseGuards(PolicyRevenueGuard)
@@ -39,15 +42,18 @@ export class RevenuesController {
       endDate = query.endDate
     }
 
+    const totalCommisions = await this.commisionService.calculateAdsTotalRevenue({ startDate, endDate, status: CommisionEnum.PAID })
+
     const totalPromotionAds = await this.adsService.calculateAdsTotalRevenue({ startDate, endDate, status: ["active", "expired"] })
 
     const totalSubcriptionAmount = await this.subscriptionService.calculateSubscriptionsTotalRevenue({ startDate, endDate, isPaid: true })
 
-    const totalRevenue = totalSubcriptionAmount + totalPromotionAds
+    const totalRevenue = totalSubcriptionAmount + totalPromotionAds + totalCommisions
 
     return {
-      subscriptions: totalSubcriptionAmount,
-      promotionAds: totalPromotionAds,
+      commisions: totalCommisions ?? 0,
+      subscriptions: totalSubcriptionAmount ?? 0,
+      promotionAds: totalPromotionAds ?? 0,
       totalRevenue
     }
   }
@@ -60,13 +66,10 @@ export class RevenuesController {
   }
 
   @UseGuards(PolicyRevenueGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, "REVENUE"))
-  @Get("/store")
-  async getStoreRevenueMetrics(@Query() query: IRevenueQuery) {
-    const storeId = query.storeId
-
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, "REVENUE"))
+  @Get("/stores/:storeId")
+  async getStoreRevenueMetrics(@Param("storeId", ParseUUIDPipe) storeId: string) {
     const store = await this.storeService.findById(storeId)
-
     if (!store) throw new NotFoundException("Store does not exist")
 
     return await this.ordersService.getStoreRevenueMetrics(storeId)
@@ -83,7 +86,7 @@ export class RevenuesController {
 
   @UseGuards(PolicyRevenueGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, "REVENUE"))
-  @Get("downloads")
+  @Get("download")
   async downloads(@Res() res: Response, @Query() query: IRevenueQuery) {
     const isPaid = query.flag === "paid"
 

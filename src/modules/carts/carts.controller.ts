@@ -17,6 +17,11 @@ import { OrdersService } from "../orders/orders.service"
 import { TransactionHelper } from "../services/utils/transactions/transactions.service"
 import { UserService } from "../users/user.service"
 import { HelpersService } from "../services/utils/helpers/helpers.service"
+import { VoucherService } from "../vouchers/voucher.service"
+import { SettingsService } from "../settings/settings.service"
+import { CommisionsService } from "../commisions/commisions.service"
+import { BadReqException } from "@/exceptions/badRequest.exception"
+import { VoucherEnum } from "../vouchers/enum/voucher-enum"
 
 @Controller("carts")
 export class CartsController {
@@ -27,7 +32,10 @@ export class CartsController {
     private readonly ordersService: OrdersService,
     private readonly transactionHelper: TransactionHelper,
     private readonly userService: UserService,
-    private readonly helperService: HelpersService
+    private readonly helperService: HelpersService,
+    private readonly voucherService: VoucherService,
+    private readonly settingService: SettingsService,
+    private readonly commisionService: CommisionsService
   ) {}
 
   @Post()
@@ -45,22 +53,23 @@ export class CartsController {
   }
 
   @Post("checkout")
-  async checkout(@Body(new JoiValidationPipe(checkoutSchema)) createCartDto: CheckoutDto, @Req() req: Request) {
+  async checkout(@Body(new JoiValidationPipe(checkoutSchema)) checkoutDto: CheckoutDto, @Req() req: Request) {
     const user = req.user
 
-    return this.transactionHelper.runInTransaction(async (manager) => {
-      if (!(await this.cartsService.exists({ user: { id: user.id } }))) throw new NotFoundException("empty cart")
+    const voucher = await this.voucherService.findById(checkoutDto.voucherId)
+    if (checkoutDto.voucherId && !voucher) throw new BadReqException("voucher not found")
+    if (checkoutDto.voucherId && voucher.status === VoucherEnum.REDEEMED) throw new BadReqException("voucher redeemed")
 
-      const [carts] = await this.cartsService.find({ user: { id: user.id } })
+    return this.transactionHelper.runInTransaction(async (manager) => {
+      const [carts, count] = await this.cartsService.find({ user: { id: user.id } })
+      if (count <= 0) throw new NotFoundException("empty cart")
 
       const amount = await this.cartsService.calculateTotalPrice(user.id)
-
-      const reference = this.helperService.generateReference("REF-", 11)
-
-      await this.ordersService.create(
+      const reference = this.helperService.generateReference("REF-", 12)
+      const order = await this.ordersService.create(
         {
           buyerId: user.id,
-          paymentMethod: createCartDto.paymentMethod,
+          paymentMethod: checkoutDto.paymentMethod,
           reference,
           items: carts.map((cart) => ({
             quantity: cart.quantity,
@@ -72,28 +81,18 @@ export class CartsController {
         manager
       )
 
-      // to help track the order and item counts for user and vendor
-      // question: does this make sense here or in the order webhooks
-      await this.userService.update(user, { ordersCount: user.ordersCount + 1 }, manager)
-      const storeIds = carts.map((cart) => cart.product.storeId)
-      const vendors = await Promise.all(
-        storeIds.map(async (storeId) => {
-          const vendor = await this.userService.findOne({ business: { store: { id: storeId } } })
-          const itemCount = carts.filter((cart) => cart.product.storeId === storeId).length
-          return { vendor, itemCount }
-        })
-      )
-      await Promise.all(
-        vendors.map(({ vendor, itemCount }) => this.userService.update(vendor, { itemsCount: vendor.itemsCount + itemCount }, manager))
-      )
-
       const payload: InitiatePayment = {
         amount,
         email: user.email,
-        reference: reference
+        reference: order.reference
       }
 
-      return await this.paymentsService.with(createCartDto.paymentMethod).initiatePayment(payload)
+      if (checkoutDto.voucherId) {
+        payload.amount = this.voucherService.applyVoucher(voucher, amount)
+        await this.voucherService.update(voucher, { orderId: order.id }, manager)
+      }
+
+      return await this.paymentsService.with(checkoutDto.paymentMethod).initiatePayment(payload)
     })
   }
 

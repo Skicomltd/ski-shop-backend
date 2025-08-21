@@ -11,9 +11,25 @@ import { StoreModule } from "../stores/store.module"
 import { WithdrawalsModule } from "../withdrawals/withdrawals.module"
 import { PayoutsModule } from "../payouts/payouts.module"
 import { AdsModule } from "../ads/ads.module"
+import { SettingsModule } from "../settings/settings.module"
+import { CommisionsModule } from "../commisions/commisions.module"
+import { VoucherModule } from "../vouchers/voucher.module"
 
 @Module({
-  imports: [OrdersModule, CartsModule, SubscriptionModule, PlansModule, UserModule, StoreModule, WithdrawalsModule, PayoutsModule, AdsModule],
+  imports: [
+    OrdersModule,
+    CartsModule,
+    SubscriptionModule,
+    PlansModule,
+    UserModule,
+    StoreModule,
+    WithdrawalsModule,
+    PayoutsModule,
+    AdsModule,
+    SettingsModule,
+    CommisionsModule,
+    VoucherModule
+  ],
   controllers: [WebhookController],
   providers: [WebhookService, PaymentsService]
 })

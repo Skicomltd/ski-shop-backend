@@ -13,6 +13,7 @@ import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { AppAbility } from "../services/casl/casl-ability.factory"
 import { Response } from "express"
 import { CsvService } from "../services/utils/csv/csv.service"
+import { BadReqException } from "@/exceptions/badRequest.exception"
 
 @Controller("users")
 export class UserController {
@@ -52,8 +53,10 @@ export class UserController {
 
   @UseGuards(PolicyUsersGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, User))
-  @Get("downloads")
-  async downloads(@Query() query: IUserQuery, @Res() res: Response) {
+  @Get("download")
+  async download(@Query() query: IUserQuery, @Res() res: Response) {
+    if (!query.role) throw new BadReqException("Role is Required")
+
     const [users] = await this.userService.find(query)
 
     const { headers, records } = await this.userService.headersRecords(query, users)

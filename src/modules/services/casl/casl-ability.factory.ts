@@ -15,6 +15,9 @@ import { Promotion } from "@/modules/promotions/entities/promotion.entity"
 import { Payout } from "@/modules/payouts/entities/payout.entity"
 import { Withdrawal } from "@/modules/withdrawals/entities/withdrawal.entity"
 import { Ad } from "@/modules/ads/entities/ad.entity"
+import { Coupon } from "@/modules/coupons/entities/coupon.entity"
+import { Voucher } from "@/modules/vouchers/entities/voucher.entity"
+import { Setting } from "@/modules/settings/entities/setting.entity"
 
 type Subjects = InferSubjects<
   | typeof User
@@ -30,8 +33,12 @@ type Subjects = InferSubjects<
   | typeof Withdrawal
   | typeof Promotion
   | typeof Ad
+  | typeof Coupon
+  | typeof Voucher
+  | typeof Setting
   | "REVENUE"
   | "VENDOR"
+  | "PROFILE"
   | "all"
 >
 
@@ -364,6 +371,8 @@ export class CaslAbilityFactory {
 
     if (user.role === UserRoleEnum.Admin) {
       can(Action.Manage, "REVENUE")
+    } else if (user.role === UserRoleEnum.Vendor) {
+      can(Action.Read, "REVENUE")
     } else if (user.role) {
       cannot(Action.Read, "REVENUE")
       cannot(Action.Delete, "REVENUE")
@@ -410,6 +419,99 @@ export class CaslAbilityFactory {
     } else {
       cannot(Action.Read, "VENDOR")
       cannot(Action.Update, "VENDOR")
+    }
+
+    const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
+  }
+
+  createAbilityForCoupons(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, Coupon)
+    } else if (user.role === UserRoleEnum.Customer) {
+      can(Action.Read, Coupon)
+      cannot(Action.Create, Coupon)
+      cannot(Action.Update, Coupon)
+      cannot(Action.Delete, Coupon)
+    } else {
+      cannot(Action.Read, Coupon)
+      cannot(Action.Create, Coupon)
+      cannot(Action.Update, Coupon)
+      cannot(Action.Delete, Coupon)
+    }
+
+    const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
+  }
+
+  createAbilityForVouchers(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, Voucher)
+    } else if (user.role === UserRoleEnum.Customer) {
+      can(Action.Read, Voucher)
+      can(Action.Delete, Voucher)
+      cannot(Action.Create, Voucher)
+      cannot(Action.Update, Voucher)
+    } else {
+      cannot(Action.Read, Voucher)
+      cannot(Action.Create, Voucher)
+      cannot(Action.Delete, Voucher)
+      cannot(Action.Update, Voucher)
+    }
+
+    const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
+  }
+
+  createUserAbilityForSettings(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, Setting)
+    } else {
+      cannot(Action.Create, Setting)
+      cannot(Action.Read, Setting)
+      cannot(Action.Update, Setting)
+      cannot(Action.Delete, Setting)
+    }
+
+    const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
+  }
+  createUserAbilityForProfile(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, "PROFILE")
+    } else {
+      cannot(Action.Create, "PROFILE")
+      cannot(Action.Read, "PROFILE")
+      cannot(Action.Update, "PROFILE")
+      cannot(Action.Delete, "PROFILE")
     }
 
     const ability = build({

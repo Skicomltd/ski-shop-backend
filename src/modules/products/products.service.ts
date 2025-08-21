@@ -222,4 +222,16 @@ export class ProductsService implements IService<Product> {
 
     return updatedImages
   }
+
+  async getProductCounts(storeId: string, status: ProductStatusEnum): Promise<{ totalProduct: number; totalPublishedOrDraftProduct: number }> {
+    const totalProduct = await this.productRepository.createQueryBuilder("product").where("product.storeId = :storeId", { storeId }).getCount()
+
+    const totalPublishedOrDraftProduct = await this.productRepository
+      .createQueryBuilder("product")
+      .where("product.storeId = :storeId", { storeId })
+      .andWhere("product.status = :status", { status: status })
+      .getCount()
+
+    return { totalProduct, totalPublishedOrDraftProduct }
+  }
 }

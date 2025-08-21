@@ -1,24 +1,26 @@
 import { Injectable } from "@nestjs/common"
 import { SubscriptionService } from "../subscription/subscription.service"
-import { OrdersService } from "../orders/orders.service"
 import { AdsService } from "../ads/ads.service"
 import { CombineRevenue } from "./interface/combined-revenue.interface"
+import { CommisionsService } from "../commisions/commisions.service"
+import { CommisionEnum } from "../commisions/enum/commision-enum"
 
 @Injectable()
 export class RevenuesService {
   constructor(
     private subscriptionService: SubscriptionService,
-    private orderService: OrdersService,
+    private commisionService: CommisionsService,
     private adsService: AdsService
   ) {}
 
   async getCombineRevenue({ startDate, endDate }: CombineRevenue) {
-    const [subscriptionRevenue, adsRevenue] = await Promise.all([
+    const [subscriptionRevenue, adsRevenue, commisionRevenue] = await Promise.all([
       this.subscriptionService.getSubscriptionMonthlyRevenue({ startDate, endDate, isPaid: true }),
-      this.adsService.getAdsMonthlyRevenue({ startDate, endDate, status: ["active", "expired"] })
+      this.adsService.getAdsMonthlyRevenue({ startDate, endDate, status: ["active", "expired"] }),
+      this.commisionService.getCommisionMonthlyRevenue({ startDate, endDate, status: CommisionEnum.PAID })
     ])
 
-    const combinedRevenue = [...subscriptionRevenue, ...adsRevenue]
+    const combinedRevenue = [...subscriptionRevenue, ...adsRevenue, ...commisionRevenue]
 
     const result = Object.values(
       combinedRevenue.reduce(

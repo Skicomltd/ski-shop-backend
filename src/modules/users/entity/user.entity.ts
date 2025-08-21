@@ -21,6 +21,7 @@ import { Review } from "@/modules/reviews/entities/review.entity"
 import { Subscription } from "@/modules/subscription/entities/subscription.entity"
 import { userStatus } from "../interfaces/user.status.interface"
 import { USER_STATUS } from "../enum/user-status"
+import { Voucher } from "@/modules/vouchers/entities/voucher.entity"
 
 export enum UserRoleEnum {
   "Customer" = "customer",
@@ -96,6 +97,9 @@ export class User {
 
   @OneToMany(() => Subscription, (subscription) => subscription.vendor)
   subscriptions: Subscription[]
+
+  @OneToMany(() => Voucher, (voucher) => voucher.user)
+  vouchers: Voucher[]
 
   private _previousPassword?: string
 

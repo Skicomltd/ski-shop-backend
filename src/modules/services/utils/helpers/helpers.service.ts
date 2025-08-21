@@ -58,4 +58,20 @@ export class HelpersService {
     }
     return reference
   }
+
+  generateCouponCode(length: number): string {
+    const prefix = "SK"
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+    const numbers = "0123456789"
+    let code = prefix
+    for (let i = 0; i < length - prefix.length; i++) {
+      if (i % 2 === 0) {
+        code += characters[Crypto.randomInt(characters.length)]
+      } else {
+        code += numbers[Crypto.randomInt(numbers.length)]
+      }
+    }
+
+    return code
+  }
 }

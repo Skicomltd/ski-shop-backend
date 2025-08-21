@@ -3,10 +3,12 @@ import { PAYMENT_METHODS, PaymentMethod } from "../../orders/interfaces/payment-
 
 export class CheckoutDto {
   paymentMethod: PaymentMethod
+  voucherId?: string
 }
 
 export const checkoutSchema = Joi.object({
   paymentMethod: Joi.string()
     .valid(...PAYMENT_METHODS)
-    .required()
+    .required(),
+  voucherId: Joi.string().uuid().optional()
 })

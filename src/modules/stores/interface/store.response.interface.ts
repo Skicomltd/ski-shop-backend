@@ -6,7 +6,6 @@ export interface StoreResponse {
   name: string
   description: string
   logo: string
-  isStarSeller: boolean
   business: {
     id: string
     type: string

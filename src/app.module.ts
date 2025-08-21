@@ -36,6 +36,11 @@ import paymentConfig from "./config/payment.config"
 import { AdsModule } from "./modules/ads/ads.module"
 import { ScheduleModule } from "@nestjs/schedule"
 import { RevenuesModule } from "./modules/revenues/revenues.module"
+import { CouponsModule } from "./modules/coupons/coupons.module"
+import { VoucherModule } from "./modules/vouchers/voucher.module"
+import { ProfilesModule } from './modules/profiles/profiles.module';
+import { SettingsModule } from './modules/settings/settings.module';
+import { CommisionsModule } from './modules/commisions/commisions.module';
 @Module({
   imports: [
     UserModule,
@@ -69,7 +74,12 @@ import { RevenuesModule } from "./modules/revenues/revenues.module"
     WithdrawalsModule,
     PromotionsModule,
     AdsModule,
-    RevenuesModule
+    RevenuesModule,
+    CouponsModule,
+    VoucherModule,
+    ProfilesModule,
+    SettingsModule,
+    CommisionsModule
   ],
   controllers: [AppController],
   providers: [

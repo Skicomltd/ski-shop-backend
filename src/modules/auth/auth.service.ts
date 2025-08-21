@@ -83,8 +83,8 @@ export class AuthService {
   async validateResetToken(token: string): Promise<string> {
     try {
       const payload = await this.jwtService.verifyAsync(token, { secret: this.configService.get<IAuth>("auth").resetSecret })
-
-      return payload.sub
+      console.error("payload", payload)
+      return payload.id
     } catch (error) {
       throw new UnAuthorizedException()
     }
@@ -94,7 +94,7 @@ export class AuthService {
     try {
       const payload = await this.jwtService.verifyAsync(token, { secret: this.configService.get<IAuth>("auth").refreshSecret })
 
-      return payload.sub
+      return payload.id
     } catch (error) {
       throw new UnAuthorizedException()
     }

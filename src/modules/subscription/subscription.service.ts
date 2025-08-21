@@ -167,4 +167,12 @@ export class SubscriptionService implements IService<Subscription>, UseQueue<str
 
     return monthlyData
   }
+
+  async findLatestByUserId(userId: string) {
+    return await this.subscriptionRepository
+      .createQueryBuilder("subscription")
+      .where("subscription.vendorId = :userId", { userId })
+      .orderBy("subscription.createdAt", "DESC")
+      .getOne()
+  }
 }
