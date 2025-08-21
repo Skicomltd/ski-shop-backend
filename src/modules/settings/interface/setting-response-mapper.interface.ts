@@ -5,12 +5,15 @@ export abstract class SettingResponseMapper implements IInterceptor {
   transform(data: Setting): ISettingResponse {
     return {
       id: data.id,
-      accountEmail: data.accountEmail,
-      alternativeEmail: data.alternativeEmail,
-      emailNewsUpdates: data.emailNewsUpdates,
-      emailPayout: data.emailPayout,
-      emailProductCreation: data.emailProductCreation,
-      emailPurchase: data.emailPurchase,
+      generalSettings: {
+        id: data.generalSetting.id,
+        purchaseEmailNotification: data.generalSetting.purchaseEmailNotification,
+        newsAndUpdateEmailNotification: data.generalSetting.newsAndUpdateEmailNotification,
+        productCreationEmailNotification: data.generalSetting.productCreationEmailNotification,
+        payoutEmailNotification: data.generalSetting.payoutEmailNotification,
+        contactEmail: data.generalSetting.contactEmail,
+        alternativeContactEmail: data.generalSetting.alternativeContactEmail
+      },
       play2winSettings: {
         id: data?.play2winSetting?.id,
         couponRedemptionFrequency: data?.play2winSetting?.couponRedemptionFrequency,

@@ -37,6 +37,7 @@ import { Commision } from "./modules/commisions/entities/commision.entity"
 import { RevenueSetting } from "./modules/settings/entities/revenueSetting.entity"
 import { Play2winSetting } from "./modules/settings/entities/play2winSetting.entity"
 import { PromotionSetting } from "./modules/settings/entities/promotionSetting.entity"
+import { GeneralSetting } from "./modules/settings/entities/general.entity"
 
 seeder({
   imports: [
@@ -68,7 +69,8 @@ seeder({
       Commision,
       RevenueSetting,
       Play2winSetting,
-      PromotionSetting
+      PromotionSetting,
+      GeneralSetting
     ])
   ],
   providers: [UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder, PromotionSeeder, PlanSeeder]

@@ -1,30 +1,17 @@
-import { Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, Column } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from "typeorm"
 import { RevenueSetting } from "./revenueSetting.entity"
 import { PromotionSetting } from "./promotionSetting.entity"
 import { Play2winSetting } from "./play2winSetting.entity"
+import { GeneralSetting } from "./general.entity"
 
 @Entity()
 export class Setting {
   @PrimaryGeneratedColumn("uuid")
   id: string
 
-  @Column({ default: true })
-  emailPurchase: boolean
-
-  @Column({ default: false })
-  emailNewsUpdates: boolean
-
-  @Column({ default: true })
-  emailProductCreation: boolean
-
-  @Column({ default: true })
-  emailPayout: boolean
-
-  @Column({ default: "info@skishop.com" })
-  accountEmail: string
-
-  @Column({ nullable: true })
-  alternativeEmail: string
+  @OneToOne(() => GeneralSetting, (generalSetting) => generalSetting.setting, { eager: true, cascade: true, onDelete: "CASCADE" })
+  @JoinColumn()
+  generalSetting: GeneralSetting
 
   @OneToOne(() => RevenueSetting, (revenueSetting) => revenueSetting.setting, { eager: true, cascade: true, onDelete: "CASCADE" })
   @JoinColumn()

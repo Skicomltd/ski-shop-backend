@@ -9,7 +9,7 @@ import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
 export class SettingsService implements IService<Setting> {
   constructor(@InjectRepository(Setting) private readonly settingRepository: Repository<Setting>) {}
 
-  readonly relations = ["revenueSetting", "promotionSetting", "play2winSetting"]
+  readonly relations = ["revenueSetting", "promotionSetting", "play2winSetting", "generalSetting"]
 
   async create(data: CreateSettingDto, manager?: EntityManager): Promise<Setting> {
     const repo = manager ? manager.getRepository<Setting>(Setting) : this.settingRepository
@@ -23,6 +23,7 @@ export class SettingsService implements IService<Setting> {
       .leftJoinAndSelect("setting.revenueSetting", "revenue")
       .leftJoinAndSelect("setting.promotionSetting", "promotion")
       .leftJoinAndSelect("setting.play2winSetting", "play2win")
+      .leftJoinAndSelect("setting.generalSetting", "generalSetting")
       .getManyAndCount()
   }
 
@@ -66,6 +67,7 @@ export class SettingsService implements IService<Setting> {
       .leftJoinAndSelect("setting.revenueSetting", "revenue")
       .leftJoinAndSelect("setting.promotionSetting", "promotion")
       .leftJoinAndSelect("setting.play2winSetting", "play2win")
+      .leftJoinAndSelect("setting.generalSetting", "generalSetting")
       .getOne()
   }
 }

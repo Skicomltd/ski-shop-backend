@@ -1,6 +1,6 @@
 import { PartialType } from "@nestjs/mapped-types"
 import {
-  CreateGeneralSettingsDto,
+  CreateGeneralSettingDto,
   CreatePlay2winSettingDto,
   CreatePromotionSettingDto,
   CreateRevenueSettingDto,
@@ -8,7 +8,7 @@ import {
 } from "./create-setting.dto"
 import * as joi from "joi"
 
-export class UpdateGeneralSettingDto extends PartialType(CreateGeneralSettingsDto) {}
+export class UpdateGeneralSettingDto extends PartialType(CreateGeneralSettingDto) {}
 export class UpdateSettingDto extends PartialType(CreateSettingDto) {}
 export class UpdateRevenueSettingDto extends PartialType(CreateRevenueSettingDto) {}
 export class UpdatePromotionSettingDto extends PartialType(CreatePromotionSettingDto) {}

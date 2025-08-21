@@ -1,14 +1,19 @@
 export interface ISettingResponse {
-  emailNewsUpdates: boolean
-  alternativeEmail: string
   id: string
-  emailPurchase: boolean
-  emailProductCreation: boolean
-  emailPayout: boolean
-  accountEmail: string
+  generalSettings: IGeneralSettings
   revenueSettings: RevenueSettings
   promotionSettings: PromotionSettings
   play2winSettings: Play2winSettings
+}
+
+type IGeneralSettings = {
+  id: string
+  purchaseEmailNotification: boolean
+  newsAndUpdateEmailNotification: boolean
+  productCreationEmailNotification: boolean
+  payoutEmailNotification: boolean
+  contactEmail: string
+  alternativeContactEmail?: string
 }
 
 type RevenueSettings = {

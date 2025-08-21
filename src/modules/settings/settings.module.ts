@@ -9,11 +9,13 @@ import { Setting } from "./entities/setting.entity"
 import { PromotionSetting } from "./entities/promotionSetting.entity"
 import { Play2winSetting } from "./entities/play2winSetting.entity"
 import { RevenueSetting } from "./entities/revenueSetting.entity"
+import { GeneralSetting } from "./entities/general.entity"
+import { GeneralSettingService } from "./general-settings.service"
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Setting, RevenueSetting, PromotionSetting, Play2winSetting])],
+  imports: [TypeOrmModule.forFeature([Setting, RevenueSetting, PromotionSetting, Play2winSetting, GeneralSetting])],
   controllers: [SettingsController],
-  providers: [SettingsService, Play2winSettingService, PromotionSettingService, RevenueSettingService],
+  providers: [SettingsService, Play2winSettingService, PromotionSettingService, RevenueSettingService, GeneralSettingService],
   exports: [SettingsService]
 })
 export class SettingsModule {}
