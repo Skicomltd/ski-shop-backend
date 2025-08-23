@@ -40,6 +40,7 @@ import { ProductCategoriesEnum } from "../common/types"
 import { SaveProductDto, saveProductSchema } from "./dto/save-product.dto"
 import { CsvService } from "../services/utils/csv/csv.service"
 import { Response } from "express"
+import { BadReqException } from "@/exceptions/badRequest.exception"
 @Controller("products")
 export class ProductsController {
   constructor(
@@ -62,6 +63,8 @@ export class ProductsController {
     // find the store
     const store = await this.storeService.findOne({ id: createProductDto.storeId })
     if (!store) throw new NotFoundException("store not found")
+
+    if (createProductDto.discountPrice > createProductDto.price) throw new BadReqException("Discount price should not be more than item price")
 
     // handle multiple image upload
     const handleImageUploaded = await Promise.all(

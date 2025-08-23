@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class SyncFix17557790897501755779106744 implements MigrationInterface {
-    name = 'SyncFix17557790897501755779106744'
+export class SyncFix17559654579141755965466515 implements MigrationInterface {
+    name = 'SyncFix17559654579141755965466515'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TABLE "bank" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "bankName" character varying NOT NULL, "accountNumber" character varying NOT NULL, "accountName" character varying NOT NULL, "code" character varying NOT NULL, "recipientCode" character varying NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "userId" uuid, CONSTRAINT "UQ_90c0c48a76481f77c68569ab627" UNIQUE ("accountNumber"), CONSTRAINT "PK_7651eaf705126155142947926e8" PRIMARY KEY ("id"))`);
@@ -31,12 +31,12 @@ export class SyncFix17557790897501755779106744 implements MigrationInterface {
         await queryRunner.query(`CREATE TABLE "cart" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "quantity" integer NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "userId" uuid, "productId" uuid, CONSTRAINT "PK_c524ec48751b9b5bcfbf6e59be7" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TYPE "public"."subscription_status_enum" AS ENUM('active', 'inactive')`);
         await queryRunner.query(`CREATE TABLE "subscription" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "vendorId" uuid NOT NULL, "reference" character varying, "planCode" character varying NOT NULL, "subscriptionCode" character varying NOT NULL DEFAULT '', "startDate" TIMESTAMP, "endDate" TIMESTAMP, "planType" character varying NOT NULL, "status" "public"."subscription_status_enum" NOT NULL DEFAULT 'inactive', "isPaid" boolean NOT NULL DEFAULT false, "amount" integer NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_8c3e00ebd02103caa1174cd5d9d" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TYPE "public"."voucher_status_enum" AS ENUM('pending', 'redeemed', 'expired')`);
-        await queryRunner.query(`CREATE TYPE "public"."voucher_prizetype_enum" AS ENUM('discount', 'amount')`);
-        await queryRunner.query(`CREATE TABLE "voucher" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" uuid NOT NULL, "status" "public"."voucher_status_enum" NOT NULL DEFAULT 'pending', "code" character varying NOT NULL, "orderId" character varying, "dateWon" TIMESTAMP NOT NULL, "startDate" TIMESTAMP NOT NULL, "endDate" TIMESTAMP NOT NULL, "prizeWon" numeric(10,2) NOT NULL, "prizeType" "public"."voucher_prizetype_enum" NOT NULL DEFAULT 'amount', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_677ae75f380e81c2f103a57ffaf" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TYPE "public"."user_role_enum" AS ENUM('customer', 'vendor', 'admin', 'rider')`);
         await queryRunner.query(`CREATE TYPE "public"."user_status_enum" AS ENUM('active', 'inactive')`);
         await queryRunner.query(`CREATE TABLE "user" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "firstName" character varying NOT NULL, "lastName" character varying NOT NULL, "password" character varying NOT NULL, "role" "public"."user_role_enum" NOT NULL DEFAULT 'customer', "email" character varying NOT NULL, "phoneNumber" text NOT NULL DEFAULT '', "address" text NOT NULL DEFAULT '', "isEmailVerified" boolean NOT NULL DEFAULT false, "status" "public"."user_status_enum" NOT NULL DEFAULT 'inactive', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "itemsCount" integer NOT NULL DEFAULT '0', "ordersCount" integer NOT NULL DEFAULT '0', CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TYPE "public"."voucher_status_enum" AS ENUM('pending', 'redeemed', 'expired')`);
+        await queryRunner.query(`CREATE TYPE "public"."voucher_prizetype_enum" AS ENUM('discount', 'amount')`);
+        await queryRunner.query(`CREATE TABLE "voucher" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "userId" uuid NOT NULL, "status" "public"."voucher_status_enum" NOT NULL DEFAULT 'pending', "code" character varying NOT NULL, "orderId" character varying, "dateWon" TIMESTAMP NOT NULL, "startDate" TIMESTAMP NOT NULL, "endDate" TIMESTAMP NOT NULL, "prizeWon" numeric(10,2) NOT NULL, "prizeType" "public"."voucher_prizetype_enum" NOT NULL DEFAULT 'amount', "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_677ae75f380e81c2f103a57ffaf" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "revenue_setting" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "settingId" character varying NOT NULL, "minPayoutAmount" integer NOT NULL DEFAULT '10000', "maxPayoutAmount" integer NOT NULL DEFAULT '100000', "maxWithdrawalsPerDay" integer NOT NULL DEFAULT '1', "fulfillmentFeePercentage" integer NOT NULL DEFAULT '10', "gasFee" integer NOT NULL DEFAULT '1000', "monthlySubscriptionFee" integer NOT NULL DEFAULT '10000', "yearlySubscriptionFee" integer NOT NULL DEFAULT '100000', "gracePeriodAfterExpiry" integer NOT NULL DEFAULT '7', "autoExpiryNotification" boolean NOT NULL DEFAULT true, "notifyUserOnApproval" boolean NOT NULL DEFAULT true, "notifyOnSubscriptionExpiry" boolean NOT NULL DEFAULT true, "notifyOnCommissionDeduction" boolean NOT NULL DEFAULT true, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_90495c774bed200ed83f0bcad2e" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "promotion_setting" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "settingId" character varying NOT NULL, "defaultDurationDays" integer NOT NULL DEFAULT '7', "maxPromotionsPerDay" integer NOT NULL DEFAULT '3', "bannerPromotion" boolean NOT NULL DEFAULT true, "featuredSectionPromotion" boolean NOT NULL DEFAULT true, "autoApprovePromotions" boolean NOT NULL DEFAULT true, "notifyVendorOnApproval" boolean NOT NULL DEFAULT true, "notifyOnNewRequest" boolean NOT NULL DEFAULT true, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "UpdatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_f639a537a19ea02e007a6228083" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "play2win_setting" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "settingId" character varying NOT NULL, "playFrequency" character varying NOT NULL DEFAULT 'Once Every 24 Hours', "redemptionWindowDays" integer NOT NULL DEFAULT '7', "couponRedemptionFrequency" character varying NOT NULL DEFAULT 'Once Every 24 Hours', "drawCycleResetTime" character varying NOT NULL DEFAULT '08:00PM', "loginRequiredToPlay" boolean NOT NULL DEFAULT true, "notifyAdminOnCouponExhaustion" boolean NOT NULL DEFAULT true, "showWinnersNotification" boolean NOT NULL DEFAULT true, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_ef8504918a59052ee1a3fa9e485" PRIMARY KEY ("id"))`);
@@ -44,9 +44,9 @@ export class SyncFix17557790897501755779106744 implements MigrationInterface {
         await queryRunner.query(`CREATE TABLE "setting" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), "generalSettingId" uuid, "revenueSettingId" uuid, "promotionSettingId" uuid, "play2winSettingId" uuid, CONSTRAINT "REL_2e6052f77c508d3712d1e333c3" UNIQUE ("generalSettingId"), CONSTRAINT "REL_3a77f9616ac6d231f8d58ce77c" UNIQUE ("revenueSettingId"), CONSTRAINT "REL_cc85295362cbdf0c2e6c45b619" UNIQUE ("promotionSettingId"), CONSTRAINT "REL_83ce3e9f9dc4b6a059df5b33d9" UNIQUE ("play2winSettingId"), CONSTRAINT "PK_fcb21187dc6094e24a48f677bed" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TYPE "public"."plan_interval_enum" AS ENUM('hourly', 'daily', 'monthly', 'biannually', 'annually')`);
         await queryRunner.query(`CREATE TABLE "plan" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "planCode" character varying NOT NULL, "interval" "public"."plan_interval_enum" NOT NULL, "name" character varying NOT NULL, "amount" integer NOT NULL, "savingPercentage" integer, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_54a2b686aed3b637654bf7ddbb3" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TABLE "otp" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "email" character varying NOT NULL, "code" character varying NOT NULL, "expireAt" TIMESTAMP WITH TIME ZONE NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "UQ_463cf01e0ea83ad57391fd4e1d7" UNIQUE ("email"), CONSTRAINT "PK_32556d9d7b22031d7d0e1fd6723" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TYPE "public"."coupon_coupontype_enum" AS ENUM('discount', 'amount')`);
         await queryRunner.query(`CREATE TABLE "coupon" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "title" character varying NOT NULL, "code" character varying(50) NOT NULL, "quantity" integer NOT NULL, "remainingQuantity" integer NOT NULL, "couponType" "public"."coupon_coupontype_enum" NOT NULL DEFAULT 'amount', "value" numeric(10,2) NOT NULL, "startDate" TIMESTAMP NOT NULL, "endDate" TIMESTAMP NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_fcbe9d72b60eed35f46dc35a682" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "otp" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "email" character varying NOT NULL, "code" character varying NOT NULL, "expireAt" TIMESTAMP WITH TIME ZONE NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "UQ_463cf01e0ea83ad57391fd4e1d7" UNIQUE ("email"), CONSTRAINT "PK_32556d9d7b22031d7d0e1fd6723" PRIMARY KEY ("id"))`);
         await queryRunner.query(`ALTER TABLE "bank" ADD CONSTRAINT "FK_f023abe054fcf7b1d67cd4c8a13" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "business" ADD CONSTRAINT "FK_ac8ad696f6731c86b52c058c0c6" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
         await queryRunner.query(`ALTER TABLE "withdrawal" ADD CONSTRAINT "FK_190820cd3165dcc6a6ec7df3581" FOREIGN KEY ("bankId") REFERENCES "bank"("id") ON DELETE NO ACTION ON UPDATE NO ACTION`);
@@ -104,9 +104,9 @@ export class SyncFix17557790897501755779106744 implements MigrationInterface {
         await queryRunner.query(`ALTER TABLE "withdrawal" DROP CONSTRAINT "FK_190820cd3165dcc6a6ec7df3581"`);
         await queryRunner.query(`ALTER TABLE "business" DROP CONSTRAINT "FK_ac8ad696f6731c86b52c058c0c6"`);
         await queryRunner.query(`ALTER TABLE "bank" DROP CONSTRAINT "FK_f023abe054fcf7b1d67cd4c8a13"`);
+        await queryRunner.query(`DROP TABLE "otp"`);
         await queryRunner.query(`DROP TABLE "coupon"`);
         await queryRunner.query(`DROP TYPE "public"."coupon_coupontype_enum"`);
-        await queryRunner.query(`DROP TABLE "otp"`);
         await queryRunner.query(`DROP TABLE "plan"`);
         await queryRunner.query(`DROP TYPE "public"."plan_interval_enum"`);
         await queryRunner.query(`DROP TABLE "setting"`);
@@ -114,12 +114,12 @@ export class SyncFix17557790897501755779106744 implements MigrationInterface {
         await queryRunner.query(`DROP TABLE "play2win_setting"`);
         await queryRunner.query(`DROP TABLE "promotion_setting"`);
         await queryRunner.query(`DROP TABLE "revenue_setting"`);
-        await queryRunner.query(`DROP TABLE "user"`);
-        await queryRunner.query(`DROP TYPE "public"."user_status_enum"`);
-        await queryRunner.query(`DROP TYPE "public"."user_role_enum"`);
         await queryRunner.query(`DROP TABLE "voucher"`);
         await queryRunner.query(`DROP TYPE "public"."voucher_prizetype_enum"`);
         await queryRunner.query(`DROP TYPE "public"."voucher_status_enum"`);
+        await queryRunner.query(`DROP TABLE "user"`);
+        await queryRunner.query(`DROP TYPE "public"."user_status_enum"`);
+        await queryRunner.query(`DROP TYPE "public"."user_role_enum"`);
         await queryRunner.query(`DROP TABLE "subscription"`);
         await queryRunner.query(`DROP TYPE "public"."subscription_status_enum"`);
         await queryRunner.query(`DROP TABLE "cart"`);
