@@ -46,7 +46,7 @@ export class UserService implements IService<User> {
     }
 
     if (search) {
-      query.andWhere("LOWER(user.firstName) LIKE :search OR LOWER(user.lastName) LIKE :search", {
+      query.andWhere("LOWER(user.firstName) LIKE :search OR LOWER(user.lastName) LIKE :search OR LOWER(user.email) LIKE :search", {
         search: `%${search.toLowerCase()}%`
       })
     }
