@@ -13,7 +13,6 @@ import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { AppAbility } from "../services/casl/casl-ability.factory"
 import { Response } from "express"
 import { CsvService } from "../services/utils/csv/csv.service"
-import { BadReqException } from "@/exceptions/badRequest.exception"
 
 @Controller("users")
 export class UserController {
