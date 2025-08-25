@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common"
 import { JwtService } from "@nestjs/jwt"
 import * as Crypto from "crypto"
 import generator from "generate-password-ts"
+import { v4 as uuidv4 } from "uuid"
 
 @Injectable()
 export class HelpersService {
@@ -47,15 +48,9 @@ export class HelpersService {
     return otp
   }
 
-  generateReference(prefix: string, length: number): string {
-    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-    let reference = prefix
-
-    // Loop to generate characters for the specified length
-    for (let i = 0; i < length - prefix.length; i++) {
-      const randomInd = Math.floor(Math.random() * characters.length)
-      reference += characters.charAt(randomInd)
-    }
+  generateReference(prefix: string): string {
+    const UUID = uuidv4()
+    const reference = prefix + UUID
     return reference
   }
 

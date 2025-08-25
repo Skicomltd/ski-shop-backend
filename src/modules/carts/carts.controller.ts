@@ -65,7 +65,7 @@ export class CartsController {
       if (count <= 0) throw new NotFoundException("empty cart")
 
       const amount = await this.cartsService.calculateTotalPrice(user.id)
-      const reference = this.helperService.generateReference("REF-", 12)
+      const reference = this.helperService.generateReference("REF-")
       const order = await this.ordersService.create(
         {
           buyerId: user.id,
