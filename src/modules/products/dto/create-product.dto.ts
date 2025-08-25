@@ -29,7 +29,15 @@ export const createProductSchema = joi.object({
     .valid("clothings", "gadgets", "groceries", "women", "bodyCreamAndOil", "furniture", "tvAndHomeAppliances", "watchesAndAccessories")
     .required(),
   description: joi.string().required(),
-  discountPrice: joi.number().optional(),
+  discountPrice: joi
+    .number()
+    .optional()
+    .when("price", {
+      is: joi.exist(),
+      then: joi.number().max(joi.ref("price")).messages({
+        "number.max": "Discount price cannot be greater than the original price"
+      })
+    }),
   stockCount: joi.number().required(),
   storeId: joi.string().required(),
   status: joi.string().valid("draft", "published").optional()
