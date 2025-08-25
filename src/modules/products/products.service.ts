@@ -112,7 +112,7 @@ export class ProductsService implements IService<Product> {
       })
     }
 
-    if (rating) {
+    if (rating && Number(rating) !== 0) {
       query.andWhere(
         `product.totalProductRatingCount > 0 
     AND ROUND(product.totalProductRatingSum / product.totalProductRatingCount, 1) = :rating 
