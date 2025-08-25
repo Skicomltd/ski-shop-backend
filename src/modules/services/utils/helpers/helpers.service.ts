@@ -49,9 +49,7 @@ export class HelpersService {
   }
 
   generateReference(prefix: string): string {
-    const UUID = uuidv4()
-    const reference = prefix + UUID
-    return reference
+    return prefix + uuidv4()
   }
 
   generateCouponCode(length: number): string {
