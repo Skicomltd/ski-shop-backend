@@ -52,11 +52,15 @@ export class ProductsService implements IService<Product> {
     return [products, count]
   }
 
-  async find({ page, limit, status, stockCount, storeId, categories, vendor, flag, search }: IProductsQuery) {
+  async find({ page, limit, status, stockCount, storeId, categories, vendor, flag, search, rating, orderBy = "ASC", sortBy }: IProductsQuery) {
     const query = this.productRepository
       .createQueryBuilder("product")
       .leftJoinAndSelect("product.store", "store")
       .leftJoinAndSelect("product.user", "user")
+      .orderBy("product.createdAt", orderBy)
+      .groupBy("product.id")
+      .addGroupBy("store.id")
+      .addGroupBy("user.id")
 
     if (storeId) {
       query.andWhere("product.storeId = :storeId", { storeId })
@@ -98,10 +102,23 @@ export class ProductsService implements IService<Product> {
       query.innerJoin("product.ads", "ad").andWhere("ad.type = :adType", { adType: PromotionTypeEnum.SEARCH })
     }
 
+    if (sortBy) {
+      query.orderBy("product.price", sortBy)
+    }
+
     if (search) {
       query.andWhere("LOWER(product.name) LIKE :search", {
         search: `%${search.toLowerCase()}%`
       })
+    }
+
+    if (rating) {
+      query.andWhere(
+        `product.totalProductRatingCount > 0 
+    AND ROUND(product.totalProductRatingSum / product.totalProductRatingCount, 1) = :rating 
+  `,
+        { rating: Number(rating) }
+      )
     }
 
     return await query
