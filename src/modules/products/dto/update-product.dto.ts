@@ -15,7 +15,15 @@ export const updateProductSchema = joi.object({
     )
     .optional(),
   description: joi.string().optional(),
-  discountPrice: joi.number().optional(),
+  discountPrice: joi
+    .number()
+    .optional()
+    .when("price", {
+      is: joi.exist(),
+      then: joi.number().max(joi.ref("price")).messages({
+        "number.max": "Discount price cannot be greater than the original price"
+      })
+    }),
   stockCount: joi.number().optional(),
   status: joi.string().valid("draft", "published").optional(),
   images: joi.array().min(1).max(5).items(joi.string()).optional()
