@@ -16,6 +16,7 @@ import { CouponsResponseInterceptor } from "./interceptor/coupons.interceptor"
 import { VoucherService } from "../vouchers/voucher.service"
 import { Request } from "express"
 import { TransactionHelper } from "../services/utils/transactions/transactions.service"
+import { BadReqException } from "@/exceptions/badRequest.exception"
 
 @Controller("coupons")
 export class CouponsController {
@@ -99,6 +100,13 @@ export class CouponsController {
     if (!coupon) {
       throw new NotFoundException("Coupon not found")
     }
+
+    const [voucher] = await this.voucherService.find({ code: coupon.code })
+
+    if (voucher.length > 0) {
+      throw new BadReqException("Coupon is already in use")
+    }
+
     updateCouponDto.remainingQuantity = updateCouponDto.quantity ? coupon.remainingQuantity + updateCouponDto.quantity : updateCouponDto.quantity
     updateCouponDto.quantity = updateCouponDto.quantity ? coupon.quantity + updateCouponDto.quantity : updateCouponDto.quantity
     return this.couponsService.update(coupon, updateCouponDto)
