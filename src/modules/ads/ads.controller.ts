@@ -56,7 +56,7 @@ export class AdsController {
       throw new BadReqException(`An active promotion ad of type '${promotion.type}' already exists for this product`)
     }
 
-    const reference = await this.helperService.generateReference("REF-", 12)
+    const reference = this.helperService.generateReference("REF-")
     const ad = await this.adsService.create({
       duration: promotion.duration,
       productId: product.id,
