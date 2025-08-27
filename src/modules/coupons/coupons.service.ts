@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common"
 import { CreateCouponDto } from "./dto/create-coupon.dto"
 import { UpdateCouponDto } from "./dto/update-coupon.dto"
 import { Coupon } from "./entities/coupon.entity"
-import { Between, EntityManager, Equal, FindOptionsWhere, LessThanOrEqual, MoreThanOrEqual, Repository } from "typeorm"
+import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
 import { InjectRepository } from "@nestjs/typeorm"
 import { ICouponsQuery } from "./interface/query-filter.interface"
 import { CouponStats } from "./interface/coupon-stats.interface"
@@ -21,35 +21,51 @@ export class CouponsService implements IService<Coupon> {
     return await repo.save(coupon)
   }
 
-  async find({ limit, page, startDate, endDate, couponType, quantity, remainingQuantity }: ICouponsQuery): Promise<[Coupon[], number]> {
-    const where: FindOptionsWhere<Coupon> = {}
+  async find({
+    limit,
+    page,
+    startDate,
+    endDate,
+    couponType,
+    quantity,
+    remainingQuantity,
+    search,
+    orderBy = "ASC"
+  }: ICouponsQuery): Promise<[Coupon[], number]> {
+    const query = this.couponRepository.createQueryBuilder("coupon").orderBy("coupon.createdAt", orderBy)
     if (startDate && endDate) {
-      where.startDate = Between(startDate, endDate)
+      query.andWhere("coupon.createdAt BETWEEN :startDate AND :endDate", {
+        startDate,
+        endDate
+      })
     }
     if (startDate) {
-      where.startDate = MoreThanOrEqual(startDate)
+      query.andWhere("coupon.createdAt >= :startDate", { startDate })
     }
 
     if (endDate) {
-      where.endDate = LessThanOrEqual(endDate)
+      query.andWhere("coupon.createdAt <= :endDate", { endDate })
     }
 
     if (couponType) {
-      where.couponType = couponType
+      query.andWhere("coupon.couponType = :couponType", { couponType })
     }
     if (quantity) {
-      where.quantity = Equal(quantity)
+      query.andWhere("coupon.quantity = :quantity", { quantity })
     }
     if (remainingQuantity) {
-      where.remainingQuantity = Equal(remainingQuantity)
+      query.andWhere("coupon.remainingQuantity = :remainingQuantity", { remainingQuantity })
     }
 
-    const [coupons, count] = await this.couponRepository.findAndCount({
-      where: where,
-      take: limit,
-      skip: page ? (page - 1) * limit : undefined
-    })
-    return [coupons, count]
+    if (search) {
+      query.andWhere("LOWER(coupon.title) LIKE :search OR LOWER(coupon.code) LIKE :search", {
+        search: `%${search.toLowerCase()}%`
+      })
+    }
+    return await query
+      .take(limit)
+      .skip(page && page > 0 ? (page - 1) * limit : 0)
+      .getManyAndCount()
   }
 
   async findById(id: string): Promise<Coupon> {
