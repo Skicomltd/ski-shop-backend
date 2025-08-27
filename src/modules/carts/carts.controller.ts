@@ -58,15 +58,15 @@ export class CartsController {
       const [carts, count] = await this.cartsService.find({ user: { id: user.id } })
       if (count <= 0) throw new NotFoundException("empty cart")
 
-      carts.forEach(async (cart) => {
+      for (const cart of carts) {
         const product = await this.productService.findOne({ id: cart.product.id, status: ProductStatusEnum.published })
 
-        if (!product) throw new BadReqException(`${product.name} currently does not exist`)
+        if (!product) throw new NotFoundException(`${product.name} currently does not exist`)
 
         if (product.stockCount <= 0) {
           throw new BadReqException(`${product.name} is currently out of stock.`)
         }
-      })
+      }
 
       const amount = await this.cartsService.calculateTotalPrice(user.id)
       const reference = this.helperService.generateReference("REF-")
