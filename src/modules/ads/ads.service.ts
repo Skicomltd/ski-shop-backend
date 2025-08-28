@@ -69,6 +69,7 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
     return await this.adRepository.findAndCount({
       where,
       take: limit,
+      order: { createdAt: "DESC" },
       skip: page ? page - 1 : undefined,
       relations: this.relations
     })

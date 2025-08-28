@@ -134,11 +134,7 @@ export class RevenuesController {
       }
     })
 
-    return {
-      subscription,
-      ad,
-      commision
-    }
+    return [...subscription, ...ad, ...commision]
   }
 
   @UseGuards(PolicyRevenueGuard)

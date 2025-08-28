@@ -44,6 +44,7 @@ export class CommisionsService implements IService<Commision> {
     return await this.commisionRepository.findAndCount({
       where,
       take: limit,
+      order: { createdAt: "DESC" },
       skip: page ? page - 1 : undefined,
       relations: this.relations
     })
