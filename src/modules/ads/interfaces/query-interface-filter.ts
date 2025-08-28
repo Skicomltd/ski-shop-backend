@@ -7,4 +7,5 @@ export interface IAdsQuery extends PaginationParams, FindOptionsWhere<Ad> {
   vendorId?: string
   startDate?: Date
   endDate?: Date
+  adStatus?: string[]
 }

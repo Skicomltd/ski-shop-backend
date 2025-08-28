@@ -14,6 +14,7 @@ import { Response } from "express"
 import { CsvService } from "../services/utils/csv/csv.service"
 import { CommisionsService } from "../commisions/commisions.service"
 import { CommisionEnum } from "../commisions/enum/commision-enum"
+import { Subscription } from "../subscription/entities/subscription.entity"
 
 @Controller("revenues")
 export class RevenuesController {
@@ -86,11 +87,71 @@ export class RevenuesController {
 
   @UseGuards(PolicyRevenueGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, "REVENUE"))
+  @Get("history")
+  async revenueHistory(@Query() query: IRevenueQuery) {
+    const startDate = query.startDate
+    const endDate = query.endDate
+
+    const [[subscriptions], [ads], [commisions]] = await Promise.all([
+      this.subscriptionService.find({ isPaid: true, startDate, endDate }),
+      this.adsService.find({ adStatus: ["active", "expired"], startDate, endDate }),
+      this.commisionService.find({ startDate, endDate })
+    ])
+
+    const subscription = subscriptions.map((subscription: Subscription) => {
+      return {
+        id: subscription.id,
+        revenueSource: "Subscription",
+        description: subscription.planType,
+        amount: subscription.amount,
+        user: subscription.vendor.business.name,
+        role: subscription.vendor.role,
+        date: subscription.createdAt
+      }
+    })
+
+    const ad = ads.map((ad) => {
+      return {
+        id: ad.id,
+        revenueSource: "Ads",
+        description: ad.promotion.type,
+        amount: ad.amount,
+        user: ad.product.store.name,
+        role: ad.product.user.role,
+        date: ad.createdAt
+      }
+    })
+
+    const commision = commisions.map((commision) => {
+      return {
+        id: commision.id,
+        revenueSource: "Commisions",
+        description: "",
+        amount: commision.amount,
+        user: commision.store.name,
+        role: commision.store.business.user.getFullName,
+        date: commision.createdAt
+      }
+    })
+
+    return {
+      subscription,
+      ad,
+      commision
+    }
+  }
+
+  @UseGuards(PolicyRevenueGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, "REVENUE"))
   @Get("download")
   async downloads(@Res() res: Response, @Query() query: IRevenueQuery) {
     const isPaid = query.flag === "paid"
 
-    const [[subscriptions], [ads]] = await Promise.all([this.subscriptionService.find({ isPaid }), this.adsService.find({ status: query.adsStatus })])
+    const [[subscriptions], [ads], [commisions]] = await Promise.all([
+      this.subscriptionService.find({ isPaid }),
+      this.adsService.find({ status: query.adsStatus }),
+      this.commisionService.find({})
+    ])
 
     const headers = [
       { key: "revenueSource", header: "Revenue Source" },
@@ -122,7 +183,17 @@ export class RevenuesController {
       }
     })
 
-    const records = [...subscriptionsRecord, ...adsRecord]
+    const commisionRecord = commisions.map((commision) => {
+      return {
+        revenueSource: "Commision",
+        description: commision.value,
+        amount: commision.amount,
+        user: commision.store.name,
+        date: commision.createdAt
+      }
+    })
+
+    const records = [...subscriptionsRecord, ...adsRecord, ...commisionRecord]
 
     const data = await this.csvService.writeCsvToBuffer({ headers, records })
 
