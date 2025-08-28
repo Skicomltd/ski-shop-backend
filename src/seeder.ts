@@ -38,6 +38,11 @@ import { RevenueSetting } from "./modules/settings/entities/revenueSetting.entit
 import { Play2winSetting } from "./modules/settings/entities/play2winSetting.entity"
 import { PromotionSetting } from "./modules/settings/entities/promotionSetting.entity"
 import { GeneralSetting } from "./modules/settings/entities/general.entity"
+import { SettingSeeder } from "./modules/seeder/setting.seeder"
+import { RevenueSettingSeeder } from "./modules/seeder/revenue-setting.seeder"
+import { Play2WinSeeder } from "./modules/seeder/play-2-win.seeder"
+import { PromotionSettingSeeder } from "./modules/seeder/promotion-setting.seeder"
+import { GeneralSeeder } from "./modules/seeder/general.seeder"
 
 seeder({
   imports: [
@@ -74,4 +79,17 @@ seeder({
     ])
   ],
   providers: [UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder, PromotionSeeder, PlanSeeder]
-}).run([UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder, PromotionSeeder, PlanSeeder])
+}).run([
+  UserSeeder,
+  BusinessSeeder,
+  StoreSeeder,
+  BankSeeder,
+  ProductSeeder,
+  PromotionSeeder,
+  PlanSeeder,
+  SettingSeeder,
+  RevenueSettingSeeder,
+  Play2WinSeeder,
+  PromotionSettingSeeder,
+  GeneralSeeder
+])
