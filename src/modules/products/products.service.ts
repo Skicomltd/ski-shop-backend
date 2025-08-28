@@ -52,7 +52,7 @@ export class ProductsService implements IService<Product> {
     return [products, count]
   }
 
-  async find({ page, limit, status, stockCount, storeId, categories, vendor, flag, search, rating, orderBy = "ASC", sortBy }: IProductsQuery) {
+  async find({ page, limit, status, stockCount = -1, storeId, categories, vendor, flag, search, rating, orderBy = "ASC", sortBy }: IProductsQuery) {
     const query = this.productRepository
       .createQueryBuilder("product")
       .leftJoinAndSelect("product.store", "store")
@@ -72,7 +72,7 @@ export class ProductsService implements IService<Product> {
     }
 
     if (stockCount) {
-      query.andWhere("product.stockCount = :stockCount", { stockCount })
+      query.andWhere("product.stockCount > :stockCount", { stockCount })
     }
 
     if (categories) {

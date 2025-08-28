@@ -15,11 +15,8 @@ import { PaymentsService } from "../services/payments/payments.service"
 import { InitiatePayment } from "../services/payments/interfaces/strategy.interface"
 import { OrdersService } from "../orders/orders.service"
 import { TransactionHelper } from "../services/utils/transactions/transactions.service"
-import { UserService } from "../users/user.service"
 import { HelpersService } from "../services/utils/helpers/helpers.service"
 import { VoucherService } from "../vouchers/voucher.service"
-import { SettingsService } from "../settings/settings.service"
-import { CommisionsService } from "../commisions/commisions.service"
 import { BadReqException } from "@/exceptions/badRequest.exception"
 import { VoucherEnum } from "../vouchers/enum/voucher-enum"
 
@@ -31,11 +28,8 @@ export class CartsController {
     private readonly paymentsService: PaymentsService,
     private readonly ordersService: OrdersService,
     private readonly transactionHelper: TransactionHelper,
-    private readonly userService: UserService,
     private readonly helperService: HelpersService,
-    private readonly voucherService: VoucherService,
-    private readonly settingService: SettingsService,
-    private readonly commisionService: CommisionsService
+    private readonly voucherService: VoucherService
   ) {}
 
   @Post()
@@ -63,6 +57,16 @@ export class CartsController {
     return this.transactionHelper.runInTransaction(async (manager) => {
       const [carts, count] = await this.cartsService.find({ user: { id: user.id } })
       if (count <= 0) throw new NotFoundException("empty cart")
+
+      for (const cart of carts) {
+        const product = await this.productService.findOne({ id: cart.product.id, status: ProductStatusEnum.published })
+
+        if (!product) throw new NotFoundException(`${product.name} currently does not exist`)
+
+        if (product.stockCount <= 0) {
+          throw new BadReqException(`${product.name} is currently out of stock.`)
+        }
+      }
 
       const amount = await this.cartsService.calculateTotalPrice(user.id)
       const reference = this.helperService.generateReference("REF-")
