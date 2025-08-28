@@ -2,4 +2,7 @@ import { PaginationParams } from "@/modules/services/pagination/interfaces/pagin
 import { FindOptionsWhere } from "typeorm"
 import { Coupon } from "../entities/coupon.entity"
 
-export interface ICouponsQuery extends PaginationParams, FindOptionsWhere<Coupon> {}
+export interface ICouponsQuery extends PaginationParams, FindOptionsWhere<Coupon> {
+  search?: string
+  orderBy?: "ASC" | "DESC"
+}
