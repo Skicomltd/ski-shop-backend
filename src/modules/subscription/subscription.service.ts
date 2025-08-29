@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common"
 import { CreateSubscriptionDto } from "./dto/create-subscription.dto"
 import { UpdateSubscriptionDto } from "./dto/update-subscription.dto"
 import { Subscription } from "./entities/subscription.entity"
-import { Between, EntityManager, FindManyOptions, FindOptionsWhere, LessThanOrEqual, MoreThanOrEqual, Repository } from "typeorm"
+import { Between, EntityManager, FindOptionsWhere, LessThanOrEqual, MoreThanOrEqual, Repository } from "typeorm"
 import { InjectRepository } from "@nestjs/typeorm"
 import { GetSubscriptionPayload, ISubscriptionsQuery } from "./interface/query-filter.interface"
 import { PaymentsService } from "../services/payments/payments.service"
@@ -30,39 +30,54 @@ export class SubscriptionService implements IService<Subscription>, UseQueue<str
     return subscription
   }
 
-  async find({ page, limit, planType, status, vendorId, startDate, endDate }: ISubscriptionsQuery): Promise<[Subscription[], number]> {
-    const where: FindManyOptions<Subscription>["where"] = {}
+  async find({
+    page,
+    limit,
+    planType,
+    status,
+    vendorId,
+    startDate,
+    endDate,
+    search,
+    orderBy = "DESC"
+  }: ISubscriptionsQuery): Promise<[Subscription[], number]> {
+    const query = this.subscriptionRepository
+      .createQueryBuilder("subscription")
+      .leftJoinAndSelect("subscription.vendor", "vendor")
+      .leftJoinAndSelect("vendor.business", "business")
+      .leftJoinAndSelect("business.store", "store")
+      .orderBy("subscription.createdAt", orderBy)
 
     if (planType) {
-      where.planType = planType
+      query.andWhere("subscription.planType = :planType", { planType })
     }
 
     if (status) {
-      where.status = status
+      query.andWhere("subscription.status = :status", { status })
     }
 
     if (vendorId) {
-      where.vendorId = vendorId
+      query.andWhere("subscription.vendorId = :vendorId", { vendorId })
     }
 
     if (startDate && endDate) {
-      where.createdAt = Between(startDate, endDate)
+      query.andWhere("subscription.createdAt BETWEEN :startDate AND :endDate", { startDate, endDate })
+    } else if (startDate) {
+      query.andWhere("subscription.createdAt >= :startDate", { startDate })
+    } else if (endDate) {
+      query.andWhere("subscription.createdAt <= :endDate", { endDate })
     }
 
-    if (startDate) {
-      where.createdAt = MoreThanOrEqual(startDate)
+    if (search) {
+      query.andWhere("LOWER(vendor.firstName) LIKE :search OR LOWER(vendor.lastName) LIKE :search OR LOWER(store.name) LIKE :search", {
+        search: `%${search.toLowerCase()}%`
+      })
     }
 
-    if (endDate) {
-      where.createdAt = LessThanOrEqual(endDate)
-    }
-
-    return await this.subscriptionRepository.findAndCount({
-      where,
-      take: limit,
-      skip: page ? page - 1 : undefined,
-      relations: this.relations
-    })
+    return await query
+      .take(limit)
+      .skip(page && page > 0 ? (page - 1) * limit : 0)
+      .getManyAndCount()
   }
 
   async findById(id: string): Promise<Subscription> {
