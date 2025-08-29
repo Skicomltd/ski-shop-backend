@@ -16,6 +16,6 @@ import { GeneralSettingService } from "./general-settings.service"
   imports: [TypeOrmModule.forFeature([Setting, RevenueSetting, PromotionSetting, Play2winSetting, GeneralSetting])],
   controllers: [SettingsController],
   providers: [SettingsService, Play2winSettingService, PromotionSettingService, RevenueSettingService, GeneralSettingService],
-  exports: [SettingsService]
+  exports: [SettingsService, Play2winSettingService, PromotionSettingService, RevenueSettingService, GeneralSettingService]
 })
 export class SettingsModule {}
