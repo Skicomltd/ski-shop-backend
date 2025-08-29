@@ -8,6 +8,7 @@ import { IOrdersQuery } from "./interfaces/query-filter.interface"
 import { OrderRevenueInterface } from "./interfaces/order-revenue.interface"
 import { MonthlySalesData, MonthlySalesQuery } from "./interfaces/order-monthlystats.interface"
 import { StoreOrderRevenueSummary } from "./interfaces/store-order.interface"
+import { months } from "../common/types"
 
 @Injectable()
 export class OrdersService implements IService<Order> {
@@ -138,7 +139,7 @@ export class OrdersService implements IService<Order> {
 
     return result.map((row) => ({
       year: row.year,
-      month: row.month,
+      month: months[row.month],
       total: parseFloat(row.total) || 0
     }))
   }

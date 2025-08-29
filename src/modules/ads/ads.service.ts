@@ -26,7 +26,7 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
     return await repo.save(ad)
   }
 
-  async find({ productId, vendorId, type, storeId, limit, page, startDate, endDate, status }: IAdsQuery): Promise<[Ad[], number]> {
+  async find({ productId, vendorId, type, storeId, limit, page, startDate, endDate, status, adStatus }: IAdsQuery): Promise<[Ad[], number]> {
     const where: FindOptionsWhere<Ad> = { status: Not("inactive") }
 
     if (productId) {
@@ -62,9 +62,14 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
       where.createdAt = LessThanOrEqual(endDate)
     }
 
+    if (adStatus) {
+      where.status = In(adStatus)
+    }
+
     return await this.adRepository.findAndCount({
       where,
       take: limit,
+      order: { createdAt: "DESC" },
       skip: page ? page - 1 : undefined,
       relations: this.relations
     })

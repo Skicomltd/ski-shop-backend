@@ -8,6 +8,7 @@ import { CreateCommisionDto } from "./dto/create-commision.dto"
 import { UpdateCommisionDto } from "./dto/update-commision.dto"
 import { OrderItem } from "../orders/entities/order-item.entity"
 import { CommisionRevenueInterface, MonthlyCommisionRevenue } from "./interface/commision-revenue.interface"
+import { ICommisionQuery } from "./interface/query-filter.interface"
 
 @Injectable()
 export class CommisionsService implements IService<Commision> {
@@ -16,6 +17,8 @@ export class CommisionsService implements IService<Commision> {
     private readonly settingsService: SettingsService
   ) {}
 
+  private relations = ["store", "store.business", "store.business.user"]
+
   async create(createCommisionDto: CreateCommisionDto, manager?: EntityManager): Promise<Commision> {
     const repo = manager ? manager.getRepository<Commision>(Commision) : this.commisionRepository
     const createCommision = repo.create({ ...createCommisionDto })
@@ -23,12 +26,32 @@ export class CommisionsService implements IService<Commision> {
     return await repo.save(createCommision)
   }
 
-  async find(data?: FindOptionsWhere<Commision>): Promise<[Commision[], number]> {
-    return await this.commisionRepository.findAndCount({ where: data })
+  async find({ startDate, endDate, limit, page }: ICommisionQuery): Promise<[Commision[], number]> {
+    const where: FindOptionsWhere<Commision> = {}
+
+    if (startDate && endDate) {
+      where.createdAt = Between(startDate, endDate)
+    }
+
+    if (startDate) {
+      where.createdAt = MoreThanOrEqual(startDate)
+    }
+
+    if (endDate) {
+      where.createdAt = LessThanOrEqual(endDate)
+    }
+
+    return await this.commisionRepository.findAndCount({
+      where,
+      take: limit,
+      order: { createdAt: "DESC" },
+      skip: page ? page - 1 : undefined,
+      relations: this.relations
+    })
   }
 
   async findOne(filter: FindOptionsWhere<Commision>) {
-    return this.commisionRepository.findOne({ where: filter })
+    return this.commisionRepository.findOne({ where: filter, relations: this.relations })
   }
 
   async exists(filter: FindOptionsWhere<Commision>): Promise<boolean> {
@@ -36,7 +59,7 @@ export class CommisionsService implements IService<Commision> {
   }
 
   async findById(id: string): Promise<Commision> {
-    return await this.commisionRepository.findOne({ where: { id: id } })
+    return await this.commisionRepository.findOne({ where: { id: id }, relations: this.relations })
   }
 
   async update(entity: Commision, data: UpdateCommisionDto, manager?: EntityManager): Promise<Commision> {
