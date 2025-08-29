@@ -1,6 +1,6 @@
 export interface MonthlySalesData {
   year: number
-  month: number
+  month: string
   total: number
 }
 
