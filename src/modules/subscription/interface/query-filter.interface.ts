@@ -5,6 +5,8 @@ import { FindOptionsWhere } from "typeorm"
 export interface ISubscriptionsQuery extends PaginationParams, FindOptionsWhere<Subscription> {
   startDate?: Date
   endDate?: Date
+  search?: string
+  orderBy?: "ASC" | "DESC"
 }
 
 export interface GetSubscriptionPayload {
