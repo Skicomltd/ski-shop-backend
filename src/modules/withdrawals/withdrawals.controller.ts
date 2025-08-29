@@ -17,6 +17,7 @@ import { ApiException } from "@/exceptions/api.exception"
 import { WithdrawalsResponseInterceptor } from "./interceptors/withdrawals.interceptor"
 import { WithdrawalDecision, withdrawalDecisionSchema } from "./dto/withdrawal-decision.dto"
 import { IWithdrawalQuery } from "./interfaces/query-filter.interface"
+import { SettingsService } from "../settings/settings.service"
 
 @Controller("withdrawals")
 export class WithdrawalsController {
@@ -25,7 +26,8 @@ export class WithdrawalsController {
     private readonly bankService: BankService,
     private readonly paymentsService: PaymentsService,
     private readonly transactionHelper: TransactionHelper,
-    private readonly payoutsService: PayoutsService
+    private readonly payoutsService: PayoutsService,
+    private readonly settingsService: SettingsService
   ) {}
 
   @Post("")
@@ -35,6 +37,18 @@ export class WithdrawalsController {
   async withdraw(@Body(new JoiValidationPipe(createWithdrawalSchema)) dto: CreateWithdrawalDto, @Req() req: Request) {
     return await this.transactionHelper.runInTransaction(async (manager) => {
       const storeId = req.user.business.store.id
+      const settings = await this.settingsService.getSettings()
+
+      if (!settings) throw new NotFoundException("Setting not found")
+
+      const maximumPayout = settings.revenueSetting.maxPayoutAmount
+      const minimumPayout = settings.revenueSetting.minPayoutAmount
+
+      if (dto.amount > maximumPayout) {
+        throw new BadReqException(`Withdrawal amount exceeds maximum allowed payout of ${maximumPayout}`)
+      } else if (dto.amount < minimumPayout) {
+        throw new BadReqException(`Withdrawal amount is below minimum allowed payout of ${minimumPayout}`)
+      }
 
       const bank = await this.bankService.findById(dto.bankId)
       if (!bank) throw new NotFoundException("bank not found")
@@ -66,6 +80,19 @@ export class WithdrawalsController {
   async decision(@Body(new JoiValidationPipe(withdrawalDecisionSchema)) dto: WithdrawalDecision) {
     const withdrawal = await this.withdrawalsService.findOne({ id: dto.withdrawalId, status: "pending" })
     if (!withdrawal) throw new NotFoundException("withdrawal not found")
+
+    const settings = await this.settingsService.getSettings()
+
+    if (!settings) throw new NotFoundException("Setting not found")
+
+    const maximumPayout = settings.revenueSetting.maxPayoutAmount
+    const minimumPayout = settings.revenueSetting.minPayoutAmount
+
+    if (withdrawal.amount > maximumPayout) {
+      throw new BadReqException(`Withdrawal amount exceeds maximum allowed payout of ${maximumPayout}`)
+    } else if (withdrawal.amount < minimumPayout) {
+      throw new BadReqException(`Withdrawal amount is below minimum allowed payout of ${minimumPayout}`)
+    }
 
     if (dto.decision === "approve") {
       const balance = await this.paymentsService.checkBalance()
