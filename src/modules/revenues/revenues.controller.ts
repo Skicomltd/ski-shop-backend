@@ -104,7 +104,7 @@ export class RevenuesController {
         revenueSource: "Subscription",
         description: subscription.planType,
         amount: subscription.amount,
-        user: subscription.vendor.business.name,
+        user: subscription.vendor.business.store.name,
         role: subscription.vendor.role,
         date: subscription.createdAt
       }
@@ -134,7 +134,7 @@ export class RevenuesController {
       }
     })
 
-    return [...subscription, ...ad, ...commision]
+    return [...ad, ...subscription, ...commision]
   }
 
   @UseGuards(PolicyRevenueGuard)

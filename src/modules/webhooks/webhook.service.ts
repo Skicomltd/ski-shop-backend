@@ -101,6 +101,7 @@ export class WebhookService {
 
     await this.transactionHelper.runInTransaction(async (manager) => {
       await this.cartsService.remove({ user: { id: order.buyerId } }, manager)
+      const user = await this.userService.findOne({ id: order.buyerId })
 
       await this.orderService.update(
         order,
@@ -122,6 +123,7 @@ export class WebhookService {
         const storeId = product.user.business.store.id
         const total = item.unitPrice * item.quantity
         const commission = await this.commisionService.calculateOrderItemCommission(item)
+        const vendor = await this.userService.findOne({ id: item.product.user.id })
 
         const totalAfterCommission = total - commission
         const payout = await this.payoutsService.findOne({ storeId })
@@ -146,7 +148,10 @@ export class WebhookService {
           },
           manager
         )
+        await this.userService.update(vendor, { itemsCount: vendor.itemsCount + 1 }, manager)
       }
+
+      await this.userService.update(user, { ordersCount: user.ordersCount + 1 }, manager)
     })
   }
 
