@@ -134,7 +134,9 @@ export class RevenuesController {
       }
     })
 
-    return [...ad, ...subscription, ...commision]
+    const revenue = [...subscription, ...ad, ...commision]
+
+    return revenue.sort((a, b) => b.date.getTime() - a.date.getTime())
   }
 
   @UseGuards(PolicyRevenueGuard)
