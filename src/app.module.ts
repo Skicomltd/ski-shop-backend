@@ -41,6 +41,7 @@ import { VoucherModule } from "./modules/vouchers/voucher.module"
 import { ProfilesModule } from "./modules/profiles/profiles.module"
 import { SettingsModule } from "./modules/settings/settings.module"
 import { CommisionsModule } from "./modules/commisions/commisions.module"
+import { PdfModule } from './modules/pdf/pdf.module';
 @Module({
   imports: [
     UserModule,
@@ -79,7 +80,8 @@ import { CommisionsModule } from "./modules/commisions/commisions.module"
     VoucherModule,
     ProfilesModule,
     SettingsModule,
-    CommisionsModule
+    CommisionsModule,
+    PdfModule
   ],
   controllers: [AppController],
   providers: [

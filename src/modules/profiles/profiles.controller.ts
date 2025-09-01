@@ -8,8 +8,6 @@ import { ProductStatusEnum } from "../common/types"
 import { OrdersService } from "../orders/orders.service"
 import { PayoutsService } from "../payouts/payouts.service"
 import { WithdrawalsService } from "../withdrawals/withdrawals.service"
-import { PdfInterface } from "../services/utils/pdf/interface/pdf.interface"
-import { PdfService } from "../services/utils/pdf/pdf.service"
 import { Response } from "express"
 import { BadReqException } from "@/exceptions/badRequest.exception"
 import { BuyerProfile } from "./interface/buyer-profile"
@@ -17,6 +15,8 @@ import { UserRoleEnum } from "../users/entity/user.entity"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { PolicyProfilesGuard } from "./guard/policy-profiles.guard"
 import { Action } from "../services/casl/actions/action"
+import { PdfService } from "../pdf/pdf.service"
+import { PdfInterface } from "../pdf/interface/pdf.interface"
 
 @Controller("profiles")
 export class ProfilesController {

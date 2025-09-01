@@ -6,9 +6,10 @@ import { ProductsModule } from "../products/products.module"
 import { OrdersModule } from "../orders/orders.module"
 import { PayoutsModule } from "../payouts/payouts.module"
 import { WithdrawalsModule } from "../withdrawals/withdrawals.module"
+import { PdfModule } from "../pdf/pdf.module"
 
 @Module({
-  imports: [UserModule, SubscriptionModule, ProductsModule, OrdersModule, PayoutsModule, WithdrawalsModule],
+  imports: [UserModule, SubscriptionModule, ProductsModule, OrdersModule, PayoutsModule, WithdrawalsModule, PdfModule],
   controllers: [ProfilesController]
 })
 export class ProfilesModule {}
