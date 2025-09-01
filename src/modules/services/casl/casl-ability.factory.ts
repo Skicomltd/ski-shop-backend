@@ -413,6 +413,9 @@ export class CaslAbilityFactory {
   createAbilityForVendors(user: User): AppAbility {
     const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
 
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, "all")
+    }
     if (user.role === UserRoleEnum.Vendor) {
       can(Action.Update, "VENDOR")
       can(Action.Read, "VENDOR")
