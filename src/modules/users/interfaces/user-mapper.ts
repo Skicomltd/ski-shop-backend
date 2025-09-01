@@ -8,6 +8,7 @@ export abstract class UserResponseMapper implements IInterceptor {
       firstName: data.firstName,
       lastName: data.lastName,
       role: data.role,
+      kycStatus: data?.business?.kycStatus,
       itemsCount: data.itemsCount,
       ordersCount: data.ordersCount,
       email: data.email,
