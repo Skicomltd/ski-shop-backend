@@ -3,6 +3,7 @@ import { IOrderResponse } from "./order-response.interface"
 
 export abstract class OrderResponseMapper implements IInterceptor {
   transform(data: Order): IOrderResponse {
+    console.log(data)
     return {
       id: data.id,
       status: data.status,
