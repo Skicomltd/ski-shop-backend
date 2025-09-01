@@ -10,5 +10,6 @@ export interface IUserResponse {
   ordersCount: number
   phoneNumber: string
   isEmailVerified: boolean
+  lastTimeActivity: Date
   createdAt: Date
 }

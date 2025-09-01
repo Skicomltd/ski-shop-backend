@@ -12,6 +12,7 @@ export abstract class UserResponseMapper implements IInterceptor {
       ordersCount: data.ordersCount,
       email: data.email,
       isEmailVerified: data.isEmailVerified,
+      lastTimeActivity: null,
       createdAt: data.createdAt,
       phoneNumber: data.phoneNumber
     }
