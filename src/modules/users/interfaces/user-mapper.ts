@@ -3,6 +3,10 @@ import { IUserResponse } from "./user-response"
 
 export abstract class UserResponseMapper implements IInterceptor {
   transform(data: User): IUserResponse {
+    const latestSubscription =
+      data.subscriptions?.length > 0
+        ? data.subscriptions.reduce((latest, current) => (new Date(current.createdAt) > new Date(latest.createdAt) ? current : latest))
+        : null
     return {
       id: data.id,
       firstName: data.firstName,
@@ -10,6 +14,7 @@ export abstract class UserResponseMapper implements IInterceptor {
       role: data.role,
       kycStatus: data?.business?.kycStatus,
       itemsCount: data.itemsCount,
+      subscriptionStatus: latestSubscription?.status,
       ordersCount: data.ordersCount,
       email: data.email,
       isEmailVerified: data.isEmailVerified,
