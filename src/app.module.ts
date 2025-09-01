@@ -38,11 +38,10 @@ import { ScheduleModule } from "@nestjs/schedule"
 import { RevenuesModule } from "./modules/revenues/revenues.module"
 import { CouponsModule } from "./modules/coupons/coupons.module"
 import { VoucherModule } from "./modules/vouchers/voucher.module"
-import { ProfilesModule } from "./modules/profiles/profiles.module"
 import { SettingsModule } from "./modules/settings/settings.module"
 import { CommisionsModule } from "./modules/commisions/commisions.module"
-import { PdfModule } from './modules/pdf/pdf.module';
-import { BuyerModule } from './modules/buyer/buyer.module';
+import { PdfModule } from "./modules/pdf/pdf.module"
+import { BuyerModule } from "./modules/buyer/buyer.module"
 @Module({
   imports: [
     UserModule,
@@ -79,7 +78,6 @@ import { BuyerModule } from './modules/buyer/buyer.module';
     RevenuesModule,
     CouponsModule,
     VoucherModule,
-    ProfilesModule,
     SettingsModule,
     CommisionsModule,
     PdfModule,
