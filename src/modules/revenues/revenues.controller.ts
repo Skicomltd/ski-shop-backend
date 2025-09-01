@@ -104,7 +104,7 @@ export class RevenuesController {
         revenueSource: "Subscription",
         description: subscription.planType,
         amount: subscription.amount,
-        user: subscription.vendor.business.name,
+        user: subscription.vendor.business.store.name,
         role: subscription.vendor.role,
         date: subscription.createdAt
       }
@@ -134,7 +134,9 @@ export class RevenuesController {
       }
     })
 
-    return [...subscription, ...ad, ...commision]
+    const revenue = [...subscription, ...ad, ...commision]
+
+    return revenue.sort((a, b) => b.date.getTime() - a.date.getTime())
   }
 
   @UseGuards(PolicyRevenueGuard)
