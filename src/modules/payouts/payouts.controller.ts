@@ -32,4 +32,11 @@ export class PayoutsController {
   async findAll(@Query() query: IPayoutQuery) {
     return await this.payoutsService.find(query)
   }
+
+  @UseGuards(PolicyPayoutGuard)
+  @CheckPolicies((ability) => ability.can(Action.Manage, Payout))
+  @Get("/stats")
+  async payoutStats() {
+    return await this.payoutsService.payoutStats()
+  }
 }

@@ -4,6 +4,7 @@ import { EntityManager, FindManyOptions, FindOptionsWhere, MoreThan, Repository 
 
 import { Payout } from "./entities/payout.entity"
 import { IPayoutQuery } from "./interfaces/query-filter.interface"
+import { PayoutStats } from "./interfaces/payout-stats"
 
 @Injectable()
 export class PayoutsService implements IService<Payout> {
@@ -54,5 +55,20 @@ export class PayoutsService implements IService<Payout> {
   async remove(filter: FindOptionsWhere<Payout>): Promise<number> {
     const result = await this.payoutRepository.delete(filter)
     return result.affected || 0
+  }
+
+  async payoutStats(): Promise<PayoutStats> {
+    const result = await this.payoutRepository
+      .createQueryBuilder("payout")
+      .select("SUM(payout.withdrawn)", "totalPayoutsPaid")
+      .addSelect("SUM(payout.available)", "walletBalance")
+      .addSelect("SUM(payout.pending)", "pendingPayouts")
+      .getRawOne()
+
+    return {
+      totalPayoutsPaid: parseFloat(result.totalPayoutsPaid) || 0,
+      walletBalance: parseFloat(result.walletBalance) || 0,
+      pendingPayouts: parseFloat(result.pendingPayouts) || 0
+    }
   }
 }
