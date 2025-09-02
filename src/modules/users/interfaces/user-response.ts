@@ -1,3 +1,4 @@
+import { KYC_ENUM_STATUS } from "@/modules/business/enum/kyc-status-enum"
 import { UserRoleEnum } from "../entity/user.entity"
 
 export interface IUserResponse {
@@ -6,9 +7,11 @@ export interface IUserResponse {
   lastName: string
   role: UserRoleEnum
   email: string
+  kycStatus: KYC_ENUM_STATUS
   itemsCount: number
   ordersCount: number
   phoneNumber: string
   isEmailVerified: boolean
+  lastTimeActivity: Date
   createdAt: Date
 }
