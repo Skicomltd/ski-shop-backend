@@ -42,6 +42,7 @@ import { SettingsModule } from "./modules/settings/settings.module"
 import { CommisionsModule } from "./modules/commisions/commisions.module"
 import { PdfModule } from "./modules/pdf/pdf.module"
 import { BuyerModule } from "./modules/buyer/buyer.module"
+import { NewslettersModule } from "./modules/newsletters/newsletters.module"
 @Module({
   imports: [
     UserModule,
@@ -81,7 +82,8 @@ import { BuyerModule } from "./modules/buyer/buyer.module"
     SettingsModule,
     CommisionsModule,
     PdfModule,
-    BuyerModule
+    BuyerModule,
+    NewslettersModule
   ],
   controllers: [AppController],
   providers: [

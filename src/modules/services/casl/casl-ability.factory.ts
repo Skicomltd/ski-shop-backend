@@ -39,6 +39,7 @@ type Subjects = InferSubjects<
   | "REVENUE"
   | "VENDOR"
   | "PROFILE"
+  | "NEWSLETTER"
   | "all"
 >
 
@@ -515,6 +516,27 @@ export class CaslAbilityFactory {
       cannot(Action.Read, "PROFILE")
       cannot(Action.Update, "PROFILE")
       cannot(Action.Delete, "PROFILE")
+    }
+
+    const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
+  }
+
+  createUserAbilityForNewsletter(user: User): AppAbility {
+    const { build, can, cannot } = new AbilityBuilder(createMongoAbility)
+
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, "NEWSLETTER")
+    } else {
+      cannot(Action.Read, "NEWSLETTER")
+      cannot(Action.Create, "NEWSLETTER")
+      cannot(Action.Update, "NEWSLETTER")
+      cannot(Action.Delete, "NEWSLETTER")
     }
 
     const ability = build({
