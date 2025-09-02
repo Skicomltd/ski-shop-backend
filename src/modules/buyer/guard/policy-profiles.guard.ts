@@ -5,7 +5,7 @@ import { PolicyHandler } from "../../auth/interface/policies-interface"
 import { CHECK_POLICIES_KEY } from "../../auth/decorators/policies-handler.decorator"
 
 @Injectable()
-export class PolicyProfilesGuard implements CanActivate {
+export class PolicyBuyerProfilesGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
     private caslAbilityFactory: CaslAbilityFactory

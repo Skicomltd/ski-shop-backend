@@ -9,6 +9,7 @@ export abstract class OrderResponseMapper implements IInterceptor {
       paidAt: data.paidAt,
       paymentMethod: data.paymentMethod,
       reference: data.reference,
+      totalAmount: data.items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0),
       buyer: {
         id: data.buyer.id,
         name: data.buyer.getFullName(),
