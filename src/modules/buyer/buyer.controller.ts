@@ -9,14 +9,14 @@ import { NotFoundException } from "@/exceptions/notfound.exception"
 import { UserRoleEnum } from "../users/entity/user.entity"
 import { OrdersService } from "../orders/orders.service"
 import { BuyerProfile } from "./interface/buyer-profile"
-import { PdfService } from "../pdf/pdf.service"
+import { BuyerService } from "./buyer.service"
 
 @Controller("buyer")
 export class BuyerController {
   constructor(
+    private readonly buyerService: BuyerService,
     private readonly userService: UserService,
-    private readonly orderService: OrdersService,
-    private readonly pdfService: PdfService
+    private readonly orderService: OrdersService
   ) {}
 
   @UseGuards(PolicyBuyerProfilesGuard)
@@ -52,7 +52,7 @@ export class BuyerController {
       },
       orders: refinedOrders
     }
-    const pdfBuffer = await this.pdfService.generateBuyerPdf(profile)
+    const pdfBuffer = await this.buyerService.generateBuyerPdf(profile)
 
     res.setHeader("Content-Type", "application/pdf")
     res.setHeader("Content-Disposition", `attachment; filename=vendor_profile_${user.id}.pdf`)
