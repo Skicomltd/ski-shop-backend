@@ -8,10 +8,11 @@ import { ProductsModule } from "../products/products.module"
 import { OrdersModule } from "../orders/orders.module"
 import { PayoutsModule } from "../payouts/payouts.module"
 import { WithdrawalsModule } from "../withdrawals/withdrawals.module"
-import { PdfModule } from "../pdf/pdf.module"
+import { VendorService } from "./vendor.service"
 
 @Module({
-  imports: [UserModule, StoreModule, BusinessModule, SubscriptionModule, ProductsModule, OrdersModule, PayoutsModule, WithdrawalsModule, PdfModule],
-  controllers: [VendorController]
+  imports: [UserModule, StoreModule, BusinessModule, SubscriptionModule, ProductsModule, OrdersModule, PayoutsModule, WithdrawalsModule],
+  controllers: [VendorController],
+  providers: [VendorService]
 })
 export class VendorModule {}
