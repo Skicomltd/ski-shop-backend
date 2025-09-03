@@ -41,6 +41,7 @@ import { VoucherModule } from "./modules/vouchers/voucher.module"
 import { SettingsModule } from "./modules/settings/settings.module"
 import { CommisionsModule } from "./modules/commisions/commisions.module"
 import { BuyerModule } from "./modules/buyer/buyer.module"
+import { NewslettersModule } from "./modules/newsletters/newsletters.module"
 @Module({
   imports: [
     UserModule,
@@ -79,7 +80,8 @@ import { BuyerModule } from "./modules/buyer/buyer.module"
     VoucherModule,
     SettingsModule,
     CommisionsModule,
-    BuyerModule
+    BuyerModule,
+    NewslettersModule
   ],
   controllers: [AppController],
   providers: [
