@@ -40,7 +40,6 @@ import { CouponsModule } from "./modules/coupons/coupons.module"
 import { VoucherModule } from "./modules/vouchers/voucher.module"
 import { SettingsModule } from "./modules/settings/settings.module"
 import { CommisionsModule } from "./modules/commisions/commisions.module"
-import { PdfModule } from "./modules/pdf/pdf.module"
 import { BuyerModule } from "./modules/buyer/buyer.module"
 import { NewslettersModule } from "./modules/newsletters/newsletters.module"
 @Module({
@@ -81,7 +80,6 @@ import { NewslettersModule } from "./modules/newsletters/newsletters.module"
     VoucherModule,
     SettingsModule,
     CommisionsModule,
-    PdfModule,
     BuyerModule,
     NewslettersModule
   ],

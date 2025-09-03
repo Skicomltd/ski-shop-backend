@@ -27,9 +27,9 @@ import { ProductsService } from "../products/products.service"
 import { OrdersService } from "../orders/orders.service"
 import { PayoutsService } from "../payouts/payouts.service"
 import { WithdrawalsService } from "../withdrawals/withdrawals.service"
-import { PdfService } from "../pdf/pdf.service"
 import { ProductStatusEnum } from "../common/types"
-import { PdfInterface } from "../pdf/interface/pdf.interface"
+import { PdfInterface } from "../services/utils/pdf/interface/pdf.interface"
+import { VendorService } from "./vendor.service"
 
 @Controller("vendors")
 export class VendorController {
@@ -44,7 +44,7 @@ export class VendorController {
     private readonly orderService: OrdersService,
     private readonly payoutsService: PayoutsService,
     private readonly withdrawalsService: WithdrawalsService,
-    private readonly pdfService: PdfService
+    private readonly vendorService: VendorService
   ) {}
 
   @UseGuards(PolicyVendorGuard)
@@ -128,7 +128,7 @@ export class VendorController {
       }))
     }
 
-    const pdfBuffer = await this.pdfService.generateVendorPdf(pdfData)
+    const pdfBuffer = await this.vendorService.generateVendorPdf(pdfData)
 
     res.setHeader("Content-Type", "application/pdf")
     res.setHeader("Content-Disposition", `attachment; filename=vendor_profile_${user.id}.pdf`)
