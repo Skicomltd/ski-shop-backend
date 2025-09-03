@@ -43,6 +43,7 @@ import { CommisionsModule } from "./modules/commisions/commisions.module"
 import { PdfModule } from "./modules/pdf/pdf.module"
 import { BuyerModule } from "./modules/buyer/buyer.module"
 import { NewslettersModule } from "./modules/newsletters/newsletters.module"
+import { ContactUsModule } from "./modules/contact-us/contact-us.module"
 @Module({
   imports: [
     UserModule,
@@ -83,7 +84,8 @@ import { NewslettersModule } from "./modules/newsletters/newsletters.module"
     CommisionsModule,
     PdfModule,
     BuyerModule,
-    NewslettersModule
+    NewslettersModule,
+    ContactUsModule
   ],
   controllers: [AppController],
   providers: [
