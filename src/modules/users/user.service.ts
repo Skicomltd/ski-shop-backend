@@ -36,6 +36,7 @@ export class UserService implements IService<User> {
       .leftJoinAndSelect("business.store", "store")
       .leftJoinAndSelect("user.orders", "orders")
       .leftJoinAndSelect("orders.items", "items")
+      .leftJoinAndSelect("user.subscriptions", "subscriptions")
 
     if (role) {
       query.andWhere("user.role = :role", { role })
