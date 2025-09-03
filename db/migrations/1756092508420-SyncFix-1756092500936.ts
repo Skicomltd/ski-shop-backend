@@ -183,6 +183,9 @@ export class SyncFix17560925009361756092508420 implements MigrationInterface {
     await queryRunner.query(
       `CREATE TABLE "newsletter" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "email" character varying NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_036bb790d1d19efeacfd2f3740c" PRIMARY KEY ("id"))`
     )
+    await queryRunner.query(
+      `CREATE TABLE "contact_us" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "fullName" character varying NOT NULL, "email" character varying NOT NULL, "subject" character varying NOT NULL, "message" text NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_b61766a4d93470109266b976cfe" PRIMARY KEY ("id"))`
+    )
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
@@ -257,5 +260,6 @@ export class SyncFix17560925009361756092508420 implements MigrationInterface {
     await queryRunner.query(`DROP TYPE "public"."business_kycstatus_enum"`)
     await queryRunner.query(`DROP TABLE "bank"`)
     await queryRunner.query(`DROP TABLE "newsletter"`)
+    await queryRunner.query(`DROP TABLE "contact_us"`)
   }
 }
