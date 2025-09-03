@@ -47,6 +47,8 @@ import { OnboardBankDto } from "./dto/onboard-bank.dto"
 import { BankService } from "../banks/bank.service"
 import { bankSchema } from "../banks/dto/create-bank.dto"
 import { PaymentsService } from "../services/payments/payments.service"
+import { UserRoleEnum } from "../users/entity/user.entity"
+import { ForbiddenException } from "@/exceptions/forbidden.exception"
 
 @Controller("auth")
 export class AuthController {
@@ -208,6 +210,57 @@ export class AuthController {
   @UseInterceptors(AuthInterceptor)
   @UseGuards(LoginValidationGuard, PasswordAuthGuard)
   async passwordLogin(@Req() req: Request) {
+    const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
+
+    return { user: req.user, tokens }
+  }
+
+  @Public()
+  @Post("/login/vendor")
+  @HttpCode(200)
+  @UseInterceptors(AuthInterceptor)
+  @UseGuards(LoginValidationGuard, PasswordAuthGuard)
+  async loginVendor(@Req() req: Request) {
+    const user = req.user
+
+    if (user.role !== UserRoleEnum.Vendor) {
+      throw new ForbiddenException(`User with role '${user.role}' cannot log in as a vendor. Only 'Vendor' role is allowed.`)
+    }
+
+    const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
+
+    return { user: req.user, tokens }
+  }
+
+  @Public()
+  @Post("/login/customer")
+  @HttpCode(200)
+  @UseInterceptors(AuthInterceptor)
+  @UseGuards(LoginValidationGuard, PasswordAuthGuard)
+  async loginCustomer(@Req() req: Request) {
+    const user = req.user
+
+    if (user.role !== UserRoleEnum.Customer) {
+      throw new ForbiddenException(`User with role '${user.role}' cannot log in as a Customer. Only 'Customer' role is allowed.`)
+    }
+
+    const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
+
+    return { user: req.user, tokens }
+  }
+
+  @Public()
+  @Post("/login/admin")
+  @HttpCode(200)
+  @UseInterceptors(AuthInterceptor)
+  @UseGuards(LoginValidationGuard, PasswordAuthGuard)
+  async loginAdmin(@Req() req: Request) {
+    const user = req.user
+
+    if (user.role !== UserRoleEnum.Admin) {
+      throw new ForbiddenException(`User with role '${user.role}' cannot log in as a Admin. Only 'Admin' role is allowed.`)
+    }
+
     const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
 
     return { user: req.user, tokens }
