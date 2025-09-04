@@ -11,4 +11,5 @@ export interface IProductsQuery extends PaginationParams, FindOptionsWhere<Produ
   orderBy?: "ASC" | "DESC"
   sortBy?: "ASC" | "DESC" // sort using product price from lowest to highest
   rating?: number
+  userId?: string
 }
