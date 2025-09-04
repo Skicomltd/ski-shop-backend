@@ -7,6 +7,7 @@ export interface IProductResponse {
   description: string
   price: number
   rating: number
+  savedProduct: boolean
   discountPrice: number
   stockCount: number
   images: string[]

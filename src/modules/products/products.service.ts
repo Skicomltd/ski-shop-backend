@@ -20,6 +20,8 @@ export class ProductsService implements IService<Product> {
     private fileSystem: FileSystemService
   ) {}
 
+  private relations = ["user", "store"]
+
   async create(createProductDto: CreateProductDto, manager?: EntityManager): Promise<Product> {
     const repo = manager ? manager.getRepository(Product) : this.productRepository
 
@@ -52,7 +54,21 @@ export class ProductsService implements IService<Product> {
     return [products, count]
   }
 
-  async find({ page, limit, status, stockCount = -1, storeId, categories, vendor, flag, search, rating, orderBy = "ASC", sortBy }: IProductsQuery) {
+  async find({
+    page,
+    limit,
+    status,
+    stockCount = -1,
+    storeId,
+    categories,
+    vendor,
+    flag,
+    search,
+    rating,
+    orderBy = "ASC",
+    sortBy,
+    userId
+  }: IProductsQuery) {
     const query = this.productRepository
       .createQueryBuilder("product")
       .leftJoinAndSelect("product.store", "store")
@@ -121,6 +137,11 @@ export class ProductsService implements IService<Product> {
       )
     }
 
+    if (userId) {
+      query.leftJoinAndSelect("product.savedBy", "savedBy", "savedBy.userId = :userId", { userId })
+      query.addGroupBy("savedBy.id")
+    }
+
     return await query
       .take(limit)
       .skip(page && page > 0 ? (page - 1) * limit : 0)
@@ -130,13 +151,13 @@ export class ProductsService implements IService<Product> {
   async findOne(filter: FindOptionsWhere<Product>): Promise<Product> {
     const product = await this.productRepository.findOne({
       where: filter,
-      relations: ["store", "user"]
+      relations: this.relations
     })
     return product
   }
 
   async findById(id: string): Promise<Product> {
-    return await this.productRepository.findOne({ where: { id } })
+    return await this.productRepository.findOne({ where: { id }, relations: this.relations })
   }
 
   async exists(filter: FindOptionsWhere<Product>): Promise<boolean> {
