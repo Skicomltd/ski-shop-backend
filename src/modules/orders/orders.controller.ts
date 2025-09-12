@@ -14,6 +14,7 @@ import { FindOptionsWhere } from "typeorm"
 import { UserRoleEnum } from "../users/entity/user.entity"
 import { Response } from "express"
 import { CsvService } from "../services/utils/csv/csv.service"
+import { OrderSummaryData } from "./interfaces/order-summary.interface"
 
 @Controller("orders")
 export class OrdersController {
@@ -69,6 +70,40 @@ export class OrdersController {
     res.setHeader("Content-Type", "text/csv")
     res.setHeader("Content-Disposition", "attachment; filename=orders.csv")
     res.send(data)
+  }
+
+  @UseGuards(PolicyOrderGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, Order))
+  @Get("download/:id")
+  async orderSummary(@Param("id", ParseUUIDPipe) id: string, @Res() res: Response) {
+    const order = await this.ordersService.findById(id)
+    if (!order) {
+      throw new NotFoundException("Order does not exist")
+    }
+
+    const orderSummary: OrderSummaryData = {
+      order: {
+        dateTime: order.paidAt,
+        id: order.id,
+        orderStatus: order.deliveryStatus,
+        paymentStatus: order.status,
+        totalAmount: order.items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0)
+      },
+      products: order.items.map((item) => {
+        return {
+          buyer: order?.buyer.getFullName(),
+          name: item.product.name,
+          price: item.unitPrice,
+          quantity: item.quantity
+        }
+      })
+    }
+
+    const pdfBuffer = await this.ordersService.generateOrderSummaryPdf(orderSummary)
+
+    res.setHeader("Content-Type", "application/pdf")
+    res.setHeader("Content-Disposition", "attachment; filename=order-summary.pdf")
+    res.send(pdfBuffer)
   }
 
   @UseGuards(PolicyOrderGuard)

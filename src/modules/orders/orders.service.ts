@@ -9,12 +9,16 @@ import { OrderRevenueInterface } from "./interfaces/order-revenue.interface"
 import { MonthlySalesData, MonthlySalesQuery } from "./interfaces/order-monthlystats.interface"
 import { StoreOrderRevenueSummary } from "./interfaces/store-order.interface"
 import { months } from "../common/types"
+import * as PDFDocument from "pdfkit"
+import { PdfService } from "../services/utils/pdf/pdf.service"
+import { OrderSummaryData } from "./interfaces/order-summary.interface"
 
 @Injectable()
 export class OrdersService implements IService<Order> {
   constructor(
     @InjectRepository(Order)
-    private readonly orderRepository: Repository<Order>
+    private readonly orderRepository: Repository<Order>,
+    private readonly pdfService: PdfService
   ) {}
 
   async create(data: CreateOrderDto, manager?: EntityManager): Promise<Order> {
@@ -211,5 +215,139 @@ export class OrdersService implements IService<Order> {
       totalAmount: ord.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0),
       dateOrdered: ord.createdAt
     }))
+  }
+
+  async generateOrderSummaryPdf(data: OrderSummaryData): Promise<Buffer> {
+    return new Promise((resolve, reject) => {
+      try {
+        const doc = new PDFDocument({
+          size: "A4",
+          margin: 50,
+          info: {
+            Title: `Order Summary - ${data.order.id}`,
+            Author: "Skicom Management System",
+            Subject: "Skicom Order Summary Document",
+            Creator: "Skicom Order Service"
+          }
+        })
+        doc.fillColor("#FFFFFF").rect(0, 0, doc.page.width, doc.page.height).fill()
+
+        const buffers: Buffer[] = []
+        doc.on("data", (chunk) => buffers.push(chunk))
+        doc.on("end", () => resolve(Buffer.concat(buffers)))
+        doc.on("error", (err) => reject(err))
+
+        this.generateOrderSummaryPdfContent(doc, data)
+        doc.end()
+      } catch (error) {
+        console.error("Order Summary PDF generation error:", error)
+        reject(error)
+      }
+    })
+  }
+
+  async generateOrderSummaryPdfContent(doc: PDFKit.PDFDocument, data: OrderSummaryData) {
+    // Set default font
+    doc.font("Helvetica")
+
+    // Header (simulating the screenshot's light blue background)
+    doc.fillColor("#1DA1F2").opacity(0.1).roundedRect(50, 50, 495, 60, 10).fill()
+    doc.opacity(1).fontSize(20).fillColor("#1DA1F2").text("Order Summary", 50, 60, {
+      align: "center"
+    })
+    // Note: The "Download as PDF" button isn't rendered in PDF; it's for the web UI.
+
+    let yPos = 130
+
+    // ====================
+    // ORDER OVERVIEW
+    // ====================
+    this.pdfService.addSectionHeader(doc, "Order Overview", yPos) // Use your pdfService method
+    // Alternative if no pdfService: doc.fontSize(14).fillColor("#000").text("Order Overview", 50, yPos); yPos += 20;
+
+    yPos += 20
+
+    // Two-column layout for overview (like your buyer PDF)
+    yPos = this.pdfService.addTwoColumnPair(
+      doc,
+      "Order ID:",
+      data.order.id || "-",
+      "Date & Time:",
+      data.order.dateTime?.toLocaleString() || "-", // e.g., "03/07/2025 - 12:50 PM"
+      yPos
+    )
+    yPos = this.pdfService.addTwoColumnPair(
+      doc,
+      "Total Amount:",
+      `₦${data.order.totalAmount?.toLocaleString() || "0"}`, // e.g., "₦234,000"
+      "Payment Status:",
+      data.order.paymentStatus || "-",
+      yPos
+    )
+    yPos = this.pdfService.addTwoColumnPair(
+      doc,
+      "Order Status:",
+      data.order.orderStatus || "-",
+      "", // Empty for single row if needed
+      "",
+      yPos
+    )
+
+    // Check for page break
+    yPos = this.pdfService.checkPageBreak(doc, yPos, 100)
+
+    // ====================
+    // PRODUCTS IN THE ORDER
+    // ====================
+    yPos += 20
+    this.pdfService.addSectionHeader(doc, "Product(s) In The Order", yPos)
+    yPos += 20
+
+    // Table Header for Products
+    doc.fontSize(10).fillColor("#000000")
+    this.pdfService.createTableHeader(doc, yPos, [
+      // Reuse your table header method
+      { text: "Product Name", width: 200, x: 50 },
+      { text: "Quantity", width: 60, x: 260 },
+      { text: "Price", width: 80, x: 330 },
+      { text: "Buyer", width: 150, x: 420 }
+    ])
+    yPos += 15
+
+    // Table Rows for Products
+    const products = data.products || []
+    products.forEach((product, index) => {
+      if (yPos > doc.page.height - 50) {
+        doc.addPage()
+        yPos = 50
+        // Re-add table header on new page
+        this.pdfService.createTableHeader(doc, yPos, [
+          { text: "Product Name", width: 200, x: 50 },
+          { text: "Quantity", width: 60, x: 260 },
+          { text: "Price", width: 80, x: 330 },
+          { text: "Buyer", width: 150, x: 420 }
+        ])
+        yPos += 15
+      }
+      doc.fontSize(8).fillColor("#333333")
+      doc.text(product.name || "-", 50, yPos, { width: 200, ellipsis: true })
+      doc.text(product.quantity?.toString() || "-", 260, yPos, { width: 60 })
+      doc.text(`₦${product.price?.toLocaleString() || "0"}`, 330, yPos, { width: 80 }) // e.g., "₦22,000"
+      doc.text(product.buyer || "-", 420, yPos, { width: 150, ellipsis: true })
+
+      // Alternating row shading (like your buyer orders)
+      if (index % 2 === 0) {
+        doc
+          .opacity(0.05)
+          .fillColor("#1DA1F2")
+          .rect(50, yPos - 5, 495, 15)
+          .fill()
+          .opacity(1)
+      }
+      yPos += 15
+    })
+
+    // Footer
+    this.pdfService.addFooter(doc, "Generated by Skicom Management System")
   }
 }
