@@ -27,16 +27,36 @@ export class CloudinaryStrategy implements IFileSystemService {
 
   async upload(file: FileUploadDto): Promise<string> {
     try {
-      if (!fs.existsSync(file.filePath)) {
-        throw new Error(`File does not exist ${file.filePath}`)
+      // If filePath is defined and exists, upload using file path
+      if (file.filePath && fs.existsSync(file.filePath)) {
+        const result = await cloudinary.uploader.upload(file.filePath, {
+          resource_type: file.mimetype.startsWith("video") ? "video" : file.mimetype.startsWith("image") ? "image" : "raw"
+        })
+
+        fs.unlinkSync(file.filePath) // Clean up the file
+        return result.secure_url
       }
+      // If filePath is undefined, use buffer for upload
+      else if (file.buffer) {
+        return new Promise((resolve, reject) => {
+          const uploadStream = cloudinary.uploader.upload_stream(
+            {
+              resource_type: file.mimetype.startsWith("video") ? "video" : file.mimetype.startsWith("image") ? "image" : "raw"
+            },
+            (error: UploadApiErrorResponse | undefined, result: UploadApiResponse | undefined) => {
+              if (error || !result) {
+                return reject(new HttpException(`Failed to upload file to Cloudinary: ${error?.message || "Unknown error"}`, 500))
+              }
+              resolve(result.secure_url)
+            }
+          )
 
-      const result = await cloudinary.uploader.upload(file.filePath, {
-        resource_type: file.mimetype.startsWith("video") ? "video" : file.mimetype.startsWith("image") ? "image" : "raw"
-      })
-
-      fs.unlinkSync(file.filePath)
-      return result.secure_url
+          const stream = Readable.from(file.buffer)
+          stream.pipe(uploadStream)
+        })
+      } else {
+        throw new Error("No file path or buffer provided")
+      }
     } catch (error) {
       throw new HttpException(`Failed to upload file to Cloudinary: ${error.message}`, 500)
     }

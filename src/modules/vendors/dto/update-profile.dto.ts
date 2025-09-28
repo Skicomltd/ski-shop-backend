@@ -2,22 +2,22 @@ import * as joi from "joi"
 
 export class UpdateProfileDto {
   user: {
-    firstName: string
-    lastName: string
-    phoneNumber: string
+    firstName?: string
+    lastName?: string
+    phoneNumber?: string
   }
   store: {
-    name: string
-    logo: string
-    description: string
+    name?: string
+    logo?: string
+    description?: string
   }
   business: {
-    type: string
-    businessRegNumber: string
-    name: string
-    country: string
-    state: string
-    address: string
+    type?: string
+    businessRegNumber?: string
+    name?: string
+    country?: string
+    state?: string
+    address?: string
   }
 }
 
@@ -35,12 +35,14 @@ export const updateProfileSchema = joi.object({
       description: joi.string().optional()
     })
     .optional(),
-  business: joi.object({
-    type: joi.string().optional(),
-    businessRegNumber: joi.string().optional(),
-    name: joi.string().optional(),
-    country: joi.string().optional(),
-    state: joi.string().optional(),
-    address: joi.string().optional()
-  })
+  business: joi
+    .object({
+      type: joi.string().optional(),
+      businessRegNumber: joi.string().optional(),
+      name: joi.string().optional(),
+      country: joi.string().optional(),
+      state: joi.string().optional(),
+      address: joi.string().optional()
+    })
+    .optional()
 })
