@@ -12,6 +12,8 @@ export class WithdrawalsService implements IService<Withdrawal> {
     private readonly withdrawalRepository: Repository<Withdrawal>
   ) {}
 
+  // private relations = ["payout", "bank", "bank"]
+
   async create(data: CreateWithdrawalDto, manager?: EntityManager): Promise<Withdrawal> {
     const repo = manager ? manager.getRepository(Withdrawal) : this.withdrawalRepository
     const withdrawal = repo.create(data)
@@ -25,8 +27,13 @@ export class WithdrawalsService implements IService<Withdrawal> {
       where.payout = { id: filter.payoutId }
     }
 
+    if (filter.status) {
+      where.status = filter.status
+    }
+
     const [items, count] = await this.withdrawalRepository.findAndCount({
-      where
+      where,
+      relations: ["payout", "processedBy"]
     })
 
     return [items, count]

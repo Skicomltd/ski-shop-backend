@@ -1,3 +1,4 @@
+import { UserRoleEnum } from "@/modules/users/entity/user.entity"
 import { WithdrawalStatus } from "./withdraw-status.interface"
 
 export interface IWithdrawalResponse {
@@ -12,4 +13,12 @@ export interface IWithdrawalResponse {
     firstThreeDigits: string
     lastThreeDigits: string
   }
+  store: {
+    name: string
+  }
+  user: {
+    role: UserRoleEnum
+  }
+  processedBy?: string
+  dateProccess?: Date
 }

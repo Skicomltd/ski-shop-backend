@@ -77,7 +77,8 @@ export class WithdrawalsController {
   @Post("/decision")
   @UseGuards(PolicyWithdrawalGuard)
   @CheckPolicies((ability) => ability.can(Action.Manage, Withdrawal))
-  async decision(@Body(new JoiValidationPipe(withdrawalDecisionSchema)) dto: WithdrawalDecision) {
+  async decision(@Body(new JoiValidationPipe(withdrawalDecisionSchema)) dto: WithdrawalDecision, @Req() req: Request) {
+    const user = req.user
     const withdrawal = await this.withdrawalsService.findOne({ id: dto.withdrawalId, status: "pending" })
     if (!withdrawal) throw new NotFoundException("withdrawal not found")
 
@@ -100,7 +101,7 @@ export class WithdrawalsController {
       if (withdrawal.amount > balance.amount) throw new ApiException("service unavailable", 503)
 
       await this.transactionHelper.runInTransaction(async (manager) => {
-        await this.withdrawalsService.update(withdrawal, { status: "approved" }, manager)
+        await this.withdrawalsService.update(withdrawal, { status: "approved", processedById: user.id, dateApproved: new Date() }, manager)
         await this.paymentsService.transfer({
           amount: withdrawal.amount,
           reference: withdrawal.id,
