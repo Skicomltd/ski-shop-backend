@@ -205,17 +205,6 @@ export class AuthController {
   }
 
   @Public()
-  @Post("/login/password")
-  @HttpCode(200)
-  @UseInterceptors(AuthInterceptor)
-  @UseGuards(LoginValidationGuard, PasswordAuthGuard)
-  async passwordLogin(@Req() req: Request) {
-    const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
-
-    return { user: req.user, tokens }
-  }
-
-  @Public()
   @Post("/login/vendor")
   @HttpCode(200)
   @UseInterceptors(AuthInterceptor)
