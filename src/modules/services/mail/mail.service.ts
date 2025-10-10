@@ -1,10 +1,7 @@
-import * as fs from "fs"
-import * as path from "path"
-import handlebars from "handlebars"
 import { HttpException, Inject, Injectable } from "@nestjs/common"
 
-import { IMailClients, MailModuleOptions, MailTransporter } from "./interface/config.interface"
-import { IMailMessage, IMailOptionsConfigurator, IMailService, MailAddress } from "./interface/mail.service.interface"
+import { MailClientsMap, MailModuleOptions, MailTransporter } from "./interface/config.interface"
+import { IMailService, MailAddress, MailStrategy } from "./interface/service.interface"
 
 import { CONFIG_OPTIONS } from "./entities/config"
 import { MAIL_STRATEGY } from "./entities/strategies"
@@ -12,14 +9,19 @@ import { MAIL_STRATEGY } from "./entities/strategies"
 import { SesMailStrategy } from "./strategies/ses.service"
 import { SmtpMailStrategy } from "./strategies/smtp.service"
 import { MailgunMailStrategy } from "./strategies/mailgun.service"
-import { MailQueueProducer } from "./queues/queue-producer.service"
+import { MailQueueProducer } from "./queue/queue-producer.service"
+import { Mailable } from "./mailables/mailable"
 
+/**
+ * Core MailService.
+ * Provides a unified API to send or queue emails using different strategies (SMTP, SES, Mailgun).
+ */
 @Injectable()
 export class MailService implements IMailService {
   public from: MailAddress
-  private default: keyof IMailClients
-  private clients: IMailClients
-  private strategyMap: Record<MailTransporter, IMailService & IMailOptionsConfigurator> = {
+  private default: keyof MailClientsMap
+  private clients: MailClientsMap
+  private strategyMap: Record<MailTransporter, MailStrategy> = {
     smtp: this.smtpMailService,
     ses: this.sesMailService,
     mailgun: this.mailgunMailService
@@ -43,38 +45,29 @@ export class MailService implements IMailService {
     this.clients = options.clients
   }
 
-  async send(message: IMailMessage) {
-    const client = this.clients[this.default]
-    const transporter = this.getTransporter(client.transport)
-
-    await transporter.send(message)
+  /**
+   * Send a Mailable immediately using the default transporter.
+   */
+  async send(mail: Mailable) {
+    const transporter = this.getTransporter(this.default)
+    await transporter.send(mail)
   }
 
-  async queue(message: IMailMessage): Promise<void> {
+  /**
+   * Queue a Mailable for later sending using the default transporter.
+   */
+  async queue(mail: Mailable): Promise<void> {
     const options = this.clients[this.default]
-    await this.mailQueue.dispatch(options.transport, message, options.queueOptions)
+    await this.mailQueue.dispatch(options.transport, mail, options.queueOptions)
   }
 
-  getTransporter(transporter: MailTransporter): IMailService {
-    const strategy = this.strategyMap[transporter]
-    if (!strategy) throw new HttpException("Invalid mail strategy", 500)
-    return strategy.setOptions(this.clients[transporter])
-  }
-
-  static parseHtml(templateName: string, data: Record<string, any>): string {
-    try {
-      const filePath = path.join(__dirname, `../../../../../views/${templateName}`)
-
-      // Read the template file
-      const templateSource = fs.readFileSync(filePath, "utf-8")
-
-      //compile the template
-      const template = handlebars.compile(templateSource)
-
-      //return the parsed Html with the data
-      return template(data)
-    } catch (error) {
-      throw new Error(`Failed to parse HTML template: ${error.message}`)
-    }
+  /**
+   * Retrieve a configured transporter strategy for a given client name.
+   */
+  getTransporter(client: string): IMailService {
+    const options = this.clients[client]
+    if (!options) throw new HttpException("Invalid client", 500)
+    const strategy = this.strategyMap[options.transport]
+    return strategy.setOptions(options)
   }
 }

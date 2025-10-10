@@ -1,53 +1,83 @@
-// import { RegisterQueueOptions } from "@nestjs/bullmq"
-import { ModuleMetadata } from "@nestjs/common"
 import { JobsOptions } from "bullmq"
-import { MailAddress } from "./mail.service.interface"
+import { ModuleMetadata } from "@nestjs/common"
 
+import { MailAddress } from "./service.interface"
+
+/**
+ * Configuration object passed to the MailModule.
+ *
+ * - `from`: Default sender address applied to outgoing emails.
+ * - `clients`: A map of configured mail clients (SMTP, SES, Mailgun).
+ * - `default`: The key of the client to be used by default.
+ */
 export interface MailModuleOptions {
   from: MailAddress
-  clients: IMailClients
-  default: keyof IMailClients
-  queue: boolean
+  clients: MailClientsMap
+  default: keyof MailClientsMap
 }
 
-export interface IQueueOptions {
+/**
+ * Optional queue configuration for job-based email sending.
+ */
+export interface QueueConfig {
   queueOptions?: JobsOptions
 }
 
-export type IMailClients = Record<string, SmtpMailOptions | SesMailOption | MailgunMailOptions>
+/**
+ * Map of mail client identifiers to their specific configuration.
+ * Example: { primary: SmtpMailOptions, backup: SesMailOptions }
+ */
+export type MailClientsMap = Record<string, SmtpMailOptions | SesMailOptions | MailgunMailOptions>
 
-export type SmtpMailOptions = IQueueOptions & {
+/**
+ * SMTP client configuration.
+ */
+export type SmtpMailOptions = QueueConfig & {
   transport: "smtp"
   host: string
   port: number
   url?: string
-  encryption?: string
+  encryption?: "ssl" | "tls" | "starttls"
   auth: {
     user: string
     pass: string
   }
 }
 
-export type SesMailOption = IQueueOptions & {
+/**
+ * AWS SES client configuration.
+ */
+export type SesMailOptions = QueueConfig & {
   transport: "ses"
   region: string
   accessKeyId: string
   secretAccessKey: string
 }
 
-export type MailgunMailOptions = IQueueOptions & {
+/**
+ * Mailgun client configuration.
+ */
+export type MailgunMailOptions = QueueConfig & {
   transport: "mailgun"
   apiKey: string
   domain: string
 }
 
+/**
+ * Supported mail transport types.
+ */
 export type MailTransporter = "smtp" | "ses" | "mailgun"
 
-export type MailTransporterOption = MailgunMailOptions | SesMailOption | SmtpMailOptions
+/**
+ * Union type of all possible mail client configurations.
+ */
+export type MailClientOptions = SmtpMailOptions | SesMailOptions | MailgunMailOptions
 
+/**
+ * Async options for configuring MailModule dynamically.
+ * Mirrors the NestJS ModuleAsyncOptions pattern.
+ */
 export interface MailModuleAsyncOptions extends Pick<ModuleMetadata, "imports"> {
   useFactory?: (...args: any[]) => Promise<MailModuleOptions> | MailModuleOptions
   inject?: any[]
 }
-
-// export interface RegisterQueueOptions {}

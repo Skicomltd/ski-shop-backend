@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common"
-import { PaginatedResult } from "./interfaces/paginationResult.interface"
-import { PaginationParams } from "./interfaces/paginationParams.interface"
+import { PaginatedResult } from "./interfaces/pagination-result.interface"
+import { PaginationParams } from "./interfaces/pagination-params.interface"
 
 @Injectable()
 export class PaginationService {

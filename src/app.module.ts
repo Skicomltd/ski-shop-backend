@@ -21,7 +21,6 @@ import { JwtGuard } from "./modules/auth/guard/jwt-auth.guard"
 import { ProductsModule } from "./modules/products/products.module"
 import { CartsModule } from "./modules/carts/carts.module"
 import logConfig from "./config/log.config"
-import { BullModule } from "@nestjs/bullmq"
 import { VendorModule } from "./modules/vendors/vendor.module"
 import { BusinessModule } from "./modules/business/business.module"
 import { WebhooksModule } from "./modules/webhooks/webhooks.module"
@@ -43,6 +42,7 @@ import { CommisionsModule } from "./modules/commisions/commisions.module"
 import { BuyerModule } from "./modules/buyer/buyer.module"
 import { NewslettersModule } from "./modules/newsletters/newsletters.module"
 import { ContactUsModule } from "./modules/contact-us/contact-us.module"
+import { QueuesModule } from "./queues"
 @Module({
   imports: [
     UserModule,
@@ -51,12 +51,7 @@ import { ContactUsModule } from "./modules/contact-us/contact-us.module"
       isGlobal: true,
       load: [appConfig, authConfig, mailConfig, filesystemsConfig, logConfig, paymentConfig]
     }),
-    BullModule.forRoot({
-      connection: {
-        host: "localhost",
-        port: 6379
-      }
-    }),
+    QueuesModule,
     TypeOrmModule.forRootAsync(databaseConfigAsync),
     ScheduleModule.forRoot(),
     ServicesModule,

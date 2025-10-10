@@ -5,20 +5,25 @@ import { BullModule } from "@nestjs/bullmq"
 import { MailModuleAsyncOptions, MailModuleOptions } from "./interface/config.interface"
 import { CONFIG_OPTIONS } from "./entities/config"
 import { MailService } from "./mail.service"
-import { MailQueueProducer } from "./queues/queue-producer.service"
+import { MailQueueProducer } from "./queue/queue-producer.service"
 import { MAIL_STRATEGY } from "./entities/strategies"
 import { SmtpMailStrategy } from "./strategies/smtp.service"
 import { SesMailStrategy } from "./strategies/ses.service"
 import { MailgunMailStrategy } from "./strategies/mailgun.service"
-import { AppQueues } from "@/constants"
-import { MailQueueConsumer } from "./queues/queue-consumer.service"
+import { MailQueueConsumer } from "./queue/queue-consumer.service"
+import { QueueRegistry } from "@queues/queues.registry"
+import { MailQueueService } from "./queue/queue.service"
 
 @Module({})
 export class MailModule {
+  /**
+   * Synchronous registration of the MailModule.
+   * Useful when configuration is available at module import time.
+   */
   static register(options: MailModuleOptions): DynamicModule {
     return {
       module: MailModule,
-      imports: [ConfigModule, BullModule.registerQueue({ name: AppQueues.MAIL })],
+      imports: [ConfigModule, BullModule.registerQueue({ name: QueueRegistry.MAIL })],
       providers: [
         {
           provide: CONFIG_OPTIONS,
@@ -37,6 +42,7 @@ export class MailModule {
           useClass: MailgunMailStrategy
         },
         MailService,
+        MailQueueService,
         MailQueueProducer,
         MailQueueConsumer
       ],
@@ -44,10 +50,14 @@ export class MailModule {
     }
   }
 
+  /**
+   * Asynchronous registration of the MailModule.
+   * Useful when configuration depends on async providers or other modules.
+   */
   static registerAsync(options: MailModuleAsyncOptions): DynamicModule {
     return {
       module: MailModule,
-      imports: [...(options.imports || []), BullModule.registerQueue({ name: AppQueues.MAIL })],
+      imports: [...(options.imports || []), BullModule.registerQueue({ name: QueueRegistry.MAIL })],
       providers: [
         {
           provide: CONFIG_OPTIONS,
@@ -67,6 +77,7 @@ export class MailModule {
           useClass: MailgunMailStrategy
         },
         MailService,
+        MailQueueService,
         MailQueueProducer,
         MailQueueConsumer
       ],

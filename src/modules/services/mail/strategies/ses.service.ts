@@ -1,15 +1,21 @@
-import { SendEmailCommand, SESClient, SendEmailCommandInput } from "@aws-sdk/client-ses"
+import { SESv2Client, SendEmailCommand } from "@aws-sdk/client-sesv2"
 import { HttpException, Inject, Injectable, InternalServerErrorException } from "@nestjs/common"
 
 import { CONFIG_OPTIONS } from "../entities/config"
-import { MailModuleOptions, SesMailOption } from "../interface/config.interface"
-import { IMailMessage, IMailOptionsConfigurator, IMailService, MailAddress } from "../interface/mail.service.interface"
+import { MailModuleOptions, SesMailOptions } from "../interface/config.interface"
+import { MailStrategy, MailAddress } from "../interface/service.interface"
 
-import { MailQueueProducer } from "../queues/queue-producer.service"
+import { Mailable } from "../mailables/mailable"
+import { MailQueueProducer } from "../queue/queue-producer.service"
+import { SesMessage } from "../interface/messages.interface"
 
+/**
+ * Strategy for sending emails via AWS SES.
+ * Implements MailStrategy for direct sending or queuing mails.
+ */
 @Injectable()
-export class SesMailStrategy implements IMailService, IMailOptionsConfigurator {
-  private ses: SESClient
+export class SesMailStrategy implements MailStrategy {
+  private ses: SESv2Client
   public from: MailAddress
 
   constructor(
@@ -19,51 +25,55 @@ export class SesMailStrategy implements IMailService, IMailOptionsConfigurator {
     this.from = options.from
   }
 
-  async send(message: IMailMessage) {
+  /**
+   * Send a fully-prepared SES message object directly.
+   */
+  async sendMessage(message: SesMessage): Promise<void> {
     if (!this.ses) {
       throw new HttpException("SES configuration not set", 500)
     }
 
-    const params: SendEmailCommandInput = {
-      Destination: {
-        ToAddresses: Array.isArray(message.to) ? message.to : [message.to]
-      },
-
-      Message: {
-        Subject: {
-          Data: message.subject,
-          Charset: "UTF-8"
-        },
-        Body: {
-          Text: message.text ? { Data: message.text, Charset: "UTF_8" } : undefined,
-          Html: message.html ? { Data: message.html, Charset: "UTF-8" } : undefined
-        }
-      },
-      Source: message.from || `${this.from?.name} <${this.from?.address}>`
-    }
-
-    if (message.attachments?.length) {
-      throw new InternalServerErrorException("SES transporter does not support attachments directly. Consider using SMTP for attachments")
-    }
-
     try {
-      const command = new SendEmailCommand(params)
+      const command = new SendEmailCommand(message)
       await this.ses.send(command)
     } catch (error) {
       throw new InternalServerErrorException(`Failed to send Email: ${error}`)
     }
   }
 
-  async queue(message: IMailMessage) {
-    await this.mailQueue.dispatch("ses", message)
+  /**
+   * Send a Mailable instance via SES.
+   */
+  async send(mail: Mailable) {
+    if (!this.ses) {
+      throw new HttpException("SES configuration not set", 500)
+    }
+
+    try {
+      const command = new SendEmailCommand(mail.getSesMessage(this.from))
+      await this.ses.send(command)
+    } catch (error) {
+      throw new InternalServerErrorException(`Failed to send Email: ${error}`)
+    }
   }
 
-  setOptions(options: SesMailOption): IMailService {
+  /**
+   * Queue a Mailable for later sending using the MailQueueProducer.
+   */
+  async queue(mail: Mailable) {
+    await this.mailQueue.dispatch("ses", mail)
+  }
+
+  /**
+   * Configure SES client at runtime.
+   * Must provide accessKeyId, secretAccessKey, and region.
+   */
+  setOptions(options: SesMailOptions): MailStrategy {
     if (!options.accessKeyId || !options.secretAccessKey || !options.region) {
       throw new HttpException("Invalid SES configuration", 500)
     }
 
-    this.ses = new SESClient({
+    this.ses = new SESv2Client({
       region: options.region,
       credentials: {
         accessKeyId: options.accessKeyId,

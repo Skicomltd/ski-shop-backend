@@ -4,7 +4,7 @@ import { StoreResponseMapper } from "../interface/store.response.mapper"
 import { StoreResponse } from "../interface/store.response.interface"
 import { PaginationService } from "@/modules/services/pagination/pagination.service"
 import { map, Observable } from "rxjs"
-import { PaginationParams } from "@/modules/services/pagination/interfaces/paginationParams.interface"
+import { PaginationParams } from "@/modules/services/pagination/interfaces/pagination-params.interface"
 import { StoresResponse } from "../interface/stores.response.interface"
 
 type PayloadType = [Store[], number]

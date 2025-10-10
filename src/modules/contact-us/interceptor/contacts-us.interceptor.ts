@@ -1,6 +1,6 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common"
 import { map, Observable } from "rxjs"
-import { PaginationParams } from "@/modules/services/pagination/interfaces/paginationParams.interface"
+import { PaginationParams } from "@/modules/services/pagination/interfaces/pagination-params.interface"
 import { PaginationService } from "@/modules/services/pagination/pagination.service"
 import { ContactUs } from "../entities/contact-us.entity"
 import { ContactUsResponseMapper } from "../interface/contact-us-response-mapper.interface"

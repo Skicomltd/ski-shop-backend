@@ -4,9 +4,9 @@ import { Review } from "../entities/review.entity"
 import { IReviewsResponse } from "../interface/reviews-response-interface"
 import { map, Observable } from "rxjs"
 import { PaginationService } from "@/modules/services/pagination/pagination.service"
-import { PaginationParams } from "@/modules/services/pagination/interfaces/paginationParams.interface"
+import { PaginationParams } from "@/modules/services/pagination/interfaces/pagination-params.interface"
 import { IReviewResponse } from "../interface/review-response-interface"
-import { PaginatedResult } from "@/modules/services/pagination/interfaces/paginationResult.interface"
+import { PaginatedResult } from "@/modules/services/pagination/interfaces/pagination-result.interface"
 
 type PayloadType = [Review[], number]
 

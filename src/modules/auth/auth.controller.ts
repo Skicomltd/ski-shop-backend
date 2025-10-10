@@ -50,6 +50,7 @@ import { PaymentsService } from "../services/payments/payments.service"
 import { UserRoleEnum } from "../users/entity/user.entity"
 import { ForbiddenException } from "@/exceptions/forbidden.exception"
 import { ApiException } from "@/exceptions/api.exception"
+import { EmailValidationMail, PasswordRestMail } from "@/mails"
 
 @Controller("auth")
 export class AuthController {
@@ -78,11 +79,7 @@ export class AuthController {
 
       const otp = await this.authService.saveOtp({ code, email }, manager)
 
-      this.mailService.queue({
-        to: registerDto.email,
-        subject: "Email Validation",
-        text: `Validate with your otp code: ${otp.code}. Your code expires in 10mins`
-      })
+      this.mailService.queue(new EmailValidationMail(otp))
 
       const shortTimeToken = await this.helperService.generateToken({ email, id }, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
 
@@ -194,11 +191,7 @@ export class AuthController {
     const code = this.helperService.generateOtp(6)
     const otp = await this.authService.saveOtp({ code, email })
 
-    await this.mailService.send({
-      to: email,
-      subject: "Email Validation",
-      text: `Validate with your otp code: ${otp.code}. Your code expires in 10mins`
-    })
+    await this.mailService.send(new EmailValidationMail(otp))
 
     const shortTimeToken = await this.helperService.generateToken(
       { email, id: user.id },
@@ -288,11 +281,7 @@ export class AuthController {
 
     const link = this.configService.get<IApp>("app").clientUrl + `/reset-password?token=${token}`
 
-    await this.mailService.send({
-      to: email,
-      subject: "Password Reset Link",
-      text: `see attached ${link} and it expires in 1 hour`
-    })
+    await this.mailService.send(new PasswordRestMail(link, email))
 
     return "Password link sent successfully"
   }

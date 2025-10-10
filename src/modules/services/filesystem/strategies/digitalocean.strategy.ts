@@ -1,5 +1,5 @@
 import * as fs from "fs"
-import * as archiver from "archiver"
+import archiver from "archiver"
 import { WritableStreamBuffer } from "stream-buffers"
 import { HttpException, Inject, Injectable } from "@nestjs/common"
 
@@ -34,7 +34,7 @@ export class DigitalOceanStrategy implements IFileSystemService {
     if (error) throw new HttpException(error, 500)
 
     if (!file.filePath && !file.buffer) {
-      throw new HttpException("valid file required", 500)
+      throw new HttpException("Valid file required (buffer or filePath)", 500)
     }
 
     if (file.filePath && !fs.existsSync(file.filePath)) {
@@ -42,11 +42,13 @@ export class DigitalOceanStrategy implements IFileSystemService {
     }
 
     try {
+      const body = file.buffer || fs.createReadStream(file.filePath)
+
       await this.client.send(
         new PutObjectCommand({
           Bucket: this.config.bucket,
           Key: file.destination,
-          Body: file.buffer || fs.createReadStream(file.filePath),
+          Body: body,
           ContentType: file.mimetype,
           ACL: "public-read" as ObjectCannedACL
         })
@@ -72,7 +74,7 @@ export class DigitalOceanStrategy implements IFileSystemService {
       const response = await this.client.send(
         new GetObjectCommand({
           Bucket: this.config.bucket,
-          Key: path.replace(`${this.endpoint}/${this.config.bucket}/`, "")
+          Key: this.getKeyFromUrl(path)
         })
       )
       return Buffer.from(await response.Body.transformToByteArray())
@@ -99,7 +101,7 @@ export class DigitalOceanStrategy implements IFileSystemService {
     return {
       name: path,
       mimeType: response.ContentType,
-      size: response.ContentLength.toString(),
+      size: response.ContentLength,
       lastModified: response.LastModified,
       url: path.replace(this.endpoint, "")
     }
@@ -159,7 +161,7 @@ export class DigitalOceanStrategy implements IFileSystemService {
     await this.client.send(
       new DeleteObjectCommand({
         Bucket: this.config.bucket,
-        Key: path.replace(`${this.endpoint}/${this.config.bucket}/`, "")
+        Key: this.getKeyFromUrl(path)
       })
     )
   }
@@ -182,5 +184,9 @@ export class DigitalOceanStrategy implements IFileSystemService {
     }
 
     return ""
+  }
+
+  private getKeyFromUrl(url: string): string {
+    return url.replace(`${this.endpoint}/${this.config.bucket}/`, "")
   }
 }

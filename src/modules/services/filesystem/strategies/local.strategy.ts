@@ -1,7 +1,7 @@
 import * as fs from "fs"
 import * as path from "path"
 import * as mime from "mime-types"
-import * as archiver from "archiver"
+import archiver from "archiver"
 import { WritableStreamBuffer } from "stream-buffers"
 import { Inject, Injectable } from "@nestjs/common"
 
@@ -62,7 +62,7 @@ export class LocalFsStrategy implements IFileSystemService {
 
     return {
       name: path.split("/").pop() || path,
-      size: stats.size.toString(),
+      size: stats.size,
       mimeType: mime.lookup(fullPath) || "application/octet-stream",
       url: `${this.config.baseUrl}/${path.replace(/\\/g, "/")}`,
       lastModified: stats.birthtime
