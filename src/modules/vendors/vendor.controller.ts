@@ -163,7 +163,12 @@ export class VendorController {
           filePath: fileUploaded.path
         }
 
-        updateUserProfile.store.logo = await this.fileSystemService.upload(fileDto)
+        const logo = await this.fileSystemService.upload(fileDto)
+        // when updating logo,make sure the store object is not undefined
+        if (updateUserProfile.store === undefined) {
+          updateUserProfile.store = {}
+        }
+        updateUserProfile.store.logo = logo
       }
 
       await this.userService.update(user, updateUserProfile.user, manager)
