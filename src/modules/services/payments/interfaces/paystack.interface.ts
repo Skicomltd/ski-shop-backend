@@ -348,3 +348,11 @@ export interface PaystackTransferData {
   created_at: string
   updated_at: string
 }
+
+export type PaystackError = {
+  status: boolean
+  message: string
+  meta: Record<string, any>
+  type: string
+  code: string
+}

@@ -49,6 +49,7 @@ import { bankSchema } from "../banks/dto/create-bank.dto"
 import { PaymentsService } from "../services/payments/payments.service"
 import { UserRoleEnum } from "../users/entity/user.entity"
 import { ForbiddenException } from "@/exceptions/forbidden.exception"
+import { ApiException } from "@/exceptions/api.exception"
 
 @Controller("auth")
 export class AuthController {
@@ -166,18 +167,22 @@ export class AuthController {
     const bank = await this.bankService.findOne({ user: { id: user.id } })
     if (bank) throw new ConflictException("User already created a business")
 
-    const { code } = await this.paymentsService.createTransferRecipient({
-      name: onboardBankDto.accountName,
-      accountNumber: onboardBankDto.accountNumber,
-      bankCode: onboardBankDto.code
-    })
+    try {
+      const { code } = await this.paymentsService.createTransferRecipient({
+        name: onboardBankDto.accountName,
+        accountNumber: onboardBankDto.accountNumber,
+        bankCode: onboardBankDto.code
+      })
 
-    await this.bankService.create({ ...onboardBankDto, user, recipientCode: code })
+      await this.bankService.create({ ...onboardBankDto, user, recipientCode: code })
 
-    const payload = { email: user.email, id: user.id }
+      const payload = { email: user.email, id: user.id }
 
-    const { accessToken: token } = await this.authService.login(payload)
-    return { token }
+      const { accessToken: token } = await this.authService.login(payload)
+      return { token }
+    } catch (error) {
+      throw new ApiException(error.response.data.message || "Internal server error", error.status || 500)
+    }
   }
 
   @Public()
