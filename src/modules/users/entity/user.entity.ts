@@ -74,6 +74,9 @@ export class User {
   @Column({ type: "int", default: 0 })
   ordersCount: number
 
+  @Column("text", { array: true, default: "{}" })
+  fcmToken: string[]
+
   @OneToOne(() => Business, (business) => business.user, { eager: true })
   business: Business
 
