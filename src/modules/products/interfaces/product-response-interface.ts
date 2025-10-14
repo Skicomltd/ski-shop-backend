@@ -10,6 +10,7 @@ export interface IProductResponse {
   savedProduct: boolean
   discountPrice: number
   stockCount: number
+  reviewsCount: number
   images: string[]
   status: ProductStatusEnum
   store: IdName
