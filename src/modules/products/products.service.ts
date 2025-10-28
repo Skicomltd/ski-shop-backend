@@ -73,8 +73,10 @@ export class ProductsService implements IService<Product> {
       .createQueryBuilder("product")
       .leftJoinAndSelect("product.store", "store")
       .leftJoinAndSelect("product.user", "user")
+      .leftJoinAndSelect("product.reviews", "reviews")
       .orderBy("product.createdAt", orderBy)
-      .groupBy("product.id")
+      .addGroupBy("product.id")
+      .addGroupBy("reviews.id")
       .addGroupBy("store.id")
       .addGroupBy("user.id")
 

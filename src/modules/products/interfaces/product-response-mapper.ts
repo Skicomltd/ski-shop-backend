@@ -12,6 +12,7 @@ export abstract class ProductResponseMapper implements IInterceptor {
       discountPrice: data.discountPrice,
       savedProduct: data.savedBy ? (data?.savedBy?.length > 0 ? true : false) : null,
       images: data.images,
+      reviewsCount: data.reviews ? data.reviews.length : 0,
       rating: data?.totalProductRatingSum / data?.totalProductRatingCount || 0,
       price: data.price,
       stockCount: data.stockCount,
