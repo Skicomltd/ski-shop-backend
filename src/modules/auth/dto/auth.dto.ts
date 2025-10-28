@@ -21,6 +21,10 @@ export class ResendOtpDto {
 export class LoginDto {
   email: string
   password: string
+  fcmToken?: string
+}
+export class LogoutDto {
+  fcmToken?: string
 }
 export class LoginAuthDto {
   email: string
@@ -48,5 +52,10 @@ export const resendOtpSchema = joi.object({
 
 export const loginSchema = joi.object({
   email: joi.string().email().required(),
-  password: joi.string().required()
+  password: joi.string().required(),
+  fcmToken: joi.string().optional()
+})
+
+export const logoutSchema = joi.object({
+  fcmToken: joi.string().optional()
 })

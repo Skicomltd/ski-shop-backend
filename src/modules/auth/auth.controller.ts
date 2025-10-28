@@ -16,7 +16,18 @@ import {
   HttpStatus
 } from "@nestjs/common"
 import { JoiValidationPipe } from "@/validations/joi.validation"
-import { AuthDto, registerSchema, ResendOtpDto, resendOtpSchema, VerifyEmailDto, verifyEmailSchema } from "./dto/auth.dto"
+import {
+  AuthDto,
+  LoginDto,
+  loginSchema,
+  LogoutDto,
+  logoutSchema,
+  registerSchema,
+  ResendOtpDto,
+  resendOtpSchema,
+  VerifyEmailDto,
+  verifyEmailSchema
+} from "./dto/auth.dto"
 import JwtShortTimeGuard from "./guard/jwt-short-time.guard"
 import { PasswordAuthGuard } from "./guard/password-auth.guard"
 import { LoginValidationGuard } from "./guard/login-validation.guard"
@@ -207,11 +218,15 @@ export class AuthController {
   @HttpCode(200)
   @UseInterceptors(AuthInterceptor)
   @UseGuards(LoginValidationGuard, PasswordAuthGuard)
-  async loginVendor(@Req() req: Request) {
+  async loginVendor(@Req() req: Request, @Body(new JoiValidationPipe(loginSchema)) loginDto: LoginDto) {
     const user = req.user
 
     if (user.role !== UserRoleEnum.Vendor) {
       throw new ForbiddenException(`User with role '${user.role}' cannot log in as a vendor. Only 'Vendor' role is allowed.`)
+    }
+
+    if (loginDto.fcmToken) {
+      await this.userService.update(user, { fcmToken: [loginDto.fcmToken.trim()] })
     }
 
     const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
@@ -224,11 +239,15 @@ export class AuthController {
   @HttpCode(200)
   @UseInterceptors(AuthInterceptor)
   @UseGuards(LoginValidationGuard, PasswordAuthGuard)
-  async loginCustomer(@Req() req: Request) {
+  async loginCustomer(@Req() req: Request, @Body(new JoiValidationPipe(loginSchema)) loginDto: LoginDto) {
     const user = req.user
 
     if (user.role !== UserRoleEnum.Customer) {
       throw new ForbiddenException(`User with role '${user.role}' cannot log in as a Customer. Only 'Customer' role is allowed.`)
+    }
+
+    if (loginDto.fcmToken) {
+      await this.userService.update(user, { fcmToken: [loginDto.fcmToken.trim()] })
     }
 
     const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
@@ -241,16 +260,30 @@ export class AuthController {
   @HttpCode(200)
   @UseInterceptors(AuthInterceptor)
   @UseGuards(LoginValidationGuard, PasswordAuthGuard)
-  async loginAdmin(@Req() req: Request) {
+  async loginAdmin(@Req() req: Request, @Body(new JoiValidationPipe(loginSchema)) loginDto: LoginDto) {
     const user = req.user
 
     if (user.role !== UserRoleEnum.Admin) {
       throw new ForbiddenException(`User with role '${user.role}' cannot log in as a Admin. Only 'Admin' role is allowed.`)
     }
 
+    if (loginDto.fcmToken) {
+      await this.userService.update(user, { fcmToken: [loginDto.fcmToken.trim()] })
+    }
+
     const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
 
     return { user: req.user, tokens }
+  }
+
+  @Post("/logout")
+  @HttpCode(200)
+  async logout(@Body(new JoiValidationPipe(logoutSchema)) logoutdto: LogoutDto, @Req() req: Request) {
+    const user = req.user
+    if (logoutdto.fcmToken) {
+      await this.userService.update(user, { fcmToken: [] })
+    }
+    return
   }
 
   @Public()

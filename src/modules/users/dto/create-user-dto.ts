@@ -8,6 +8,7 @@ export class CreateUserDto {
   password: string
   address?: string
   role: UserRoleEnum
+  fcmToken?: string[]
   email: string
   isEmailVerified?: boolean
   itemsCount?: number
