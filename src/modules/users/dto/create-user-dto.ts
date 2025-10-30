@@ -7,6 +7,8 @@ export class CreateUserDto {
   lastName: string
   password: string
   address?: string
+  phoneNumber?: string
+  profileImage?: string
   role: UserRoleEnum
   fcmToken?: string[]
   email: string
