@@ -1,4 +1,4 @@
-import { PaginationParams } from "@/modules/services/pagination/interfaces/paginationParams.interface"
+import { PaginationParams } from "@/modules/services/pagination/interfaces/pagination-params.interface"
 import { Subscription } from "@/modules/subscription/entities/subscription.entity"
 import { FindOptionsWhere } from "typeorm"
 

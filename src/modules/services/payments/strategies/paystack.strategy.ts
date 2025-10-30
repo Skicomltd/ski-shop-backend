@@ -6,6 +6,7 @@ import { catchError, firstValueFrom, map } from "rxjs"
 import { CONFIG_OPTIONS } from "../constants/config"
 import { PaymentModuleOption } from "../interfaces/config.interface"
 import {
+  CreateDVA,
   CreatePlan,
   CreateSubscription,
   CreateTransferRecipient,
@@ -32,6 +33,10 @@ import {
   PaystackTransfer
 } from "../interfaces/paystack.interface"
 
+/**
+ * PaystackStrategy implements the IPaymentService interface.
+ * It handles all payment operations via Paystack's REST API.
+ */
 @Injectable()
 export class PaystackStrategy implements IPaymentService {
   private readonly secret: string
@@ -275,6 +280,41 @@ export class PaystackStrategy implements IPaymentService {
           return res.data
         }),
         catchError((error: AxiosError) => {
+          const err = error.response.data as any
+          throw new Error(err.message)
+        })
+      )
+    )
+  }
+
+  async createDVA(data: CreateDVA): Promise<void> {
+    const headers = {
+      Authorization: `Bearer ${this.secret}`,
+      "Content-Type": "application/json"
+    }
+
+    const body = {
+      email: data.email,
+      first_name: data.firstName,
+      middle_name: data.middleName,
+      last_name: data.lastName,
+      phone: data.phoneNumber,
+      preferred_bank: data.preferredBank,
+      country: data.country,
+      account_number: data.accountNumber,
+      bvn: data.bvn,
+      bank_code: data.bankCode
+    }
+
+    const observable = this.httpService.post(`${this.url}/dedicated_account/assign`, body, { headers })
+
+    await firstValueFrom(
+      observable.pipe(
+        map((res) => {
+          return res.data
+        }),
+        catchError((error: AxiosError) => {
+          console.error("error: ", error.response.data)
           throw error
         })
       )

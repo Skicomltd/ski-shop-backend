@@ -1,11 +1,10 @@
 import * as fs from "fs"
-import * as archiver from "archiver"
+import archiver from "archiver"
 import { WritableStreamBuffer } from "stream-buffers"
 import { HttpException, Inject, Injectable } from "@nestjs/common"
 import { DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command, ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3"
 
 import { CONFIG_OPTIONS } from "../entities/config"
-import { ApiException } from "@/exceptions/api.exception"
 import { FileSystemModuleOptions, S3Options } from "../interfaces/config.interface"
 import { FileMetada, FileUploadDto, IFileSystemService } from "../interfaces/filesystem.interface"
 
@@ -22,9 +21,8 @@ export class S3Strategy implements IFileSystemService {
         accessKeyId: this.config.key,
         secretAccessKey: this.config.secret
       },
-      endpoint: `https://${fsOptions.clients.s3.bucket}.s3.${fsOptions.clients.s3.region}.amazonaws.com`,
-      region: fsOptions.clients.s3.region,
-      forcePathStyle: true
+      endpoint: `https://s3.${fsOptions.clients.s3.region}.amazonaws.com`,
+      region: fsOptions.clients.s3.region
     })
 
     this.endpoint = `https://${fsOptions.clients.s3.bucket}.s3.${fsOptions.clients.s3.region}.amazonaws.com`
@@ -32,45 +30,52 @@ export class S3Strategy implements IFileSystemService {
 
   async upload(file: FileUploadDto): Promise<string> {
     const error = this.checkConfig(this.config)
-    if (error) throw new ApiException(error, 500)
+    if (error) throw new HttpException(error, 500)
 
     try {
       if (!file.filePath && !file.buffer) {
-        throw new ApiException("valid file required", 500)
+        throw new HttpException("Valid file required (either buffer or filePath)", 400)
       }
 
-      if (file.filePath && !fs.existsSync(file.filePath)) {
-        throw new ApiException(`File does not exist at path: ${file.filePath}`, 500)
+      let body: Buffer | fs.ReadStream
+
+      if (file.buffer) {
+        body = file.buffer
+      } else {
+        if (!fs.existsSync(file.filePath)) {
+          throw new HttpException(`File does not exist at path: ${file.filePath}`, 404)
+        }
+
+        body = fs.createReadStream(file.filePath)
       }
 
-      const fileStream = fs.createReadStream(file.filePath)
       const key = file.destination
 
       await this.client.send(
         new PutObjectCommand({
           Bucket: this.config.bucket,
           Key: key,
-          Body: fileStream,
+          Body: body,
           ACL: "public-read" as ObjectCannedACL,
           ContentType: file.mimetype
         })
       )
 
-      return `${this.endpoint}/${this.config.bucket}/${key}`
+      return `${this.endpoint}/${key}`
     } catch (error) {
       if (error.name === "NoSuchBucket") {
-        throw new ApiException(`Bucket ${this.config.bucket} does not exist`, 500)
+        throw new HttpException(`Bucket ${this.config.bucket} does not exist`, 500)
       }
       if (error.name === "AccessDenied") {
-        throw new ApiException("Access denied to AWS. Check your credentials.", 500)
+        throw new HttpException("Access denied to AWS. Check your credentials.", 500)
       }
-      throw new ApiException(`Failed to upload file to AWS: ${error.message}`, 500)
+      throw new HttpException(`Failed to upload file to AWS: ${error.message}`, 500)
     }
   }
 
   async get(path: string): Promise<Buffer> {
     const error = this.checkConfig(this.config)
-    if (error) throw new ApiException(error, 500)
+    if (error) throw new HttpException(error, 500)
 
     const response = await this.client.send(
       new GetObjectCommand({
@@ -84,7 +89,7 @@ export class S3Strategy implements IFileSystemService {
 
   async getMetaData(path: string): Promise<FileMetada> {
     const error = this.checkConfig(this.config)
-    if (error) throw new ApiException(error, 500)
+    if (error) throw new HttpException(error, 500)
 
     const response = await this.client.send(
       new GetObjectCommand({
@@ -96,7 +101,7 @@ export class S3Strategy implements IFileSystemService {
     return {
       name: path,
       mimeType: response.ContentType,
-      size: response.ContentLength.toString(),
+      size: response.ContentLength,
       lastModified: response.LastModified,
       url: path.replace(this.endpoint, "")
     }
@@ -143,7 +148,7 @@ export class S3Strategy implements IFileSystemService {
 
   async update(path: string, file: FileUploadDto): Promise<string> {
     const error = this.checkConfig(this.config)
-    if (error) throw new ApiException(error, 500)
+    if (error) throw new HttpException(error, 500)
 
     await this.delete(path)
     return this.upload(file)
@@ -151,7 +156,7 @@ export class S3Strategy implements IFileSystemService {
 
   async delete(path: string): Promise<void> {
     const error = this.checkConfig(this.config)
-    if (error) throw new ApiException(error, 500)
+    if (error) throw new HttpException(error, 500)
 
     await this.client.send(
       new DeleteObjectCommand({

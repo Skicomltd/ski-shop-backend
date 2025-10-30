@@ -75,7 +75,7 @@ export interface LogModuleAsyncOptions extends Pick<ModuleMetadata, "imports"> {
 }
 
 export type ErrorContext = {
-  level: LogLevel | "info"
+  level?: LogLevel | "info"
   status: number
   path: string
   method: string

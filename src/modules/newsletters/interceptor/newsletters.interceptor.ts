@@ -4,7 +4,7 @@ import { NewsletterResponseMapper } from "../interface/newsletter-response-mappe
 import { INewsLettersResponse } from "../interface/newsletters-response.interface"
 import { map, Observable } from "rxjs"
 import { PaginationService } from "@/modules/services/pagination/pagination.service"
-import { PaginationParams } from "@/modules/services/pagination/interfaces/paginationParams.interface"
+import { PaginationParams } from "@/modules/services/pagination/interfaces/pagination-params.interface"
 import { INewsletterResponse } from "../interface/newsletter-response.interface"
 
 type Payload = [Newsletter[], number]

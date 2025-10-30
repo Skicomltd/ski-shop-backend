@@ -97,8 +97,9 @@ export class WithdrawalsController {
 
     if (dto.decision === "approve") {
       const balance = await this.paymentsService.checkBalance()
+      // balance.
       // ADMIN SHOULD BE NOTIFIED OF THIS!
-      if (withdrawal.amount > balance.amount) throw new ApiException("service unavailable", 503)
+      if (withdrawal.amount > balance[0].balance) throw new ApiException("service unavailable", 503)
 
       await this.transactionHelper.runInTransaction(async (manager) => {
         await this.withdrawalsService.update(withdrawal, { status: "approved", processedById: user.id, dateApproved: new Date() }, manager)

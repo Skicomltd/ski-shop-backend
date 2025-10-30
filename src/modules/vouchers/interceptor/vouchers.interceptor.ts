@@ -5,7 +5,7 @@ import { IVouchersResponse } from "../interface/vouchers-response.interface"
 import { PaginationService } from "@/modules/services/pagination/pagination.service"
 import { map, Observable } from "rxjs"
 import { IVoucherResponse } from "../interface/voucher-response.interface"
-import { PaginationParams } from "@/modules/services/pagination/interfaces/paginationParams.interface"
+import { PaginationParams } from "@/modules/services/pagination/interfaces/pagination-params.interface"
 
 type PayloadType = [Voucher[], number]
 

@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common"
-import { JwtService } from "@nestjs/jwt"
 import * as Crypto from "crypto"
 import generator from "generate-password-ts"
 import { v4 as uuidv4 } from "uuid"
+import { JwtService } from "@nestjs/jwt"
 
 @Injectable()
 export class HelpersService {

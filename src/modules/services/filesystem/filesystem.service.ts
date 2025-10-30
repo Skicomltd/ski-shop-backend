@@ -14,8 +14,14 @@ import { DigitalOceanStrategy } from "./strategies/digitalocean.strategy"
 
 @Injectable()
 export class FileSystemService implements IFileSystemService {
+  // Default filesystem client
   private default: FileSystemDefault
+
+  // All configured filesystem clients
   private clients: IFileSystemClients
+
+  // Maps each driver to its corresponding service implementation
+  private strategyMap: Record<FileSystemDriver, IFileSystemService>
 
   constructor(
     @Inject(CONFIG_OPTIONS)
@@ -42,52 +48,48 @@ export class FileSystemService implements IFileSystemService {
 
     this.default = options.default
     this.clients = options.clients
+    this.strategyMap = {
+      s3: this.s3,
+      google: this.google,
+      local: this.local,
+      cloudinary: this.cloudinary,
+      spaces: this.spaces
+    }
   }
 
-  private strategyMap: Record<FileSystemDriver, IFileSystemService> = {
-    s3: this.s3,
-    google: this.google,
-    local: this.local,
-    cloudinary: this.cloudinary,
-    spaces: this.spaces
-  }
-
+  // --- Public API Methods ---
+  // Each method delegates to the default filesystem strategy
   async upload(file: FileUploadDto): Promise<string> {
-    const options = this.clients[this.default]
-    const service = this.getFileSystem(options.driver)
+    const service = this.getDefaultService()
     return service.upload(file)
   }
 
   async get(path: string): Promise<Buffer> {
-    const options = this.clients[this.default]
-    const service = this.getFileSystem(options.driver)
+    const service = this.getDefaultService()
     return service.get(path)
   }
 
   async getMetaData(path: string): Promise<FileMetada> {
-    const options = this.clients[this.default]
-    const service = this.getFileSystem(options.driver)
+    const service = this.getDefaultService()
     return service.getMetaData(path)
   }
 
   async zipFolder(folderPath: string): Promise<Buffer> {
-    const options = this.clients[this.default]
-    const service = this.getFileSystem(options.driver)
+    const service = this.getDefaultService()
     return service.zipFolder(folderPath)
   }
 
   async update(path: string, file: FileUploadDto): Promise<string> {
-    const options = this.clients[this.default]
-    const service = this.getFileSystem(options.driver)
+    const service = this.getDefaultService()
     return service.update(path, file)
   }
 
   async delete(path: string): Promise<void> {
-    const options = this.clients[this.default]
-    const service = this.getFileSystem(options.driver)
+    const service = this.getDefaultService()
     return service.delete(path)
   }
 
+  // --- Strategy Resolver ---
   getFileSystem(driver: FileSystemDriver): IFileSystemService {
     const options = this.clients[driver]
 
@@ -99,5 +101,12 @@ export class FileSystemService implements IFileSystemService {
     if (!strategy) throw new HttpException(`Invalid filesystem`, 500)
 
     return strategy
+  }
+
+  // --- Default Strategy Helper ---
+  private getDefaultService() {
+    const options = this.clients[this.default]
+    if (!options) throw new HttpException(`Invalid default filesystem: ${this.default}`, 500)
+    return this.getFileSystem(options.driver)
   }
 }

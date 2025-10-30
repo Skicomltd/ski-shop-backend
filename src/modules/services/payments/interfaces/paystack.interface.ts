@@ -1,11 +1,21 @@
 import { Currency, GetBanks } from "./strategy.interface"
 
-export type PaystackEventType = "charge.success" | "invoice.create" | "transfer.success" | "transfer.failed" | "transfer.reversed"
-type PaystackWebhookBody<T> = PaystackChargeSuccess<T> | PaystackTransferData
+export type PaystackEventType =
+  | "charge.success"
+  | "invoice.create"
+  | "transfer.success"
+  | "transfer.failed"
+  | "transfer.reversed"
+  | "customeridentification.failed"
+  | "customeridentification.success"
+  | "dedicatedaccount.assign.failed"
+  | "dedicatedaccount.assign.success"
 
-export type PaystackWebhook<T = any> = {
+// type PaystackWebhookBody<T> = PaystackChargeSuccess<T> | PaystackTransferData
+
+export type PaystackWebhook = {
   event: PaystackEventType
-  data: PaystackWebhookBody<T>
+  data: any
 }
 
 export type PaystackChargeSuccess<T = any> = {
@@ -42,6 +52,13 @@ export type PaystackChargeSuccess<T = any> = {
     reusable: boolean
     signature: string
     account_name: string | null
+    sender_bank: string
+    sender_bank_account_number: string
+    sender_country: string
+    sender_name: string
+    narration: string
+    receiver_bank_account_number: string
+    receiver_bank: string
   }
   customer: {
     id: number
@@ -84,7 +101,7 @@ export type PaystackChargeSuccess<T = any> = {
   }
 }
 
-export interface PaystackSubscriptionCreated {}
+// export interface PaystackSubscriptionCreated {}
 
 export interface PaystackApiResponse<T> {
   status: boolean
@@ -92,95 +109,94 @@ export interface PaystackApiResponse<T> {
   data: T
 }
 
-export interface PaystackInitiatePaymentResponse
-  extends PaystackApiResponse<{
-    authorization_url: string
-    access_code: string
-    reference: string
-  }> {}
+export type PaystackInitiatePaymentResponse = PaystackApiResponse<{
+  authorization_url: string
+  access_code: string
+  reference: string
+}>
 
-export interface PaystackBalanceResponse
-  extends PaystackApiResponse<{
+export type PaystackBalanceResponse = PaystackApiResponse<
+  Array<{
     currency: Currency
-    amount: number
-  }> {}
+    balance: number
+  }>
+>
 
-export interface PaystackGetBanksResponse extends PaystackApiResponse<GetBanks> {}
+export type PaystackGetBanksResponse = PaystackApiResponse<GetBanks>
 
 export type PaystackPaymentStatus = "abandoned" | "failed" | "ongoing" | "pending" | "processing" | "queued" | "reversed" | "success"
 
-export interface PaystackTransactionVerification
-  extends PaystackApiResponse<{
-    id: number
-    domain: string
-    status: PaystackPaymentStatus
-    reference: string
-    receipt_number: string | null
-    amount: number
-    message: string | null
-    gateway_response: string
-    paid_at: string
-    created_at: string
+export type PaystackTransactionVerification = PaystackApiResponse<{
+  id: number
+  domain: string
+  status: PaystackPaymentStatus
+  reference: string
+  receipt_number: string | null
+  amount: number
+  message: string | null
+  gateway_response: string
+  paid_at: string
+  created_at: string
+  channel: string
+  currency: string
+  ip_address: string
+  metadata: any // Could be string or object depending on usage
+  log: {
+    start_time: number
+    time_spent: number
+    attempts: number
+    errors: number
+    success: boolean
+    mobile: boolean
+    input: any[]
+    history: {
+      type: string
+      message: string
+      time: number
+    }[]
+  } | null
+  fees: number
+  fees_split: any | null
+  authorization: {
+    authorization_code: string
+    bin: string
+    last4: string
+    exp_month: string
+    exp_year: string
     channel: string
-    currency: string
-    ip_address: string
-    metadata: any // Could be string or object depending on usage
-    log: {
-      start_time: number
-      time_spent: number
-      attempts: number
-      errors: number
-      success: boolean
-      mobile: boolean
-      input: any[]
-      history: {
-        type: string
-        message: string
-        time: number
-      }[]
-    } | null
-    fees: number
-    fees_split: any | null
-    authorization: {
-      authorization_code: string
-      bin: string
-      last4: string
-      exp_month: string
-      exp_year: string
-      channel: string
-      card_type: string
-      bank: string
-      country_code: string
-      brand: string
-      reusable: boolean
-      signature: string
-      account_name: string | null
-    }
-    customer: {
-      id: number
-      first_name: string | null
-      last_name: string | null
-      email: string
-      customer_code: string
-      phone: string | null
-      metadata: any
-      risk_action: string
-      international_format_phone: string | null
-    }
-    plan: any | null
-    split: any
-    order_id: string | null
-    paidAt: string
-    createdAt: string
-    requested_amount: number
-    pos_transaction_data: any | null
-    source: any | null
-    fees_breakdown: any | null
-    connect: any | null
-    transaction_date: string
-    plan_object: any
-    subaccount: any
-  }> {}
+    card_type: string
+    bank: string
+    country_code: string
+    brand: string
+    reusable: boolean
+    signature: string
+    account_name: string | null
+  }
+  customer: {
+    id: number
+    first_name: string | null
+    last_name: string | null
+    email: string
+    customer_code: string
+    phone: string | null
+    metadata: any
+    risk_action: string
+    international_format_phone: string | null
+  }
+  plan: any | null
+  split: any
+  order_id: string | null
+  paidAt: string
+  createdAt: string
+  requested_amount: number
+  pos_transaction_data: any | null
+  source: any | null
+  fees_breakdown: any | null
+  connect: any | null
+  transaction_date: string
+  plan_object: any
+  subaccount: any
+}>
 
 export interface PaystackPlanResponse<T> {
   status: boolean
@@ -206,19 +222,18 @@ export interface PaystackPlanData {
   updatedAt: string
 }
 
-export interface PaystackCreateRcipientResponse
-  extends PaystackApiResponse<{
-    active: boolean
-    createdAt: string
-    currency: Currency
-    id: number
-    integration: number
-    name: string
-    recipient_code: string
-    type: TransferRecipientType
-    updatedAt: string
-    is_deleted: boolean
-  }> {}
+export type PaystackCreateRcipientResponse = PaystackApiResponse<{
+  active: boolean
+  createdAt: string
+  currency: Currency
+  id: number
+  integration: number
+  name: string
+  recipient_code: string
+  type: TransferRecipientType
+  updatedAt: string
+  is_deleted: boolean
+}>
 
 export interface GetSubscriptionPaystackResponse {
   invoices: any[]
@@ -347,4 +362,122 @@ export interface PaystackTransferData {
   }
   created_at: string
   updated_at: string
+}
+
+// {
+//   "event": "customeridentification.success",
+//   "data": {
+//     "customer_id": "9387490384",
+//     "customer_code": "CUS_xnxdt6s1zg1f4nx",
+//     "email": "bojack@horsinaround.com",
+//     "identification": {
+//       "country": "NG",
+//       "type": "bank_account",
+//       "bvn": "200*****677",
+//       "account_number": "012****789",
+//       "bank_code": "007"
+//     }
+//   }
+// }
+
+// {
+//   "event": "customeridentification.failed",
+//   "data": {
+//     "customer_id": 82796315,
+//     "customer_code": "CUS_XXXXXXXXXXXXXXX",
+//     "email": "email@email.com",
+//     "identification": {
+//       "country": "NG",
+//       "type": "bank_account",
+//       "bvn": "123*****456",
+//       "account_number": "012****345",
+//       "bank_code": "999991"
+//     },
+//     "reason": "Account number or BVN is incorrect"
+//   }
+// }
+
+export type CustomerIdentificationFailed = {
+  customer_id: number
+  customer_code: string
+  email: string
+  reason: string
+  identification: {
+    country: string
+    type: "bank_account" | string
+    bvn: string
+    account_number: string
+    bank_code: string
+  }
+}
+
+export type CustomerIdentificationSuccess = {
+  customer_id: string
+  customer_code: string
+  email: string
+  identification: {
+    country: "NG"
+    type: string
+    value: string
+  }
+}
+
+export type DVAAssignFailed = {
+  customer: {
+    id: number
+    first_name: string
+    last_name: string
+    email: string
+    customer_code: string
+    phone: string
+    // metadata: {}
+    risk_action: string
+    international_format_phone: string
+  }
+  dedicated_account: null
+  identification: {
+    status: "failed"
+  }
+}
+
+export type DVAAssignSuccess = {
+  customer: {
+    id: number
+    first_name: string
+    last_name: string
+    email: string
+    customer_code: string
+    phone: string
+    // metadata: {}
+    risk_action: "default"
+    international_format_phone: string
+  }
+  dedicated_account: {
+    bank: {
+      name: string
+      id: number
+      slug: string
+    }
+    account_name: string
+    account_number: string
+    assigned: boolean
+    currency: "NGN"
+    // metadata: null
+    active: boolean
+    id: number
+    created_at: string
+    updated_at: string
+    assignment: {
+      integration: number
+      assignee_id: number
+      assignee_type: string
+      expired: boolean
+      account_type: "PAY-WITH-TRANSFER-RECURRING"
+      assigned_at: string
+      expired_at: null
+    }
+  }
+  identification: {
+    status: "success"
+  }
 }

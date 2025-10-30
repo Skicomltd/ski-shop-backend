@@ -1,5 +1,5 @@
 import * as fs from "fs"
-import * as archiver from "archiver"
+import archiver from "archiver"
 import { WritableStreamBuffer } from "stream-buffers"
 import { Storage, Bucket } from "@google-cloud/storage"
 import { HttpException, Inject, Injectable } from "@nestjs/common"
@@ -96,7 +96,7 @@ export class GoogleStorageStrategy implements IFileSystemService {
 
     return {
       name: metadata.name,
-      size: metadata.size.toString() || "0",
+      size: Number(metadata.size) || 0,
       mimeType: metadata.contentType,
       url: this.publicUrl ? `${this.publicUrl}/${path}` : `https://storage.googleapis.com/${this.bucketName}/${path}`,
       lastModified: metadata.timeStorageClassUpdated ? new Date(metadata.timeStorageClassUpdated) : undefined
