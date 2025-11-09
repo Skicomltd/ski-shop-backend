@@ -17,7 +17,6 @@ import { FileInterceptor } from "@nestjs/platform-express"
 import { imageFilter, memoryUpload } from "@/config/multer.config"
 import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.interface"
 import { FileSystemService } from "../services/filesystem/filesystem.service"
-import { profile } from "console"
 
 @Controller("users")
 export class UserController {
