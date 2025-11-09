@@ -305,7 +305,10 @@ export class AuthController {
   @Public()
   @Post("/forgotpassword")
   @HttpCode(HttpStatus.OK)
-  async forgotPassword(@Body(new JoiValidationPipe(forgotPasswordSchema)) { email }: ForgotPasswordDto) {
+  async forgotPassword(@Body(new JoiValidationPipe(forgotPasswordSchema)) { email }: ForgotPasswordDto, @Req() req: Request) {
+    // eslint-disable-next-line no-console
+    console.log("hearders", req.headers)
+
     const user = await this.userService.findOne({ email })
 
     if (!user) return new NotFoundException("user not found!")
