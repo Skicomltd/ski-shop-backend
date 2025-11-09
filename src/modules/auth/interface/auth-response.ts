@@ -8,6 +8,7 @@ export interface IAuthResponse {
     lastName: string
     email: string
     role: string
+    profileImage: string
     fullName: string
     createdAt: Date
     updatedAt: Date

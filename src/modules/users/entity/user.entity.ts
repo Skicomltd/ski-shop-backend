@@ -56,6 +56,9 @@ export class User {
   @Column({ type: "text", default: "" })
   address: string
 
+  @Column({ type: "text", default: "" })
+  profileImage: string
+
   @Column({ default: false })
   isEmailVerified: boolean
 
