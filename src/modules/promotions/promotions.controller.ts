@@ -6,7 +6,7 @@ import { JoiValidationPipe } from "@/validations/joi.validation"
 import { PolicyPromotionGuard } from "./guard/policy-promotion.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { Promotion } from "./entities/promotion.entity"
-import { Action } from "../services/casl/actions/action"
+import { Action } from "@services/casl/actions/action"
 import { PromotionInterceptor } from "./interceptor/promotion.interceptor"
 import { PromotionsInterceptor } from "./interceptor/promotions.interceptor"
 

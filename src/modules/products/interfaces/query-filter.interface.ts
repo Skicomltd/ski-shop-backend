@@ -1,4 +1,4 @@
-import { PaginationParams } from "@/modules/services/pagination/interfaces/pagination-params.interface"
+import { PaginationParams } from "@services/pagination/interfaces/pagination-params.interface"
 import { vendonEnumType } from "@/modules/stores/entities/store.entity"
 import { Product } from "../entities/product.entity"
 import { FindOptionsWhere } from "typeorm"

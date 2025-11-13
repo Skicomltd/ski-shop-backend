@@ -1,7 +1,7 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, NotFoundException } from "@nestjs/common"
 
-import { LogService } from "@/modules/services/log/log.service"
-import { ErrorContext } from "@/modules/services/log/interfaces/log.interface"
+import { LogService } from "@services/log/log.service"
+import { ErrorContext } from "@services/log/interfaces/log.interface"
 
 @Catch()
 export class GlobalExceptionFilters implements ExceptionFilter {

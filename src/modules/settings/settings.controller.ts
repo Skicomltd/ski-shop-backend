@@ -6,14 +6,14 @@ import { JoiValidationPipe } from "@/validations/joi.validation"
 import { SettingInterceptor } from "./interceptor/setting.interceptor"
 import { PolicySettingsGuard } from "./guard/policy-settings.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
-import { Action } from "../services/casl/actions/action"
+import { Action } from "@services/casl/actions/action"
 import { Setting } from "./entities/setting.entity"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { GeneralSettingService } from "./general-settings.service"
 import { Play2winSettingService } from "./play2winSetting.service"
 import { RevenueSettingService } from "./revenueSetting.service"
 import { PromotionSettingService } from "./promotionSetting.service"
-import { TransactionHelper } from "../services/utils/transactions/transactions.service"
+import { TransactionHelper } from "@services/utils/transactions/transactions.service"
 
 @Controller("settings")
 export class SettingsController {

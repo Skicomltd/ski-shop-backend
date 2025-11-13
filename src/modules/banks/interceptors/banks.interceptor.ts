@@ -1,9 +1,9 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common"
 import { Bank } from "../entities/bank.entity"
 import { BankResponseMapper } from "../interfaces/bank-response-mapper"
-import { PaginationService } from "@/modules/services/pagination/pagination.service"
+import { PaginationService } from "@services/pagination/pagination.service"
 import { map, Observable } from "rxjs"
-import { PaginationParams } from "@/modules/services/pagination/interfaces/pagination-params.interface"
+import { PaginationParams } from "@services/pagination/interfaces/pagination-params.interface"
 import { IBanksResponse } from "../interfaces/banks-response.interface"
 import { IBankResponse } from "../interfaces/bank-response.interface"
 

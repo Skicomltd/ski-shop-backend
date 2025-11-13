@@ -12,8 +12,6 @@ import { GlobalExceptionFilters } from "./exceptions/global.exception"
 import { TypeOrmModule } from "@nestjs/typeorm"
 import { databaseConfigAsync } from "./config/database.config"
 import { TransformResponseInterceptor } from "./interceptors/response.interceptor"
-import { ServicesModule } from "./modules/services/services.module"
-import { UtilsModule } from "./modules/services/utils/utils.module"
 import { StoreModule } from "./modules/stores/store.module"
 import { BankModule } from "./modules/banks/bank.module"
 import filesystemsConfig from "./config/filesystems.config"
@@ -43,6 +41,8 @@ import { BuyerModule } from "./modules/buyer/buyer.module"
 import { NewslettersModule } from "./modules/newsletters/newsletters.module"
 import { ContactUsModule } from "./modules/contact-us/contact-us.module"
 import { QueuesModule } from "./queues"
+import { ServicesModule } from "./services/services.module"
+import { UtilsModule } from "./services/utils"
 @Module({
   imports: [
     UserModule,

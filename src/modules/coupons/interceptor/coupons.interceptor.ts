@@ -3,8 +3,8 @@ import { Coupon } from "../entities/coupon.entity"
 import { CouponResponseMapper } from "../interface/coupon-response-mapper.interface"
 import { ICouponsResponse } from "../interface/coupons-response.interface"
 import { map, Observable } from "rxjs"
-import { PaginationParams } from "@/modules/services/pagination/interfaces/pagination-params.interface"
-import { PaginationService } from "@/modules/services/pagination/pagination.service"
+import { PaginationParams } from "@services/pagination/interfaces/pagination-params.interface"
+import { PaginationService } from "@services/pagination/pagination.service"
 import { ICouponResponse } from "../interface/coupon-response.interface"
 
 type payload = [Coupon[], number]

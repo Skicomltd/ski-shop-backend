@@ -1,7 +1,7 @@
 import { Controller, Get, Param, ParseUUIDPipe, Res, UseGuards } from "@nestjs/common"
 import { PolicyBuyerProfilesGuard } from "./guard/policy-profiles.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
-import { Action } from "../services/casl/actions/action"
+import { Action } from "@services/casl/actions/action"
 import { Response } from "express"
 import { BadReqException } from "@/exceptions/badRequest.exception"
 import { UserService } from "../users/user.service"

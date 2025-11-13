@@ -1,4 +1,4 @@
-import { FcmMessage } from "@modules/services/push/messages/fcm.message"
+import { FcmMessage } from "@/services/push/messages/fcm.message"
 import { BroadcastMessage, DatabaseMessage, MailMessage, PushMessage, SmsMessage } from "../interfaces/messages.interface"
 import { INotifiable, NotificationChannel } from "../interfaces/notification.interface"
 import { NotificationContract } from "./notification.contract"

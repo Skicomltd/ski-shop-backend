@@ -2,9 +2,9 @@ import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nes
 import { Store } from "../entities/store.entity"
 import { StoreResponseMapper } from "../interface/store.response.mapper"
 import { StoreResponse } from "../interface/store.response.interface"
-import { PaginationService } from "@/modules/services/pagination/pagination.service"
+import { PaginationService } from "@services/pagination/pagination.service"
 import { map, Observable } from "rxjs"
-import { PaginationParams } from "@/modules/services/pagination/interfaces/pagination-params.interface"
+import { PaginationParams } from "@services/pagination/interfaces/pagination-params.interface"
 import { StoresResponse } from "../interface/stores.response.interface"
 
 type PayloadType = [Store[], number]

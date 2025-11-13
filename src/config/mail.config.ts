@@ -1,5 +1,5 @@
 import { ConfigModule, ConfigService, registerAs } from "@nestjs/config"
-import { MailModuleAsyncOptions, MailModuleOptions } from "../modules/services/mail/interface/config.interface"
+import { MailModuleAsyncOptions, MailModuleOptions } from "@services/mail/interface/config.interface"
 
 export default registerAs(
   "mail",

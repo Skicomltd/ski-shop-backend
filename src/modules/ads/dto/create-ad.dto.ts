@@ -1,6 +1,6 @@
 import * as joi from "joi"
 
-import { PAYMENT_METHODS, PaymentMethod } from "@/modules/services/payments/interfaces/payment-method"
+import { PAYMENT_METHODS, PaymentMethod } from "@services/payments/interfaces/payment-method"
 import { PromotionTypeEnum } from "@/modules/promotions/entities/promotion.entity"
 import { AdStatus } from "../interfaces/ad-status.interface"
 

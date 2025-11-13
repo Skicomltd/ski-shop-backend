@@ -1,6 +1,6 @@
 import { ConfigService, registerAs } from "@nestjs/config"
 
-import { LogModuleAsyncOptions, LogModuleOptions } from "@/modules/services/log/interfaces/log.interface"
+import { LogModuleAsyncOptions, LogModuleOptions } from "@services/log/interfaces/log.interface"
 
 export default registerAs(
   "logging",

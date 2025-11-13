@@ -3,10 +3,10 @@ import { ReviewResponseMapper } from "../interface/review-response-mapper"
 import { Review } from "../entities/review.entity"
 import { IReviewsResponse } from "../interface/reviews-response-interface"
 import { map, Observable } from "rxjs"
-import { PaginationService } from "@/modules/services/pagination/pagination.service"
-import { PaginationParams } from "@/modules/services/pagination/interfaces/pagination-params.interface"
+import { PaginationService } from "@services/pagination/pagination.service"
+import { PaginationParams } from "@services/pagination/interfaces/pagination-params.interface"
 import { IReviewResponse } from "../interface/review-response-interface"
-import { PaginatedResult } from "@/modules/services/pagination/interfaces/pagination-result.interface"
+import { PaginatedResult } from "@services/pagination/interfaces/pagination-result.interface"
 
 type PayloadType = [Review[], number]
 

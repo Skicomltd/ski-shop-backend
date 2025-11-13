@@ -3,7 +3,7 @@ import { Controller, Get, Query, Req, UseGuards, UseInterceptors } from "@nestjs
 
 import { Payout } from "./entities/payout.entity"
 import { PayoutsService } from "./payouts.service"
-import { Action } from "../services/casl/actions/action"
+import { Action } from "@services/casl/actions/action"
 import { PolicyPayoutGuard } from "./guards/policy-payout.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { PayoutResponseInterceptor } from "./interceptors/payout-response.interceptor"

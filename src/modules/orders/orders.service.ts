@@ -10,7 +10,7 @@ import { MonthlySalesData, MonthlySalesQuery } from "./interfaces/order-monthlys
 import { StoreOrderRevenueSummary } from "./interfaces/store-order.interface"
 import { months } from "../common/types"
 import * as PDFDocument from "pdfkit"
-import { PdfService } from "../services/utils/pdf/pdf.service"
+import { PdfService } from "@services/utils/pdf/pdf.service"
 import { OrderSummaryData } from "./interfaces/order-summary.interface"
 
 @Injectable()

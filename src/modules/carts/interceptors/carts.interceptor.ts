@@ -1,9 +1,9 @@
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common"
 import { Cart } from "../entities/cart.entity"
 import { CartResponseMapper } from "../interfaces/cart-response-mapper"
-import { PaginationService } from "@/modules/services/pagination/pagination.service"
+import { PaginationService } from "@services/pagination/pagination.service"
 import { map, Observable } from "rxjs"
-import { PaginationParams } from "@/modules/services/pagination/interfaces/pagination-params.interface"
+import { PaginationParams } from "@services/pagination/interfaces/pagination-params.interface"
 import { ICartsResponse } from "../interfaces/carts-response.interface"
 import { ICartResponse } from "../interfaces/cart-response.interface"
 

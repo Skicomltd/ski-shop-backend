@@ -9,7 +9,7 @@ import { ProductsService } from "../products/products.service"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { PolicyReviewGuard } from "./guard/policy-review.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
-import { Action } from "../services/casl/actions/action"
+import { Action } from "@services/casl/actions/action"
 import { Review } from "./entities/review.entity"
 import { Request } from "express"
 import { OrdersService } from "../orders/orders.service"
@@ -17,7 +17,7 @@ import { BadReqException } from "@/exceptions/badRequest.exception"
 import { ConflictException } from "@/exceptions/conflict.exception"
 import { ReviewsInterceptor } from "./interceptor/reviews.interceptor"
 import { StoreService } from "../stores/store.service"
-import { TransactionHelper } from "../services/utils/transactions/transactions.service"
+import { TransactionHelper } from "@services/utils/transactions/transactions.service"
 
 @Controller("reviews")
 export class ReviewsController {

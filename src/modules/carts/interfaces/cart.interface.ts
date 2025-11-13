@@ -1,4 +1,4 @@
-import { PaginationParams } from "@/modules/services/pagination/interfaces/pagination-params.interface"
+import { PaginationParams } from "@services/pagination/interfaces/pagination-params.interface"
 import { FindOptionsWhere } from "typeorm"
 import { Cart } from "../entities/cart.entity"
 

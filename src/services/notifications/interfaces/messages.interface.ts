@@ -1,10 +1,11 @@
-import { Address, Mailable } from "@modules/services/mail"
 import { NotificationData } from "./notification.interface"
-import { PushMessage as PMessage } from "@modules/services/push/interfaces/message.interface"
-import { Header } from "@modules/services/mail/interface/messages.interface"
-import { Attachment } from "@modules/services/mail/mailables/attachment"
-import { Content } from "@modules/services/mail/mailables/content"
-import { Envelope } from "@modules/services/mail/mailables/envelope"
+import { PushMessage as PMessage } from "@/services/push/interfaces/message.interface"
+import { Header } from "@/services/mail/interface/messages.interface"
+import { Attachment } from "@/services/mail/mailables/attachment"
+import { Content } from "@/services/mail/mailables/content"
+import { Envelope } from "@/services/mail/mailables/envelope"
+import { Address } from "@services/mail/mailables/address"
+import { Mailable } from "@services/mail/mailables/mailable"
 
 export type BroadcastMessage = {
   topic?: string
@@ -24,13 +25,13 @@ type MailMessageType = {
   to: Address | string
   from?: Address | string
   subject: string
-  message: string
+  message: string | Content
   client?: string
 }
 export class MailMessage extends Mailable {
   private readonly to: Address | string
   private readonly from: Address | string
-  private readonly message: string
+  private readonly message: string | Content
   private readonly subject: string
   public client: string
 
@@ -52,9 +53,13 @@ export class MailMessage extends Mailable {
   }
 
   public content(): Content {
-    return new Content({
-      text: this.message
-    })
+    if (typeof this.message === "string") {
+      return new Content({
+        text: this.message
+      })
+    }
+
+    return this.message
   }
 
   public attachments(): Attachment[] {

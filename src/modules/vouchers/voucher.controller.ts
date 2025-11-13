@@ -10,10 +10,10 @@ import { UserRoleEnum } from "../users/entity/user.entity"
 import { VouchersInterceptor } from "./interceptor/vouchers.interceptor"
 import { VoucherInterceptor } from "./interceptor/voucher.interceptor"
 import { PolicyVouchersGuard } from "./guard/policy-voucher.guard"
-import { AppAbility } from "../services/casl/casl-ability.factory"
+import { AppAbility } from "@services/casl/casl-ability.factory"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { Voucher } from "./entities/voucher.entity"
-import { Action } from "../services/casl/actions/action"
+import { Action } from "@services/casl/actions/action"
 
 @Controller("vouchers")
 export class VoucherController {

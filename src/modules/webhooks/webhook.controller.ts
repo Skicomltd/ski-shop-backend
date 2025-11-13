@@ -2,7 +2,7 @@ import { Body, Controller, Post, UseGuards } from "@nestjs/common"
 import { WebhookService } from "./webhook.service"
 import { PaystackWebhookGuard } from "./guard/paystack.guard"
 import { Public } from "../auth/decorators/public.decorator"
-import { PaystackChargeSuccess, PaystackTransferData, PaystackWebhook } from "../services/payments/interfaces/paystack.interface"
+import { PaystackChargeSuccess, PaystackTransferData, PaystackWebhook } from "@services/payments/interfaces/paystack.interface"
 
 @Public()
 @Controller("webhooks")

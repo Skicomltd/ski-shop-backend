@@ -9,11 +9,11 @@ import { Request } from "express"
 import { PoliciesGuard } from "../auth/guard/policies-handler.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { Bank } from "./entities/bank.entity"
-import { Action } from "../services/casl/actions/action"
-import { AppAbility } from "../services/casl/casl-ability.factory"
+import { Action } from "@services/casl/actions/action"
+import { AppAbility } from "@services/casl/casl-ability.factory"
 import { BanksInterceptor } from "./interceptors/banks.interceptor"
 import { Public } from "../auth/decorators/public.decorator"
-import { PaymentsService } from "../services/payments/payments.service"
+import { PaymentsService } from "@services/payments/payments.service"
 
 @Controller("banks")
 export class BankController {

@@ -2,10 +2,10 @@ import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nes
 import { Voucher } from "../entities/voucher.entity"
 import { VoucherResponseMapper } from "../interface/voucher-response-mapper"
 import { IVouchersResponse } from "../interface/vouchers-response.interface"
-import { PaginationService } from "@/modules/services/pagination/pagination.service"
+import { PaginationService } from "@services/pagination/pagination.service"
 import { map, Observable } from "rxjs"
 import { IVoucherResponse } from "../interface/voucher-response.interface"
-import { PaginationParams } from "@/modules/services/pagination/interfaces/pagination-params.interface"
+import { PaginationParams } from "@services/pagination/interfaces/pagination-params.interface"
 
 type PayloadType = [Voucher[], number]
 

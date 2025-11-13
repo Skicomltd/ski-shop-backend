@@ -1,6 +1,6 @@
 import * as path from "path"
 import { ConfigModule, ConfigService, registerAs } from "@nestjs/config"
-import { FileSystemDriver, FileSystemModuleAsynOptions, FileSystemModuleOptions } from "@modules/services/filesystem/interfaces/config.interface"
+import { FileSystemDriver, FileSystemModuleAsynOptions, FileSystemModuleOptions } from "@services/filesystem/interfaces/config.interface"
 
 function getOptions(): FileSystemModuleOptions {
   return {

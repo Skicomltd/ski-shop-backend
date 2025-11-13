@@ -60,19 +60,19 @@ export class NotificationsService {
   @OnEvent(NOTIFICATION_EVENT, { async: true })
   protected async onCreateNotification(event: NotificationContract) {
     if (event.via().includes("database")) {
-      await this.database(event)
+      this.database(event)
     }
     if (event.via().includes("broadcast")) {
-      await this.broadcast(event)
+      this.broadcast(event)
     }
     if (event.via().includes("mail") && this.mailService) {
-      await this.mail(event)
+      this.mail(event)
     }
     if (event.via().includes("sms")) {
-      await this.sms(event)
+      this.sms(event)
     }
     if (event.via().includes("push") && this.pushService) {
-      await this.push(event)
+      this.push(event)
     }
   }
 

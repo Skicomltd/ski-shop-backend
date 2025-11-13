@@ -1,6 +1,6 @@
 import { CHECK_POLICIES_KEY } from "@/modules/auth/decorators/policies-handler.decorator"
 import { PolicyHandler } from "@/modules/auth/interface/policies-interface"
-import { AppAbility, CaslAbilityFactory } from "@/modules/services/casl/casl-ability.factory"
+import { AppAbility, CaslAbilityFactory } from "@services/casl/casl-ability.factory"
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common"
 import { Reflector } from "@nestjs/core"
 

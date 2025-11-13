@@ -5,7 +5,7 @@ import { Processor, WorkerHost, OnWorkerEvent } from "@nestjs/bullmq"
 import { QueueRegistry } from "@queues/queues.registry"
 import { MailQueueService } from "./queue.service"
 import { MailQueuePayload } from "../interface/queue.interface"
-import { MailTransporter } from "@modules/services/mail/interface/config.interface"
+import { MailTransporter } from "@services/mail/interface/config.interface"
 
 @Processor(QueueRegistry.MAIL)
 export class MailQueueConsumer extends WorkerHost {

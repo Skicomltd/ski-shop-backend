@@ -1,4 +1,4 @@
-import { AppAbility, CaslAbilityFactory } from "@/modules/services/casl/casl-ability.factory"
+import { AppAbility, CaslAbilityFactory } from "@services/casl/casl-ability.factory"
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common"
 import { Reflector } from "@nestjs/core"
 import { PolicyHandler } from "../interface/policies-interface"

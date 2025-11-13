@@ -1,15 +1,15 @@
 import { Controller, Post, Body, Get, Patch, Param, ParseUUIDPipe, UseInterceptors, UseGuards } from "@nestjs/common"
 import { PlansService } from "./plans.service"
 import { CreatePlanDto, createPlanSchema } from "./dto/create-plan.dto"
-import { PaymentsService } from "../services/payments/payments.service"
+import { PaymentsService } from "@services/payments/payments.service"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { UpdatePlanDto, updatePlanSchema } from "./dto/update-plan.dto"
 import { PlansIntercerptor } from "./interceptors/plans.interceptor"
 import { PlanInterceptor } from "./interceptors/plan.interceptor"
 import { PolicyPlanGuard } from "./guard/policy-plan.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
-import { AppAbility } from "../services/casl/casl-ability.factory"
-import { Action } from "../services/casl/actions/action"
+import { AppAbility } from "@services/casl/casl-ability.factory"
+import { Action } from "@services/casl/actions/action"
 import { Plan } from "./entities/plan.entity"
 
 @Controller("plans")

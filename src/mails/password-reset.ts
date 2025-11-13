@@ -1,4 +1,4 @@
-import { Attachment, Content, Envelope, Header, Mailable } from "@/modules/services/mail"
+import { Attachment, Content, Envelope, Header, Mailable } from "@/services/mail"
 
 export class PasswordRestMail extends Mailable {
   constructor(

@@ -1,5 +1,5 @@
 import { Otp } from "@/modules/auth/entities/otp.entity"
-import { Attachment, Content, Envelope, Header, Mailable } from "@/modules/services/mail"
+import { Attachment, Content, Envelope, Header, Mailable } from "@/services/mail"
 
 export class EmailValidationMail extends Mailable {
   constructor(private readonly otp: Otp) {

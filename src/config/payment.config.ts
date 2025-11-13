@@ -1,6 +1,6 @@
 import { ConfigModule, ConfigService, registerAs } from "@nestjs/config"
 
-import { PaymentModuleAsyncOptions, PaymentModuleOption } from "@/modules/services/payments/interfaces/config.interface"
+import { PaymentModuleAsyncOptions, PaymentModuleOption } from "@services/payments/interfaces/config.interface"
 
 function getOptions(): PaymentModuleOption {
   return {

@@ -1,5 +1,5 @@
 import { UnAuthorizedException } from "@/exceptions/unAuthorized.exception"
-import { PaymentModuleOption } from "@/modules/services/payments/interfaces/config.interface"
+import { PaymentModuleOption } from "@services/payments/interfaces/config.interface"
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
 import * as crypto from "crypto"

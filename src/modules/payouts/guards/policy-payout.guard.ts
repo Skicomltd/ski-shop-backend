@@ -3,7 +3,7 @@ import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common"
 
 import { PolicyHandler } from "../../auth/interface/policies-interface"
 import { CHECK_POLICIES_KEY } from "../../auth/decorators/policies-handler.decorator"
-import { AppAbility, CaslAbilityFactory } from "@/modules/services/casl/casl-ability.factory"
+import { AppAbility, CaslAbilityFactory } from "@services/casl/casl-ability.factory"
 
 @Injectable()
 export class PolicyPayoutGuard implements CanActivate {

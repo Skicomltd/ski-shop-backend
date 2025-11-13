@@ -5,8 +5,8 @@ import { Product } from "./entities/product.entity"
 import { FindOptionsWhere, Repository, EntityManager } from "typeorm"
 import { InjectRepository } from "@nestjs/typeorm"
 import { BadReqException } from "@/exceptions/badRequest.exception"
-import { FileUploadDto } from "../services/filesystem/interfaces/filesystem.interface"
-import { FileSystemService } from "../services/filesystem/filesystem.service"
+import { FileUploadDto } from "@services/filesystem/interfaces/filesystem.interface"
+import { FileSystemService } from "@services/filesystem/filesystem.service"
 import { IProductsQuery } from "./interfaces/query-filter.interface"
 import { SavedProduct } from "./entities/saved-product.entity"
 import { PromotionTypeEnum } from "../promotions/entities/promotion.entity"
@@ -132,8 +132,8 @@ export class ProductsService implements IService<Product> {
 
     if (rating && Number(rating) !== 0) {
       query.andWhere(
-        `product.totalProductRatingCount > 0 
-    AND ROUND(product.totalProductRatingSum / product.totalProductRatingCount, 1) = :rating 
+        `product.totalProductRatingCount > 0
+    AND ROUND(product.totalProductRatingSum / product.totalProductRatingCount, 1) = :rating
   `,
         { rating: Number(rating) }
       )

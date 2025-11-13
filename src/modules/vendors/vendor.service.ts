@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common"
 import * as PDFDocument from "pdfkit"
 import { PdfInterface } from "./interface/pdf.interface"
-import { PdfService } from "../services/utils/pdf/pdf.service"
+import { PdfService } from "@services/utils/pdf/pdf.service"
 
 @Injectable()
 export class VendorService {
