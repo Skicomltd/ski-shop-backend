@@ -1,19 +1,20 @@
-name: Feature Request
-about: Suggest a new feature or improvement
-title: "[FEATURE] "
+---
+name: Feature request
+about: Suggest an idea for this project
+title: Descriptive Feature Title
 labels: enhancement
-assignees: ''
+assignees: Intuneteq
 
 ---
 
-## Description
-<!-- Describe the feature or improvement clearly -->
+**Is your feature request related to a problem? Please describe.**
+A clear and concise description of what the problem is. Ex. I'm always frustrated when [...]
 
-## Use Case / Motivation
-<!-- Explain why this feature is needed or what problem it solves -->
+**Describe the solution you'd like**
+A clear and concise description of what you want to happen.
 
-## Suggested Implementation
-<!-- Optional: Suggest how it might be implemented -->
+**Describe alternatives you've considered**
+A clear and concise description of any alternative solutions or features you've considered.
 
-## Additional Context
-<!-- Optional: Any other context or ideas related to this feature -->
+**Additional context**
+Add any other context or screenshots about the feature request here.

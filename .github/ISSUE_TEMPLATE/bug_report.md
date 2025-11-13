@@ -1,33 +1,38 @@
-name: Bug Report
-about: Report a bug or unexpected behavior
-title: "[BUG] "
+---
+name: Bug report
+about: Create a report to help us improve
+title: Descriptive Bug Title
 labels: bug
-assignees: ''
+assignees: Intuneteq, Taiwola
 
 ---
 
-## Description
-<!-- Explain the bug clearly and concisely -->
+**Describe the bug**
+A clear and concise description of what the bug is.
 
-## Steps to Reproduce
+**To Reproduce**
+Steps to reproduce the behavior:
 1. Go to '...'
-2. Click on '...'
-3. Observe '...'
+2. Click on '....'
+3. Scroll down to '....'
+4. See error
 
-## Expected Behavior
-<!-- What you expected to happen -->
+**Expected behavior**
+A clear and concise description of what you expected to happen.
 
-## Actual Behavior
-<!-- What actually happened -->
+**Screenshots**
+If applicable, add screenshots to help explain your problem.
 
-## Environment
-- OS:
-- Node.js version:
-- Database:
-- Other relevant environment info:
+**Desktop (please complete the following information):**
+ - OS: [e.g. iOS]
+ - Browser [e.g. chrome, safari]
+ - Version [e.g. 22]
 
-## Screenshots / Logs
-<!-- Optional: Include any screenshots or log output -->
+**Smartphone (please complete the following information):**
+ - Device: [e.g. iPhone6]
+ - OS: [e.g. iOS8.1]
+ - Browser [e.g. stock browser, safari]
+ - Version [e.g. 22]
 
-## Additional Context
-<!-- Optional: Add any other context or ideas about the problem -->
+**Additional context**
+Add any other context about the problem here.
