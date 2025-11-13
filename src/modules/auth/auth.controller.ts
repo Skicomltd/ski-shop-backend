@@ -317,9 +317,6 @@ export class AuthController {
   @Post("/forgotpassword")
   @HttpCode(HttpStatus.OK)
   async forgotPassword(@Body(new JoiValidationPipe(forgotPasswordSchema)) { email }: ForgotPasswordDto, @Req() req: Request) {
-    // eslint-disable-next-line no-console
-    console.log("mobile", req.headers.platform)
-
     const isMobile = req.headers.platform === "mobile"
     const user = await this.userService.findOne({ email })
 
