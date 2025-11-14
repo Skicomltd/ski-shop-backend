@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UseGuards, Query } from '@nestjs/common';
 import { PickupsService } from './pickups.service';
 import { CreatePickupDto, createPickupSchema } from './dto/create-pickup.dto';
 import { UpdatePickupDto, updatePickupSchema } from './dto/update-pickup.dto';
@@ -12,6 +12,7 @@ import { CheckPolicies } from '../auth/decorators/policies-handler.decorator';
 import { AppAbility } from '@/services/casl/casl-ability.factory';
 import { Action } from '@/services/casl/actions/action';
 import { Pickup } from './entities/pickup.entity';
+import { IPickupQuery } from './interface/query-filter.interface';
 
 
 @Controller('pickups')
@@ -33,8 +34,8 @@ export class PickupsController {
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Pickup))
   @UseInterceptors(PickupsResponseInterceptor)
   @Get()
-  findAll() {
-    return this.pickupsService.find();
+  async findAll(@Query() query: IPickupQuery) {
+    return await this.pickupsService.find(query);
   }
 
   
