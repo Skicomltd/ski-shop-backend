@@ -28,6 +28,7 @@ export class PickupsController {
   }
 
   
+  
   @UseGuards(PolicyPickupGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Pickup))
   @UseInterceptors(PickupsResponseInterceptor)
