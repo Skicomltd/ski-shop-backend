@@ -44,6 +44,7 @@ import { QueuesModule } from "./queues"
 import { ServicesModule } from "./services/services.module"
 import { UtilsModule } from "./services/utils"
 import { PickupsModule } from './modules/pickups/pickups.module';
+import { AddressesModule } from './modules/addresses/addresses.module';
 @Module({
   imports: [
     UserModule,
@@ -80,7 +81,8 @@ import { PickupsModule } from './modules/pickups/pickups.module';
     BuyerModule,
     NewslettersModule,
     ContactUsModule,
-    PickupsModule
+    PickupsModule,
+    AddressesModule
   ],
   controllers: [AppController],
   providers: [
