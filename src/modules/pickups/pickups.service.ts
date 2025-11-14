@@ -4,6 +4,7 @@ import { UpdatePickupDto } from './dto/update-pickup.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
 import { Pickup } from './entities/pickup.entity';
+import { IPickupQuery } from './interface/query-filter.interface';
 
 @Injectable()
 export class PickupsService implements IService<Pickup> {
@@ -18,8 +19,19 @@ const repo = manager ? manager.getRepository<Pickup>(Pickup) : this.pickupReposi
     return await repo.save(createUser)
   }
 
-  async find(): Promise<[Pickup[], number]> {
-    return await this.pickupRepository.findAndCount();
+  async find({limit, page, status, search}: IPickupQuery): Promise<[Pickup[], number]> {
+    const query = this.pickupRepository.createQueryBuilder('pickup')
+    if (status) {
+      query.andWhere('pickup.status = :status', { status });
+    }
+    if (search) {
+      query.andWhere('LOWER(pickup.name) LIKE :search OR LOWER(pickup.address) LIKE :search', { search: `%${search.toLowerCase()}%` });
+    }
+
+    return await query
+      .take(limit)
+      .skip(page && page > 0 ? (page - 1) * limit : 0)
+      .getManyAndCount();
   }
 
   async findById(id: string): Promise<Pickup> {
