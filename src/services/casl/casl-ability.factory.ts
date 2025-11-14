@@ -18,6 +18,7 @@ import { Ad } from "@/modules/ads/entities/ad.entity"
 import { Coupon } from "@/modules/coupons/entities/coupon.entity"
 import { Voucher } from "@/modules/vouchers/entities/voucher.entity"
 import { Setting } from "@/modules/settings/entities/setting.entity"
+import { Pickup } from "@/modules/pickups/entities/pickup.entity"
 
 type Subjects = InferSubjects<
   | typeof User
@@ -36,6 +37,7 @@ type Subjects = InferSubjects<
   | typeof Coupon
   | typeof Voucher
   | typeof Setting
+  | typeof Pickup
   | "REVENUE"
   | "VENDOR"
   | "PROFILE"
@@ -569,4 +571,28 @@ export class CaslAbilityFactory {
 
     return ability
   }
+
+
+  createAbilityForPickup(user: User): AppAbility {
+  const {can, cannot, build} = new AbilityBuilder(createMongoAbility)
+
+  if (user.role === UserRoleEnum.Admin) {
+    can(Action.Manage, Pickup)
+  } else {
+    can(Action.Read, Pickup)
+    cannot(Action.Create, Pickup)
+    cannot(Action.Update, Pickup)
+    cannot(Action.Delete, Pickup)
+  }
+
+  const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
 }
+}
+
+

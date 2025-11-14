@@ -43,6 +43,7 @@ import { ContactUsModule } from "./modules/contact-us/contact-us.module"
 import { QueuesModule } from "./queues"
 import { ServicesModule } from "./services/services.module"
 import { UtilsModule } from "./services/utils"
+import { PickupsModule } from './modules/pickups/pickups.module';
 @Module({
   imports: [
     UserModule,
@@ -78,7 +79,8 @@ import { UtilsModule } from "./services/utils"
     CommisionsModule,
     BuyerModule,
     NewslettersModule,
-    ContactUsModule
+    ContactUsModule,
+    PickupsModule
   ],
   controllers: [AppController],
   providers: [
