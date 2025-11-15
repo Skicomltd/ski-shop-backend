@@ -1,6 +1,7 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { ADDRESS_STATUS } from "../enum/address.status";
 import { address_status } from "../interface/address-status.interface";
+import { User } from "@/modules/users/entity/user.entity";
 
 @Entity()
 export class Address {
@@ -22,8 +23,12 @@ export class Address {
     @Column()
     phoneNumber: string
 
+    @Column()
+    userId: string
 
     @Column({type: 'enum', enum: ADDRESS_STATUS, default: "default"})
     status: address_status
 
+    @ManyToOne(() => User, (user) => user.addressBook)
+    user: User
 }

@@ -1,26 +1,66 @@
 import { Injectable } from '@nestjs/common';
 import { CreateAddressDto } from './dto/create-address.dto';
 import { UpdateAddressDto } from './dto/update-address.dto';
+import { Address } from './entities/address.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
+import { IAddressQuery } from './interface/query-filter.interface';
 
 @Injectable()
-export class AddressesService {
-  create(createAddressDto: CreateAddressDto) {
-    return 'This action adds a new address';
+export class AddressesService implements IService<Address> {
+ constructor(@InjectRepository(Address) private addressRepository: Repository<Address>) {}
+
+
+  async create(data: CreateAddressDto, manager?: EntityManager): Promise<Address> {
+    const repo = manager ? manager.getRepository<Address>(Address) : this.addressRepository
+
+    const createAddress = repo.create({ ...data })
+    return await repo.save(createAddress)
   }
 
-  findAll() {
-    return `This action returns all addresses`;
+
+  async find({limit, page, status, userId}: IAddressQuery): Promise<[Address[], number]> {
+    const query = this.addressRepository.createQueryBuilder('address')
+
+    if (status) {
+      query.andWhere("address.status = :status", { status })
+    }
+
+    if (userId) {
+      query.andWhere("address.userId = :userId", { userId })
+    }
+
+    return await query
+      .take(limit)
+      .skip(page && page > 0 ? (page - 1) * limit : 0)
+      .getManyAndCount()
+                                        
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} address`;
+
+  async findById(id: string): Promise<Address> {
+    return await this.addressRepository.findOne({where: { id }})
   }
 
-  update(id: number, updateAddressDto: UpdateAddressDto) {
-    return `This action updates a #${id} address`;
+  async findOne(filter: FindOptionsWhere<Address>): Promise<Address> {
+    return await this.addressRepository.findOne({ where: filter })
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} address`;
+  async exists(filter: FindOptionsWhere<Address>): Promise<boolean> {
+    return await this.addressRepository.exists({ where: filter })
   }
+
+
+  async update(entity: Address, data: UpdateAddressDto, manager?: EntityManager): Promise<Address> {
+    const repo = manager ? manager.getRepository<Address>(Address) : this.addressRepository
+    const merge = repo.merge(entity, data)
+    return await repo.save(merge)
+  }
+
+  async remove(filter: FindOptionsWhere<Address>): Promise<number> {
+    const deletedResult = await this.addressRepository.delete(filter)
+    return deletedResult.affected  || 0
+  }
+
+ 
 }

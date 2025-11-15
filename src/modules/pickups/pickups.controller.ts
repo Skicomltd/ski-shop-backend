@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UseGuards, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UseGuards, Query, ParseUUIDPipe } from '@nestjs/common';
 import { PickupsService } from './pickups.service';
 import { CreatePickupDto, createPickupSchema } from './dto/create-pickup.dto';
 import { UpdatePickupDto, updatePickupSchema } from './dto/update-pickup.dto';
@@ -43,8 +43,14 @@ export class PickupsController {
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Pickup))
   @UseInterceptors(PickupResponseInterceptor)
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.pickupsService.findOne({id});
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    const pickup = await this.pickupsService.findById(id);
+
+    if (!pickup) {
+      throw new NotFoundException('Pickup not found');
+    }
+
+    return pickup;
   }
 
   
@@ -52,7 +58,7 @@ export class PickupsController {
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Pickup))
   @UseInterceptors(PickupResponseInterceptor)
   @Patch(':id')
-  async update(@Param('id') id: string, @Body(new JoiValidationPipe(updatePickupSchema)) updatePickupDto: UpdatePickupDto) {
+  async update(@Param('id', ParseUUIDPipe) id: string, @Body(new JoiValidationPipe(updatePickupSchema)) updatePickupDto: UpdatePickupDto) {
     const pickup = await this.pickupsService.findById(id)
     if (!pickup) {
       throw new NotFoundException('Pickup not found');
@@ -64,7 +70,7 @@ export class PickupsController {
   @UseGuards(PolicyPickupGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, Pickup))
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.pickupsService.remove({id});
   }
 }
