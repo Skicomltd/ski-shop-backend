@@ -1,0 +1,1 @@
+export const ADDRESS_STATUS = ["default", "inactive"] as const

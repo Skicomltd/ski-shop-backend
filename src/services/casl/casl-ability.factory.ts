@@ -18,6 +18,8 @@ import { Ad } from "@/modules/ads/entities/ad.entity"
 import { Coupon } from "@/modules/coupons/entities/coupon.entity"
 import { Voucher } from "@/modules/vouchers/entities/voucher.entity"
 import { Setting } from "@/modules/settings/entities/setting.entity"
+import { Pickup } from "@/modules/pickups/entities/pickup.entity"
+import { Address } from "@/modules/addresses/entities/address.entity"
 
 type Subjects = InferSubjects<
   | typeof User
@@ -36,6 +38,8 @@ type Subjects = InferSubjects<
   | typeof Coupon
   | typeof Voucher
   | typeof Setting
+  | typeof Pickup
+  | typeof Address
   | "REVENUE"
   | "VENDOR"
   | "PROFILE"
@@ -569,4 +573,53 @@ export class CaslAbilityFactory {
 
     return ability
   }
+
+
+  createAbilityForPickup(user: User): AppAbility {
+  const {can, cannot, build} = new AbilityBuilder(createMongoAbility)
+
+  if (user.role === UserRoleEnum.Admin) {
+    can(Action.Manage, Pickup)
+  } else {
+    can(Action.Read, Pickup)
+    cannot(Action.Create, Pickup)
+    cannot(Action.Update, Pickup)
+    cannot(Action.Delete, Pickup)
+  }
+
+  const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
 }
+
+
+  createAbilityForAddress(user: User): AppAbility {
+  const {can, cannot, build} = new AbilityBuilder(createMongoAbility)
+  if (user.role === UserRoleEnum.Customer) {
+    can(Action.Read, Address, { userId: user.id})
+    can(Action.Create, Address, { userId: user.id})
+    can(Action.Update, Address, { userId: user.id})
+    can(Action.Delete, Address, { userId: user.id})
+  } else {
+    can(Action.Read, Address)
+    cannot(Action.Create, Address)
+    cannot(Action.Update, Address)
+    cannot(Action.Delete, Address)
+  }
+
+
+   const ability = build({
+      detectSubjectType: (item) => {
+        return item.constructor as ExtractSubjectType<Subjects>
+      }
+    }) as AppAbility
+
+    return ability
+  }
+}
+
+
