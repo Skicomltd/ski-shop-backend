@@ -58,8 +58,9 @@ import { ApiException } from "@/exceptions/api.exception"
 import { EmailValidationMail, PasswordRestMail } from "@/mails"
 import { HelpersService, TransactionHelper } from "@/services/utils"
 import { MailService } from "@/services/mail"
-import { FileSystemService, FileUploadDto } from "@/services/filesystem"
 import { PaymentsService } from "@/services/payments"
+import { FileSystemService } from "@/services/filesystem/filesystem.service"
+import { FileUploadDto } from "@/services/filesystem/interfaces/filesystem.interface"
 
 @Controller("auth")
 export class AuthController {
