@@ -1,8 +1,9 @@
 import { Request } from "express"
 import { map, Observable } from "rxjs"
-import { Controller, Get, MessageEvent, Param, ParseUUIDPipe, Patch, Req, Sse } from "@nestjs/common"
+import { Controller, Get, MessageEvent, Param, ParseUUIDPipe, Patch, Query, Req, Sse } from "@nestjs/common"
 
 import { NotificationsService } from "@services/notifications/notifications.service"
+import { IQueryFilter } from "./interfaces/query-filter.interface"
 
 @Controller("notifications")
 export class NotificationsController {
@@ -14,9 +15,10 @@ export class NotificationsController {
   }
 
   @Get("")
-  async find(@Req() req: Request) {
+  async find(@Req() req: Request, @Query() query: IQueryFilter) {
     const user = req.user
-    return await this.notificationsService.find({ notifiableId: user.id })
+    const isRead = query.isRead || false
+    return await this.notificationsService.find({ notifiableId: user.id, isRead })
   }
 
   @Patch("read-all")
