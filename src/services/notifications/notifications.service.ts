@@ -56,6 +56,52 @@ export class NotificationsService {
     this.eventEmitter.emit(NOTIFICATION_EVENT, event)
   }
 
+  // ---------- READ / MARK FUNCTIONALITIES ----------
+
+  public async markAsRead(notificationId: string, notifiableId: string) {
+    const notification = await this.notificationRepository.findOne({
+      where: { id: notificationId, notifiableId }
+    })
+
+    if (!notification) return null
+
+    if (!notification.isRead) {
+      notification.isRead = true
+      await this.notificationRepository.save(notification)
+    }
+
+    return notification
+  }
+
+  public async markAsUnread(notificationId: string, notifiableId: string) {
+    const notification = await this.notificationRepository.findOne({
+      where: { id: notificationId, notifiableId }
+    })
+
+    if (!notification) return null
+
+    if (notification.isRead) {
+      notification.isRead = false
+      await this.notificationRepository.save(notification)
+    }
+
+    return notification
+  }
+
+  // ---------- BULK MARK ----------
+
+  public async markAllAsRead(notifiableId: string) {
+    await this.notificationRepository.update({ notifiableId, isRead: false }, { isRead: true })
+
+    return { success: true }
+  }
+
+  public async markAllAsUnread(notifiableId: string) {
+    await this.notificationRepository.update({ notifiableId, isRead: true }, { isRead: false })
+
+    return { success: true }
+  }
+
   // ---------- INTERNAL EVENT LISTENER (encapsulated) ----------
   @OnEvent(NOTIFICATION_EVENT, { async: true })
   protected async onCreateNotification(event: NotificationContract) {
@@ -81,6 +127,7 @@ export class NotificationsService {
     const { topic = event.notifiable.id, data } = event.toBroadCast()
 
     const payload: INotificationPayload = {
+      id: "",
       type: event.type,
       data,
       timestamp: new Date().toISOString()

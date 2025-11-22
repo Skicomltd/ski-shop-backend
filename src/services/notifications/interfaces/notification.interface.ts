@@ -10,6 +10,7 @@
 export type NotificationChannel = "mail" | "sms" | "push" | "broadcast" | "database"
 
 export interface INotificationPayload {
+  id: string
   type: string
   data: NotificationData
   timestamp: string

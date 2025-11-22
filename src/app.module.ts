@@ -43,6 +43,8 @@ import { ContactUsModule } from "./modules/contact-us/contact-us.module"
 import { QueuesModule } from "./queues"
 import { ServicesModule } from "./services/services.module"
 import { UtilsModule } from "./services/utils"
+import { NotificationsApiModule } from "./modules/notifications/notifications.module"
+import { EventsModule } from "./events/events.module"
 @Module({
   imports: [
     UserModule,
@@ -78,7 +80,9 @@ import { UtilsModule } from "./services/utils"
     CommisionsModule,
     BuyerModule,
     NewslettersModule,
-    ContactUsModule
+    ContactUsModule,
+    NotificationsApiModule,
+    EventsModule
   ],
   controllers: [AppController],
   providers: [
