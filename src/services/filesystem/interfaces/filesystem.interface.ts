@@ -1,3 +1,5 @@
+import { FIleSystemDriverOption } from "./config.interface"
+
 // Base service contract — every driver strategy must implement this
 export interface IFileSystemService {
   upload(file: FileUploadDto): Promise<string> // return file URL or identifier
@@ -6,6 +8,10 @@ export interface IFileSystemService {
   zipFolder(folderPath: string): Promise<Buffer>
   update(path: string, file: FileUploadDto): Promise<string>
   delete(path: string): Promise<void>
+}
+
+export interface FilesystemStrategy extends IFileSystemService {
+  setConfig(options: FIleSystemDriverOption): IFileSystemService
 }
 
 // DTO for uploads, flexible enough for local (filePath) or remote (buffer) sources
