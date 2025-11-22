@@ -3,24 +3,23 @@ import * as path from "path"
 import * as mime from "mime-types"
 import archiver from "archiver"
 import { WritableStreamBuffer } from "stream-buffers"
-import { Inject, Injectable } from "@nestjs/common"
+import { HttpException, Injectable } from "@nestjs/common"
 
-import { FileSystemModuleOptions, LocalFsOptions } from "../interfaces/config.interface"
-import { FileMetada, FileUploadDto, IFileSystemService } from "../interfaces/filesystem.interface"
-import { CONFIG_OPTIONS } from "../entities/config"
-import { ApiException } from "@/exceptions/api.exception"
+import { LocalFsOptions } from "../../interfaces/config.interface"
+import { FileMetada, FileUploadDto, IFileSystemService, FilesystemStrategy } from "../../interfaces/filesystem.interface"
 
 @Injectable()
-export class LocalFsStrategy implements IFileSystemService {
+export class LocalFsStrategy implements FilesystemStrategy {
   private config: LocalFsOptions
 
-  constructor(@Inject(CONFIG_OPTIONS) protected fsOptions: FileSystemModuleOptions) {
-    this.config = fsOptions.clients.local
+  setConfig(config: LocalFsOptions): IFileSystemService {
+    this.config = config
+    return this
   }
 
   async upload(file: FileUploadDto): Promise<string> {
     const error = this.checkConfig(this.config)
-    if (error) throw new ApiException(error, 500)
+    if (error) throw new HttpException(error, 500)
 
     if (!file.filePath) {
       throw new Error("File path is required in FileUploadDto")
@@ -42,7 +41,7 @@ export class LocalFsStrategy implements IFileSystemService {
 
   async get(path: string): Promise<Buffer> {
     const error = this.checkConfig(this.config)
-    if (error) throw new ApiException(error, 500)
+    if (error) throw new HttpException(error, 500)
 
     const filePath = this.getFullPath(path)
     return fs.promises.readFile(filePath)
@@ -50,12 +49,12 @@ export class LocalFsStrategy implements IFileSystemService {
 
   async getMetaData(path: string): Promise<FileMetada> {
     const error = this.checkConfig(this.config)
-    if (error) throw new ApiException(error, 500)
+    if (error) throw new HttpException(error, 500)
 
     const fullPath = this.getFullPath(path)
 
     if (!fs.existsSync(fullPath)) {
-      throw new ApiException(`File not found at path: ${fullPath}`, 404)
+      throw new HttpException(`File not found at path: ${fullPath}`, 404)
     }
 
     const stats = await fs.promises.stat(fullPath)
@@ -71,12 +70,12 @@ export class LocalFsStrategy implements IFileSystemService {
 
   async zipFolder(folderPath: string): Promise<Buffer> {
     const error = this.checkConfig(this.config)
-    if (error) throw new ApiException(error, 500)
+    if (error) throw new HttpException(error, 500)
 
     const fullFolderPath = this.getFullPath(folderPath)
 
     if (!fs.existsSync(fullFolderPath)) {
-      throw new ApiException(`Folder not found at path: ${fullFolderPath}`, 404)
+      throw new HttpException(`Folder not found at path: ${fullFolderPath}`, 404)
     }
 
     const output = new WritableStreamBuffer({
@@ -91,18 +90,18 @@ export class LocalFsStrategy implements IFileSystemService {
 
       archive.on("error", (err) => {
         console.error("Archiver error:", err)
-        reject(new ApiException("Failed to create zip", 500))
+        reject(new HttpException("Failed to create zip", 500))
       })
 
       output.on("finish", () => {
         const buffer = output.getContents()
-        if (!buffer) return reject(new ApiException("Zip buffer is empty", 500))
+        if (!buffer) return reject(new HttpException("Zip buffer is empty", 500))
         resolve(buffer)
       })
 
       output.on("error", (err) => {
         console.error("Output error:", err)
-        reject(new ApiException("Failed to write zip", 500))
+        reject(new HttpException("Failed to write zip", 500))
       })
 
       const addFilesRecursively = (dir: string, base: string) => {
@@ -127,7 +126,7 @@ export class LocalFsStrategy implements IFileSystemService {
 
   async update(path: string, file: FileUploadDto): Promise<string> {
     const error = this.checkConfig(this.config)
-    if (error) throw new ApiException(error, 500)
+    if (error) throw new HttpException(error, 500)
 
     await this.delete(path)
     return this.upload(file)
@@ -135,7 +134,7 @@ export class LocalFsStrategy implements IFileSystemService {
 
   async delete(path: string): Promise<void> {
     const error = this.checkConfig(this.config)
-    if (error) throw new ApiException(error, 500)
+    if (error) throw new HttpException(error, 500)
 
     const filePath = this.getFullPath(path)
     if (fs.existsSync(filePath)) {

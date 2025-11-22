@@ -4,7 +4,7 @@ The **FileSystemModule** provides a unified interface to work with multiple stor
 
 - Local filesystem
 - AWS S3
-- DigitalOcean Spaces
+- Digital Ocean Spaces
 - Google Cloud Storage
 - Cloudinary
 
@@ -147,7 +147,7 @@ export class MyService {
 
 ## Features
 
-- **Multiple Storage Drivers**: Local, S3, Spaces, Google, Cloudinary
+- **Multiple Storage Drivers**: Local, S3, Spaces (Digital Ocean), Google, Cloudinary
 - **Unified API**: upload, get, getMetaData, update, delete, zipFolder
 - **Default Driver**: Can be configured via `default` property
 - **Strategy Injection**: Each driver has its own strategy class
@@ -200,5 +200,5 @@ await mainFs.upload(file)
 
 - Ensure environment variables are properly set for each driver.
 - Local driver requires write permissions on the specified `root` directory.
-- DigitalOcean and AWS S3 use the same `S3Client` interface.
+- Spaces and AWS S3 use the same `S3Client` interface.
 - Cloudinary and Google have provider-specific SDKs.

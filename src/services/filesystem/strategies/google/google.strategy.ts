@@ -2,26 +2,23 @@ import * as fs from "fs"
 import archiver from "archiver"
 import { WritableStreamBuffer } from "stream-buffers"
 import { Storage, Bucket } from "@google-cloud/storage"
-import { HttpException, Inject, Injectable } from "@nestjs/common"
+import { HttpException, Injectable } from "@nestjs/common"
 
-import { CONFIG_OPTIONS } from "../entities/config"
-import { FileMetada, FileUploadDto, IFileSystemService } from "../interfaces/filesystem.interface"
-import { FileSystemModuleOptions, GoogleStorageOptions } from "../interfaces/config.interface"
+import { GoogleStorageOptions } from "../../interfaces/config.interface"
+import { FileMetada, FileUploadDto, IFileSystemService, FilesystemStrategy } from "../../interfaces/filesystem.interface"
 
 @Injectable()
-export class GoogleStorageStrategy implements IFileSystemService {
+export class GoogleStorageStrategy implements FilesystemStrategy {
   private storage: Storage
   private bucket: Bucket
   private bucketName: string
   private publicUrl?: string
   private config: GoogleStorageOptions
 
-  constructor(@Inject(CONFIG_OPTIONS) protected readonly fsOptions: FileSystemModuleOptions) {
-    const config = fsOptions.clients.google
-
+  setConfig(config: GoogleStorageOptions): IFileSystemService {
+    this.config = config
     this.bucketName = config.bucket
-    this.publicUrl = config.publicUrl
-
+    // this.publicUrl = config.publicUrl
     this.storage = new Storage({
       projectId: config.projectId,
       keyFilename: config.keyFilename
@@ -30,6 +27,12 @@ export class GoogleStorageStrategy implements IFileSystemService {
     if (this.bucketName) {
       this.bucket = this.storage.bucket(this.bucketName)
     }
+
+    if (config.publicUrl) {
+      this.publicUrl = config.publicUrl
+    }
+
+    return this
   }
 
   async upload(file: FileUploadDto): Promise<string> {
@@ -53,13 +56,14 @@ export class GoogleStorageStrategy implements IFileSystemService {
 
       return new Promise((resolve, reject) => {
         stream.on("error", (error) => {
-          console.error("Google upload error:", error)
-          reject(new HttpException(`Failed to upload file to Google`, 500))
+          reject(new HttpException(`Failed to upload file to Google`, 500, { cause: error }))
         })
 
         stream.on("finish", async () => {
           await blob.makePublic()
-          const publicUrl = this.publicUrl ? `${this.publicUrl}/${destination}` : `https://storage.googleapis.com/${this.bucketName}/${destination}`
+          const publicUrl = this.publicUrl
+            ? `${this.publicUrl}/${this.bucketName}/${destination}`
+            : `https://storage.googleapis.com/${this.bucketName}/${destination}`
 
           resolve(publicUrl)
         })
@@ -71,8 +75,8 @@ export class GoogleStorageStrategy implements IFileSystemService {
           readStream.pipe(stream)
         }
       })
-    } catch (error: any) {
-      throw new HttpException(`Failed to upload to Google: ${error.message}`, 500)
+    } catch (error) {
+      throw new HttpException(`Failed to upload to Google`, 500, { cause: error })
     }
   }
 
@@ -83,8 +87,8 @@ export class GoogleStorageStrategy implements IFileSystemService {
     try {
       const [fileContent] = await this.bucket.file(path).download()
       return fileContent
-    } catch (error: any) {
-      throw new HttpException(`Failed to download file from Google Storage: ${error.message}`, 500)
+    } catch (error) {
+      throw new HttpException(`Failed to download file from Google Storage`, 500, { cause: error })
     }
   }
 
@@ -92,14 +96,17 @@ export class GoogleStorageStrategy implements IFileSystemService {
     const error = this.checkConfig(this.config)
     if (error) throw new HttpException(error, 500)
 
-    const [metadata] = await this.bucket.file(path).getMetadata()
-
-    return {
-      name: metadata.name,
-      size: Number(metadata.size) || 0,
-      mimeType: metadata.contentType,
-      url: this.publicUrl ? `${this.publicUrl}/${path}` : `https://storage.googleapis.com/${this.bucketName}/${path}`,
-      lastModified: metadata.timeStorageClassUpdated ? new Date(metadata.timeStorageClassUpdated) : undefined
+    try {
+      const [metadata] = await this.bucket.file(path).getMetadata()
+      return {
+        name: metadata.name,
+        size: Number(metadata.size) || 0,
+        mimeType: metadata.contentType,
+        url: this.publicUrl ? `${this.publicUrl}/${path}` : `https://storage.googleapis.com/${this.bucketName}/${path}`,
+        lastModified: metadata.timeStorageClassUpdated ? new Date(metadata.timeStorageClassUpdated) : undefined
+      }
+    } catch (error) {
+      throw new HttpException("Failed to Fetch File metadata", 500, { cause: error })
     }
   }
 
@@ -118,8 +125,7 @@ export class GoogleStorageStrategy implements IFileSystemService {
       archive.pipe(output)
 
       archive.on("error", (err) => {
-        console.error("Archiver error:", err)
-        reject(new HttpException("Failed to zip folder", 500))
+        reject(new HttpException("Failed to zip folder", 500, { cause: err }))
       })
 
       output.on("finish", () => {
@@ -132,7 +138,7 @@ export class GoogleStorageStrategy implements IFileSystemService {
 
       output.on("error", (err) => {
         console.error("Output buffer error:", err)
-        reject(new HttpException("Failed to create zip", 500))
+        reject(new HttpException("Failed to create zip", 500, { cause: err }))
       })
 
       const fileStream = this.bucket.getFilesStream({ prefix: folderPath })
@@ -153,13 +159,12 @@ export class GoogleStorageStrategy implements IFileSystemService {
         try {
           await archive.finalize()
         } catch (err) {
-          reject(new HttpException("Error finalizing archive", 500))
+          reject(new HttpException("Error finalizing archive", 500, { cause: err }))
         }
       })
 
       fileStream.on("error", (err) => {
-        console.error("Google file stream error:", err)
-        reject(new HttpException("Failed to read files from folder", 500))
+        reject(new HttpException("Failed to read files from folder", 500, { cause: err }))
       })
     })
   }
@@ -168,8 +173,12 @@ export class GoogleStorageStrategy implements IFileSystemService {
     const error = this.checkConfig(this.config)
     if (error) throw new HttpException(error, 500)
 
-    await this.delete(path)
-    return this.upload(file)
+    try {
+      await this.delete(path)
+      return this.upload(file)
+    } catch (error) {
+      throw new HttpException("Failed to update file from Google Storage", 500, { cause: error })
+    }
   }
 
   async delete(path: string): Promise<void> {

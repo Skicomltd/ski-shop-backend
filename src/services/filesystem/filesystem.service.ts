@@ -1,16 +1,16 @@
 import { HttpException, Inject, Injectable } from "@nestjs/common"
 
 import { CONFIG_OPTIONS } from "./entities/config"
-import { FileMetada, FileUploadDto, IFileSystemService } from "./interfaces/filesystem.interface"
+import { FileMetada, FilesystemStrategy, FileUploadDto, IFileSystemService } from "./interfaces/filesystem.interface"
 import { FileSystemDefault, FileSystemDriver, FileSystemModuleOptions, IFileSystemClients } from "./interfaces/config.interface"
 
 import { FILESYSTEM_STRATEGY } from "./entities/strategies"
 
-import { S3Strategy } from "./strategies/aws.strategy"
-import { LocalFsStrategy } from "./strategies/local.strategy"
-import { CloudinaryStrategy } from "./strategies/cloudinary.service"
-import { GoogleStorageStrategy } from "./strategies/google.strategy"
-import { DigitalOceanStrategy } from "./strategies/digitalocean.strategy"
+import { S3Strategy } from "./strategies/s3/s3.strategy"
+import { LocalFsStrategy } from "./strategies/local/local.strategy"
+import { CloudinaryStrategy } from "./strategies/cloudinary/cloudinary.service"
+import { SpacesStrategy } from "./strategies/spaces/spaces.strategy"
+import { GoogleStorageStrategy } from "./strategies/google/google.strategy"
 
 @Injectable()
 export class FileSystemService implements IFileSystemService {
@@ -21,7 +21,7 @@ export class FileSystemService implements IFileSystemService {
   private clients: IFileSystemClients
 
   // Maps each driver to its corresponding service implementation
-  private strategyMap: Record<FileSystemDriver, IFileSystemService>
+  private strategyMap: Record<FileSystemDriver, FilesystemStrategy>
 
   constructor(
     @Inject(CONFIG_OPTIONS)
@@ -30,8 +30,8 @@ export class FileSystemService implements IFileSystemService {
     @Inject(FILESYSTEM_STRATEGY.aws)
     private readonly s3: S3Strategy,
 
-    @Inject(FILESYSTEM_STRATEGY.digitalOcean)
-    private readonly spaces: DigitalOceanStrategy,
+    @Inject(FILESYSTEM_STRATEGY.spaces)
+    private readonly spaces: SpacesStrategy,
 
     @Inject(FILESYSTEM_STRATEGY.google)
     private readonly google: GoogleStorageStrategy,
@@ -90,17 +90,17 @@ export class FileSystemService implements IFileSystemService {
   }
 
   // --- Strategy Resolver ---
-  getFileSystem(driver: FileSystemDriver): IFileSystemService {
-    const options = this.clients[driver]
+  getFileSystem(client: string): IFileSystemService {
+    const options = this.clients[client]
 
     if (!options) {
-      throw new HttpException(`FileSystem ${driver} not configured`, 500)
+      throw new HttpException(`FileSystem ${client} not configured`, 500)
     }
 
-    const strategy = this.strategyMap[driver]
+    const strategy = this.strategyMap[options.driver]
     if (!strategy) throw new HttpException(`Invalid filesystem`, 500)
 
-    return strategy
+    return strategy.setConfig(options)
   }
 
   // --- Default Strategy Helper ---

@@ -1,22 +1,6 @@
 import { ModuleMetadata } from "@nestjs/common"
 
-// Top-level options that the FilesystemModule will consume
-export interface FileSystemModuleOptions {
-  clients: IFileSystemClients // map of configured storage clients
-  default: FileSystemDefault // the default storage driver key
-}
-
-// Shape of all supported storage clients
-export type IFileSystemClients = {
-  local: LocalFsOptions
-  s3: S3Options
-  spaces: DOSpacesOptions
-  google: GoogleStorageOptions
-  cloudinary: CloudinaryStorageOptions
-}
-
 // --- Individual driver option contracts ---
-
 export type LocalFsOptions = {
   driver: "local"
   root: string // absolute path to local storage root
@@ -31,7 +15,7 @@ export type S3Options = {
   secret: string
 }
 
-export type DOSpacesOptions = {
+export type SpacesOptions = {
   driver: "spaces"
   key: string
   secret: string
@@ -58,10 +42,19 @@ export type CloudinaryStorageOptions = {
 export type FileSystemDriver = "local" | "s3" | "google" | "spaces" | "cloudinary"
 
 // Union of all possible driver config objects
-export type FIleSystemDriverOption = LocalFsOptions | DOSpacesOptions | GoogleStorageOptions | S3Options | CloudinaryStorageOptions
+export type FIleSystemDriverOption = LocalFsOptions | SpacesOptions | GoogleStorageOptions | S3Options | CloudinaryStorageOptions
 
 // Default client must be one of the defined keys
-export type FileSystemDefault = keyof IFileSystemClients
+export type FileSystemDefault = string
+
+// Top-level options that the FilesystemModule will consume
+export interface FileSystemModuleOptions {
+  clients: IFileSystemClients // map of configured storage clients
+  default: FileSystemDefault // the default storage driver key
+}
+
+// Shape of all supported storage clients
+export type IFileSystemClients = Record<string, FIleSystemDriverOption>
 
 // Async module registration options
 export interface FileSystemModuleAsynOptions extends Pick<ModuleMetadata, "imports"> {

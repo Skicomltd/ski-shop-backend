@@ -1,75 +1,67 @@
 import * as fs from "fs"
 import archiver from "archiver"
 import { WritableStreamBuffer } from "stream-buffers"
-import { HttpException, Inject, Injectable } from "@nestjs/common"
-import { DeleteObjectCommand, GetObjectCommand, ListObjectsV2Command, ObjectCannedACL, PutObjectCommand, S3Client } from "@aws-sdk/client-s3"
+import { HttpException, Injectable } from "@nestjs/common"
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand, S3Client, ObjectCannedACL, ListObjectsV2Command } from "@aws-sdk/client-s3"
 
-import { CONFIG_OPTIONS } from "../entities/config"
-import { FileSystemModuleOptions, S3Options } from "../interfaces/config.interface"
-import { FileMetada, FileUploadDto, IFileSystemService } from "../interfaces/filesystem.interface"
+import { SpacesOptions } from "../../interfaces/config.interface"
+import { FileMetada, FileUploadDto, IFileSystemService, FilesystemStrategy } from "../../interfaces/filesystem.interface"
 
 @Injectable()
-export class S3Strategy implements IFileSystemService {
-  private config: S3Options
+export class SpacesStrategy implements FilesystemStrategy {
   private client: S3Client
   private endpoint: string
+  private config: SpacesOptions
 
-  constructor(@Inject(CONFIG_OPTIONS) protected fsOptions: FileSystemModuleOptions) {
-    this.config = fsOptions.clients.s3
+  setConfig(config: SpacesOptions): IFileSystemService {
+    this.config = config
+    this.endpoint = `https://${this.config.region}.digitaloceanspaces.com`
     this.client = new S3Client({
       credentials: {
-        accessKeyId: this.config.key,
-        secretAccessKey: this.config.secret
+        accessKeyId: config.key,
+        secretAccessKey: config.secret
       },
-      endpoint: `https://s3.${fsOptions.clients.s3.region}.amazonaws.com`,
-      region: fsOptions.clients.s3.region
+      endpoint: this.endpoint,
+      region: config.region,
+      forcePathStyle: true
     })
-
-    this.endpoint = `https://${fsOptions.clients.s3.bucket}.s3.${fsOptions.clients.s3.region}.amazonaws.com`
+    return this
   }
 
   async upload(file: FileUploadDto): Promise<string> {
     const error = this.checkConfig(this.config)
     if (error) throw new HttpException(error, 500)
 
+    if (!file.filePath && !file.buffer) {
+      throw new HttpException("Valid file required (buffer or filePath)", 500)
+    }
+
+    if (file.filePath && !fs.existsSync(file.filePath)) {
+      throw new HttpException(`File does not exist at path: ${file.filePath}`, 500)
+    }
+
     try {
-      if (!file.filePath && !file.buffer) {
-        throw new HttpException("Valid file required (either buffer or filePath)", 400)
-      }
-
-      let body: Buffer | fs.ReadStream
-
-      if (file.buffer) {
-        body = file.buffer
-      } else {
-        if (!fs.existsSync(file.filePath)) {
-          throw new HttpException(`File does not exist at path: ${file.filePath}`, 404)
-        }
-
-        body = fs.createReadStream(file.filePath)
-      }
-
-      const key = file.destination
+      const body = file.buffer || fs.createReadStream(file.filePath)
 
       await this.client.send(
         new PutObjectCommand({
           Bucket: this.config.bucket,
-          Key: key,
+          Key: file.destination,
           Body: body,
-          ACL: "public-read" as ObjectCannedACL,
-          ContentType: file.mimetype
+          ContentType: file.mimetype,
+          ACL: "public-read" as ObjectCannedACL
         })
       )
 
-      return `${this.endpoint}/${key}`
+      return `${this.endpoint}/${this.config.bucket}/${file.destination}`
     } catch (error) {
-      if (error.name === "NoSuchBucket") {
-        throw new HttpException(`Bucket ${this.config.bucket} does not exist`, 500)
+      if (error.name === `NoSuchBucket`) {
+        throw new HttpException(`No bucket`, 500)
       }
       if (error.name === "AccessDenied") {
-        throw new HttpException("Access denied to AWS. Check your credentials.", 500)
+        throw new HttpException(`Access denied`, 500)
       }
-      throw new HttpException(`Failed to upload file to AWS: ${error.message}`, 500)
+      throw new HttpException(error.message, 500)
     }
   }
 
@@ -77,14 +69,21 @@ export class S3Strategy implements IFileSystemService {
     const error = this.checkConfig(this.config)
     if (error) throw new HttpException(error, 500)
 
-    const response = await this.client.send(
-      new GetObjectCommand({
-        Bucket: this.config.bucket,
-        Key: path
-      })
-    )
+    try {
+      const response = await this.client.send(
+        new GetObjectCommand({
+          Bucket: this.config.bucket,
+          Key: this.getKeyFromUrl(path)
+        })
+      )
+      return Buffer.from(await response.Body.transformToByteArray())
+    } catch (error) {
+      if (error.name === `NoSuchKey`) {
+        throw new HttpException(`not found`, 404)
+      }
 
-    return Buffer.from(await response.Body.transformToByteArray())
+      throw new HttpException(error.message, 500)
+    }
   }
 
   async getMetaData(path: string): Promise<FileMetada> {
@@ -161,12 +160,12 @@ export class S3Strategy implements IFileSystemService {
     await this.client.send(
       new DeleteObjectCommand({
         Bucket: this.config.bucket,
-        Key: path
+        Key: this.getKeyFromUrl(path)
       })
     )
   }
 
-  private checkConfig(options: S3Options) {
+  private checkConfig(options: SpacesOptions) {
     if (!options.driver) {
       return "Invalid driver"
     }
@@ -184,5 +183,9 @@ export class S3Strategy implements IFileSystemService {
     }
 
     return ""
+  }
+
+  private getKeyFromUrl(url: string): string {
+    return url.replace(`${this.endpoint}/${this.config.bucket}/`, "")
   }
 }

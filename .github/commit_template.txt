@@ -1,0 +1,29 @@
+# <type>(<scope>): <short summary>
+# -------------------------------------------------------------------
+# Allowed <type> values:
+#   feat, fix, docs, style, refactor, perf, test, build, chore
+#
+# <scope> should be the module affected (e.g., auth, users, cart)
+# Subject MUST be ≤ 50 characters and in imperative mood.
+#
+# Example:
+# feat(auth): add Google login support
+#
+# After the summary, leave an empty line and describe the change.
+# Wrap lines at ~72 characters.
+
+<type>(<scope>): <short summary>
+
+# Why is this change needed?
+# - Write a short explanation of the problem.
+#
+# What does this change do?
+# - Describe the solution.
+#
+# Anything else reviewers should know?
+# - List breaking changes
+# - Mention migrations or environment variable changes
+
+# Footer (optional)
+# Closes #<issue-number>
+# Related to #<issue-number>
