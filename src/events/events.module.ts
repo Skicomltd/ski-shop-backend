@@ -1,5 +1,5 @@
-import { Module } from '@nestjs/common'
-import { EventEmitterModule } from '@nestjs/event-emitter'
+import { Module } from "@nestjs/common"
+import { EventEmitterModule } from "@nestjs/event-emitter"
 
 @Module({
   imports: [
@@ -7,7 +7,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter'
       // set this to `true` to use wildcards
       wildcard: false,
       // the delimiter used to segment namespaces
-      delimiter: '.',
+      delimiter: ".",
       // set this to `true` if you want to emit the newListener event
       newListener: false,
       // set this to `true` if you want to emit the removeListener event
