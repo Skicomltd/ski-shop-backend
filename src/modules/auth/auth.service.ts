@@ -48,10 +48,9 @@ export class AuthService {
     return true
   }
 
-  async validateEmail(email: string) {
+  async validateEmail(email: string): Promise<User | null> {
     const user = await this.userService.findOne({ email })
-    if (!user) throw new NotFoundException("user not found")
-
+    if (!user) return null
     return user
   }
 

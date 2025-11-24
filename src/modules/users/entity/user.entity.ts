@@ -66,7 +66,7 @@ export class User {
   isPhoneNumberVerified: boolean
 
   @Column({ type: "enum", enum: USER_STATUS, default: "inactive" })
-  status: userStatus
+  status: userStatus // Both email and phone number are verified
 
   @CreateDateColumn()
   createdAt: Date
