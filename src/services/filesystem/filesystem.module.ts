@@ -4,11 +4,11 @@ import { CONFIG_OPTIONS } from "./entities/config"
 import { FileSystemService } from "./filesystem.service"
 import { FileSystemModuleAsynOptions, FileSystemModuleOptions } from "./interfaces/config.interface"
 import { FILESYSTEM_STRATEGY } from "./entities/strategies"
-import { LocalFsStrategy } from "./strategies/local.strategy"
-import { S3Strategy } from "./strategies/aws.strategy"
-import { GoogleStorageStrategy } from "./strategies/google.strategy"
-import { DigitalOceanStrategy } from "./strategies/digitalocean.strategy"
-import { CloudinaryStrategy } from "./strategies/cloudinary.service"
+import { LocalFsStrategy } from "./strategies/local/local.strategy"
+import { S3Strategy } from "./strategies/s3/s3.strategy"
+import { GoogleStorageStrategy } from "./strategies/google/google.strategy"
+import { SpacesStrategy } from "./strategies/spaces/spaces.strategy"
+import { CloudinaryStrategy } from "./strategies/cloudinary/cloudinary.service"
 
 @Module({})
 export class FileSystemModule {
@@ -33,8 +33,8 @@ export class FileSystemModule {
           useClass: GoogleStorageStrategy
         },
         {
-          provide: FILESYSTEM_STRATEGY.digitalOcean,
-          useClass: DigitalOceanStrategy
+          provide: FILESYSTEM_STRATEGY.spaces,
+          useClass: SpacesStrategy
         },
         {
           provide: FILESYSTEM_STRATEGY.cloudinary,
@@ -48,7 +48,7 @@ export class FileSystemModule {
         FILESYSTEM_STRATEGY.local,
         FILESYSTEM_STRATEGY.aws,
         FILESYSTEM_STRATEGY.google,
-        FILESYSTEM_STRATEGY.digitalOcean,
+        FILESYSTEM_STRATEGY.spaces,
         FILESYSTEM_STRATEGY.cloudinary
       ]
     }
@@ -77,8 +77,8 @@ export class FileSystemModule {
           useClass: GoogleStorageStrategy
         },
         {
-          provide: FILESYSTEM_STRATEGY.digitalOcean,
-          useClass: DigitalOceanStrategy
+          provide: FILESYSTEM_STRATEGY.spaces,
+          useClass: SpacesStrategy
         },
         {
           provide: FILESYSTEM_STRATEGY.cloudinary,
@@ -92,7 +92,7 @@ export class FileSystemModule {
         FILESYSTEM_STRATEGY.local,
         FILESYSTEM_STRATEGY.aws,
         FILESYSTEM_STRATEGY.google,
-        FILESYSTEM_STRATEGY.digitalOcean,
+        FILESYSTEM_STRATEGY.spaces,
         FILESYSTEM_STRATEGY.cloudinary
       ]
     }

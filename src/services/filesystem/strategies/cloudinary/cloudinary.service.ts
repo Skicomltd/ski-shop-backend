@@ -2,29 +2,17 @@ import * as fs from "fs"
 import axios from "axios"
 import archiver from "archiver"
 import { Readable } from "stream"
-import { HttpException, Inject, Injectable } from "@nestjs/common"
+import { WritableStreamBuffer } from "stream-buffers"
+import { HttpException, Injectable } from "@nestjs/common"
 import { v2 as cloudinary, UploadApiResponse, UploadApiErrorResponse } from "cloudinary"
 
-import { CONFIG_OPTIONS } from "../entities/config"
-import { WritableStreamBuffer } from "stream-buffers"
-import { FileSystemModuleOptions } from "../interfaces/config.interface"
-import { FileMetada, FileUploadDto, IFileSystemService } from "../interfaces/filesystem.interface"
+import { CloudinaryStorageOptions } from "../../interfaces/config.interface"
+import { FileMetada, FilesystemStrategy, FileUploadDto, IFileSystemService } from "../../interfaces/filesystem.interface"
 
 export type CloudinaryType = UploadApiErrorResponse | UploadApiResponse
 
 @Injectable()
-export class CloudinaryStrategy implements IFileSystemService {
-  constructor(
-    @Inject(CONFIG_OPTIONS)
-    protected fs: FileSystemModuleOptions
-  ) {
-    cloudinary.config({
-      cloud_name: fs.clients.cloudinary.cloudName,
-      api_key: fs.clients.cloudinary.apiKey,
-      api_secret: fs.clients.cloudinary.apiSecret
-    })
-  }
-
+export class CloudinaryStrategy implements FilesystemStrategy {
   async upload(file: FileUploadDto): Promise<string> {
     try {
       if (!fs.existsSync(file.filePath)) {
@@ -42,9 +30,16 @@ export class CloudinaryStrategy implements IFileSystemService {
     }
   }
 
-  async get(publicId: string): Promise<any> {
-    // Cloudinary does not provide direct file download via SDK
-    return cloudinary.url(publicId)
+  async get(publicId: string): Promise<Buffer> {
+    const url = cloudinary.url(publicId, {
+      secure: true
+    })
+
+    const response = await axios.get(url, {
+      responseType: "arraybuffer"
+    })
+
+    return Buffer.from(response.data)
   }
 
   async getMetaData(path: string): Promise<FileMetada> {
@@ -111,5 +106,15 @@ export class CloudinaryStrategy implements IFileSystemService {
     } catch (error) {
       throw new HttpException(`Failed to delete file from Cloudinary: ${error.message}`, 500)
     }
+  }
+
+  setConfig(config: CloudinaryStorageOptions): IFileSystemService {
+    cloudinary.config({
+      cloud_name: config.cloudName,
+      api_key: config.apiKey,
+      api_secret: config.apiSecret
+    })
+
+    return this
   }
 }
