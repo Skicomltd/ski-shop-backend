@@ -19,6 +19,6 @@ export default registerAs(
     url: process.env.APP_URL || "http://localhost:5000",
     clientUrl: process.env.CLIENT_URL,
     port: Number(process.env.PORT) || 5000,
-    callbackUrl: process.env.CALLBACK_URL 
+    callbackUrl: process.env.CALLBACK_URL
   })
 )
