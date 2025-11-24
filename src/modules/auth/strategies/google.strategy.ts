@@ -11,7 +11,7 @@ import { Strategy } from "passport-google-oauth2"
 export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
   constructor(
     private authService: AuthService,
-    private readonly configService: ConfigService
+    public configService: ConfigService
   ) {
     super({
       clientID: configService.get("auth.google.clientId"),
@@ -23,8 +23,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
   }
 
   async validate(req: Request, _accessToken: string, _refreshToken: string, profile: any): Promise<User> {
-    console.error("profile: ", profile)
-
     const user = await this.authService.validateEmail(profile.email)
 
     req.user = user

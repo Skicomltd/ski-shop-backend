@@ -56,7 +56,7 @@ export class AuthService {
   }
 
   async validateUser(loginDto: LoginDto) {
-    const user = await this.userService.findOne({ email: loginDto.email })
+    const user = await this.userService.findOne({ email: loginDto.email, isEmailVerified: true })
 
     if (!user) throw new NotFoundException("Invalid Credentials")
 

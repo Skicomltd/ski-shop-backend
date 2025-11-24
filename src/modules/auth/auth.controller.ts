@@ -301,6 +301,7 @@ export class AuthController {
   @UseGuards(GoogleOAuthGuard)
   async googleLogin() {}
 
+  // Add flag new user for newly registered.
   @Public()
   @Get("oauth/google/callback")
   @HttpCode(200)
