@@ -19,6 +19,8 @@ import { HelpersService } from "@services/utils/helpers/helpers.service"
 import { VoucherService } from "../vouchers/voucher.service"
 import { BadReqException } from "@/exceptions/badRequest.exception"
 import { VoucherEnum } from "../vouchers/enum/voucher-enum"
+import { ConfigService } from "@nestjs/config"
+import { IApp } from "@/config/app.config"
 
 @Controller("carts")
 export class CartsController {
@@ -29,7 +31,8 @@ export class CartsController {
     private readonly ordersService: OrdersService,
     private readonly transactionHelper: TransactionHelper,
     private readonly helperService: HelpersService,
-    private readonly voucherService: VoucherService
+    private readonly voucherService: VoucherService,
+    private readonly configService: ConfigService
   ) {}
 
   @Post()
@@ -88,6 +91,7 @@ export class CartsController {
       const payload: InitiatePayment = {
         amount,
         email: user.email,
+        callback_url: this.configService.get<IApp>("app").callbackUrl,
         reference: order.reference
       }
 
