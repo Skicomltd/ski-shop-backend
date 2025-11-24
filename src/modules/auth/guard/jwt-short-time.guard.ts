@@ -17,6 +17,7 @@ export default class JwtShortTimeGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>()
     const token = this.extractTokenFromHeader(request)
+    const path = request.path.toLowerCase()
 
     if (!token) throw new UnAuthorizedException()
 
@@ -28,6 +29,14 @@ export default class JwtShortTimeGuard implements CanActivate {
       const user = await this.userService.findById(payload.id)
 
       if (!user) throw new UnAuthorizedException()
+
+      if (path !== "/api/v1/auth/verifyemail" && path !== "/api/v1/auth/verifyphonenumber" && user.status === "inactive") {
+        throw new UnAuthorizedException()
+      }
+
+      if (path === "/api/v1/auth/verifyphonenumber" && !user.isEmailVerified) {
+        throw new UnAuthorizedException()
+      }
 
       request.user = user
     } catch (error) {

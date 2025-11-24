@@ -13,7 +13,8 @@ import {
   ConflictException,
   UploadedFile,
   Get,
-  HttpStatus
+  HttpStatus,
+  UnauthorizedException
 } from "@nestjs/common"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import {
@@ -25,8 +26,8 @@ import {
   registerSchema,
   ResendOtpDto,
   resendOtpSchema,
-  VerifyEmailDto,
-  verifyEmailSchema
+  VerifyCodeDto,
+  verifyCodeSchema
 } from "./dto/auth.dto"
 import JwtShortTimeGuard from "./guard/jwt-short-time.guard"
 import { PasswordAuthGuard } from "./guard/password-auth.guard"
@@ -61,6 +62,7 @@ import { MailService } from "@/services/mail"
 import { PaymentsService } from "@/services/payments"
 import { FileSystemService } from "@/services/filesystem/filesystem.service"
 import { FileUploadDto } from "@/services/filesystem/interfaces/filesystem.interface"
+import { FirebaseService } from "@/services/firebase"
 
 @Controller("auth")
 export class AuthController {
@@ -75,7 +77,8 @@ export class AuthController {
     private readonly fileSystemService: FileSystemService,
     private readonly storeService: StoreService,
     private readonly bankService: BankService,
-    private readonly paymentsService: PaymentsService
+    private readonly paymentsService: PaymentsService,
+    private readonly firebaseService: FirebaseService
   ) {}
 
   @Public()
@@ -101,9 +104,9 @@ export class AuthController {
   @Post("/verifyemail")
   @HttpCode(200)
   @UseGuards(JwtShortTimeGuard)
-  async verifyEmail(@Req() req: Request, @Body(new JoiValidationPipe(verifyEmailSchema)) verifyEmailDto: VerifyEmailDto) {
+  async verifyEmail(@Req() req: Request, @Body(new JoiValidationPipe(verifyCodeSchema)) verifyEmailDto: VerifyCodeDto) {
     const isVerified = await this.authService.verifyCode({ email: req.user.email, code: verifyEmailDto.code })
-    await this.userService.update(req.user, { isEmailVerified: isVerified, status: "active" })
+    await this.userService.update(req.user, { isEmailVerified: isVerified })
 
     const shortTimeToken = await this.helperService.generateToken(
       { email: req.user.email, id: req.user.id },
@@ -112,6 +115,34 @@ export class AuthController {
     )
 
     return { token: shortTimeToken }
+  }
+
+  @ShortTime()
+  @Post("/verifyphonenumber")
+  @UseGuards(JwtShortTimeGuard)
+  async verifyPhoneNumber(@Req() req: Request, @Body(new JoiValidationPipe(verifyCodeSchema)) verifyPhoneNumberDto: VerifyCodeDto) {
+    try {
+      const firebaseUser = await this.firebaseService.verifyIdToken(verifyPhoneNumberDto.code)
+
+      // No associated phone number and email with idToken
+      if (!firebaseUser.email || !firebaseUser.phone_number) throw new UnauthorizedException()
+
+      // Retrieve user
+      const user = await this.userService.findOne({ email: firebaseUser.email })
+      if (!user) throw new UnauthorizedException()
+
+      await this.userService.update(user, { phoneNumber: firebaseUser.phone_number, isPhoneNumberVerified: true })
+
+      const shortTimeToken = await this.helperService.generateToken(
+        { email: req.user.email, id: req.user.id },
+        this.configService.get<IAuth>("auth").shortTimeJwtSecret,
+        "1h"
+      )
+
+      return { token: shortTimeToken }
+    } catch (error) {
+      throw new UnauthorizedException("Phone number verification failed")
+    }
   }
 
   @ShortTime()
