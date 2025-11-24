@@ -10,7 +10,7 @@ export class AuthDto {
   confirmPassword: string
 }
 
-export class VerifyEmailDto {
+export class VerifyCodeDto {
   code: string
 }
 
@@ -42,7 +42,7 @@ export const registerSchema = joi.object({
   })
 })
 
-export const verifyEmailSchema = joi.object({
+export const verifyCodeSchema = joi.object({
   code: joi.number().required()
 })
 
