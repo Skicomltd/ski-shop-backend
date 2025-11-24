@@ -3,7 +3,6 @@ import { PolicyHandler } from "@/modules/auth/interface/policies-interface"
 import { AppAbility, CaslAbilityFactory } from "@/services/casl/casl-ability.factory"
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common"
 import { Reflector } from "@nestjs/core"
-import { Observable } from "rxjs"
 
 @Injectable()
 export class PolicyPickupGuard implements CanActivate {
