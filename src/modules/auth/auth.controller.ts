@@ -13,8 +13,7 @@ import {
   ConflictException,
   UploadedFile,
   Get,
-  HttpStatus,
-  UnauthorizedException
+  HttpStatus
 } from "@nestjs/common"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import {
