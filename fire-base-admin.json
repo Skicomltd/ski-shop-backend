@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "skicom-server",
+  "private_key_id": "f2dd0a94f80d675e2dd892e977e7b73797cbb316",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDDzJ0M8sHuwWwu\n676pNwg6wNXBu19a1Y9GmsNcWbMjlnZdkF29YrFxorSsvMtiK+apP2Ogvd+KOfwO\nhzqulqfYUhCPcXSArx0drLoKx3RzQKRol3EPmCMOlLZ7aQBvcMX0VoqoGGaVpjpF\nST+8CpqCv1DZqBFDPqdbWib+eAr3rAdU8F7wlBJ9QhBdQG87tl9M1bHpYhdCYKDg\nKBXQy132bR5NMc3+4xZisx80z0TKQnPA+VTiUeRaD1/s3X5yIl7A4y0ggsbf0kwq\nq/VrJRPI00jY6fy7rIscLpo/STFX0EPhRjrBPaALzbBjL4LLDjWBWRkjj/VlG0Yu\n+6jqvL7PAgMBAAECggEACFDm9LdUzE6zyRRjLy2ysEgjbAyIwsNiR/XnyULYDHFm\nCphImvQXpENsWA/WtY82x0Z1dUzLM0Q+M+HDeMnWTCZEJMuFTrfhTTLaXf3VsNV0\nhiq0dxyXlJV1YK13gsQv7C5Gylfq930taWbwiYyLvnTgurXcMdZ15jfggxtXH+jA\nChs7v0+mpB1Dg4b0Yx8xHb51cU6K18trowWY/QP52dfwa4c1lpEGcBy09IXx0O+t\npOqnKh3Tn2vJlidOViQeh+zbLG3beCB6iFXUpdk6AphG8+IMNjO3ljwOnneCI0bt\naHtXg8CawDlYSpEeR7pVw5yJ770+75qR7quUsxL3AQKBgQDmxL4le1dY34rPjbFL\nLxoZm8tUOIe8g4OfNk73GY6EXWbDcCKTnQvsrQMNyL6bpkt45EZMqIQSelFcKHfo\nGc7ljRXNyAwOvOzyoy+O94UpLsf+Q6/kvrfa5U0kYN6I6kOUD388wjYKfiJHmIo0\n+0GrCqEUsiZj9CaCfi/rYQddzwKBgQDZNRMDjyLiv52gqc7iYBEBxvf0Z/e5rJU6\n1BZHilA42Y+8FFJm3t0vxGPFtY8LAhL6QWz9NeVjZQQMsZlGkMEKX668tyUDRxdS\nME95YZBi6mZiQCd2AUjz6L0NtcECNf5MozecRNMF0bgNy3tVXhEbC93/LNThswlR\nBviWhzXPAQKBgQCLOXmKfX52NO+3RsIHHRS/DHpAhpaFykZ3oLlFZRrRitQ75wRF\nUINoN/1WrJ0qpMp11ir/hs+fokJBunyVADUN0u+rphx4K808me1QcM7ayMmKAmY1\nOEcN/jdrUjIQIl3BDxRxoK4f6HdgAIypaEj3G0ORi+WTejJdmino9TIPiwKBgQDF\nbYF/3a227rZm35IFn4410FV2mL3Jzf3CgB5UHns2gUItkUco6++eSGLrxVBkkBkR\n0UAwk7mR87KPmyoXwuFD/Z6FN+7zoL2o3fKPAMhNsIMpUOjNUPOvh9+3Q3pQ+STR\nIhYc+03X3zzthQPwn1TrAYliNKy3DZYtSSnRIMsfAQKBgEx//8Id33CvSGKJicsi\nyJgdpR1QmzEHvw7LpGt9v2QKgNQhGt75MEa4JMpmn91PVXOD7mSoTavuNaXiVpji\n+ve3l3PFYYxXH0ZoiGGBSbBVYLHikGcBZo4Gw9c92tk6AOtcpjksojKHJQRHzFVx\nZhaeVnDRwtLb6ZuVKGn/AgXQ\n-----END PRIVATE KEY-----\n",
+  "client_email": "firebase-adminsdk-fbsvc@skicom-server.iam.gserviceaccount.com",
+  "client_id": "110899285145835164465",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-fbsvc%40skicom-server.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
