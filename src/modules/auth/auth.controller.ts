@@ -366,14 +366,19 @@ export class AuthController {
   @Post("/forgotpassword")
   @HttpCode(HttpStatus.OK)
   async forgotPassword(@Body(new JoiValidationPipe(forgotPasswordSchema)) { email }: ForgotPasswordDto, @Req() req: Request) {
-    const isMobile = req.headers.platform === "mobile"
+    const client = req.client
     const user = await this.userService.findOne({ email })
 
     if (!user) return new NotFoundException("user not found!")
 
     const token = await this.authService.forgotPassword(user)
 
-    const baseUrl = isMobile ? "https://app.skicomltd.com" : this.configService.get<IApp>("app").clientUrl
+    const baseUrl =
+      client === "customer-mobile"
+        ? "https://app.skicomltd.com"
+        : client === "vendor-mobile"
+          ? "https://vendor.skicomltd.com"
+          : this.configService.get<IApp>("app").clientUrl
 
     const link = baseUrl + `/reset-password?token=${token}`
 
