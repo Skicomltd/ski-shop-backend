@@ -71,6 +71,10 @@ jobs:
          - name: Create .env file 🌮
            run: echo "${{ secrets.ENV_DEV }}" > $DEPLOY_PATH/.env
 
+         - name: Create Firebase Service Account Key
+           run: |
+             echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > $DEPLOY_PATH/fire-base-admin.json
+
          - name: Install dependencies 🚀
            run: npm install --prefix $DEPLOY_PATH
 
@@ -120,6 +124,10 @@ jobs:
          - name: Create .env file 🌮
            run: echo "${{ secrets.ENV_STAGING }}" > $DEPLOY_PATH/.env
 
+         - name: Create Firebase Service Account Key
+           run: |
+             echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > $DEPLOY_PATH/fire-base-admin.json
+
          - name: Install dependencies 🚀
            run: npm install --prefix $DEPLOY_PATH
 
@@ -162,6 +170,10 @@ jobs:
 
          - name: Create .env file 🌮
            run: echo "${{ secrets.ENV_PROD }}" > $DEPLOY_PATH/.env
+
+         - name: Create Firebase Service Account Key
+           run: |
+             echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > $DEPLOY_PATH/fire-base-admin.json
 
          - name: Install dependencies 🚀
            run: npm install --prefix $DEPLOY_PATH
