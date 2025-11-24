@@ -41,10 +41,14 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
         firstName: "",
         lastName: "",
         password: "",
-        role: clientValidation.data === "customer-mobile" ? UserRoleEnum.Customer : UserRoleEnum.Vendor
+        role: clientValidation.data === "customer-mobile" ? UserRoleEnum.Customer : UserRoleEnum.Vendor,
+        isEmailVerified: true
       }
 
       user = await this.usersService.create(dto)
+    } else if (user && !user.isEmailVerified) {
+      // mark existing user email as verified
+      user = await this.usersService.update(user, { isEmailVerified: true })
     }
 
     // Prevent a user other than a vendor login from the vendor mobile app.
