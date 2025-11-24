@@ -9,6 +9,8 @@ export interface IAuthResponse {
     email: string
     role: string
     profileImage: string
+    emailVerified: boolean
+    phoneNumberVerified: boolean
     fullName: string
     createdAt: Date
     updatedAt: Date

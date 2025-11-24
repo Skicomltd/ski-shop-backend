@@ -1,9 +1,13 @@
 import { EntityManager, FindOptionsWhere } from "typeorm"
 import { User as AppUser } from "./modules/users/entity/user.entity"
+import { ClientType } from "./modules/auth/interface/client-type.interface"
 
 declare global {
   namespace Express {
     interface User extends AppUser {}
+    interface Request {
+      client: ClientType
+    }
   }
   interface JwtPayload {
     id: string

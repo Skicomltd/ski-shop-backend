@@ -14,8 +14,6 @@ export class GoogleOAuthGuard extends AuthGuard("google") {
   }
 
   handleRequest<TUser extends User>(err: any, user: TUser): TUser {
-    console.error("error debugging>>>>", err, user)
-
     if (!user) {
       throw new BadReqException("user not found")
     }
