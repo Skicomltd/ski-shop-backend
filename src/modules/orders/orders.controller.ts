@@ -125,4 +125,8 @@ export class OrdersController {
 
     return order
   }
+
+  @UseGuards(PolicyOrderGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Order))
+  async requestDelivery() {}
 }
