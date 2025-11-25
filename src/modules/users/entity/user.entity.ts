@@ -22,6 +22,7 @@ import { Subscription } from "@/modules/subscription/entities/subscription.entit
 import { userStatus } from "../interfaces/user.status.interface"
 import { USER_STATUS } from "../enum/user-status"
 import { Voucher } from "@/modules/vouchers/entities/voucher.entity"
+import { Address } from "@/modules/addresses/entities/address.entity"
 
 export enum UserRoleEnum {
   "Customer" = "customer",
@@ -109,6 +110,10 @@ export class User {
 
   @OneToMany(() => Voucher, (voucher) => voucher.user)
   vouchers: Voucher[]
+
+
+  @OneToMany(() => Address, (address) => address.user, {cascade: true})
+  addressBook: Address[]
 
   private _previousPassword?: string
 
