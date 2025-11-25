@@ -10,5 +10,5 @@ export const updateAddressSchema = joi.object<UpdateAddressDto>({
   city: joi.string().optional(),
   state: joi.string().optional(),
   phoneNumber: joi.string().optional(),
-  default: joi.boolean().optional
+  default: joi.boolean().optional()
 })
