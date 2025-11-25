@@ -20,7 +20,7 @@ import { VoucherService } from "../vouchers/voucher.service"
 import { BadReqException } from "@/exceptions/badRequest.exception"
 import { VoucherEnum } from "../vouchers/enum/voucher-enum"
 import { ConfigService } from "@nestjs/config"
-import { IApp } from "@/config/app.config"
+import { PaymentModuleOption } from "@/services/payments"
 
 @Controller("carts")
 export class CartsController {
@@ -91,7 +91,7 @@ export class CartsController {
       const payload: InitiatePayment = {
         amount,
         email: user.email,
-        callback_url: this.configService.get<IApp>("app").callbackUrl,
+        callback_url: this.configService.get<PaymentModuleOption>("payment").providers.paystack.callbackUrl,
         reference: order.reference
       }
 

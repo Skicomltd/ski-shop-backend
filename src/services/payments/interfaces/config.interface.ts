@@ -7,6 +7,7 @@ export type PaymentStrategyType = "paystack"
 export interface PaystackOptions {
   secret: string // Secret key for authentication
   subscriptionCode: string // Code for subscription plans
+  callbackUrl?: string
 }
 
 // Placeholder for future providers
