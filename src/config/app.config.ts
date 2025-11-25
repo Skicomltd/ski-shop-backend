@@ -8,7 +8,6 @@ export interface IApp {
   url: string
   clientUrl: string
   port: number
-  callbackUrl?: string
 }
 
 export default registerAs(
@@ -18,7 +17,6 @@ export default registerAs(
     env: (process.env.NODE_ENV as ENV) || "development",
     url: process.env.APP_URL || "http://localhost:5000",
     clientUrl: process.env.CLIENT_URL,
-    port: Number(process.env.PORT) || 5000,
-    callbackUrl: process.env.CALLBACK_URL
+    port: Number(process.env.PORT) || 5000
   })
 )
