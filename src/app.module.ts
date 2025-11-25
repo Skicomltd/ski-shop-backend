@@ -43,14 +43,10 @@ import { ContactUsModule } from "./modules/contact-us/contact-us.module"
 import { QueuesModule } from "./queues"
 import { ServicesModule } from "./services/services.module"
 import { UtilsModule } from "./services/utils"
-<<<<<<< HEAD
-import { PickupsModule } from './modules/pickups/pickups.module';
-import { AddressesModule } from './modules/addresses/addresses.module';
-=======
+import { AddressesModule } from "./modules/addresses/addresses.module"
 import { NotificationsApiModule } from "./modules/notifications/notifications.module"
 import { EventsModule } from "./events/events.module"
 import { PickupsModule } from "./modules/pickups/pickups.module"
->>>>>>> 3d0e763d886502d0cf190169fcbfc9d66e748235
 @Module({
   imports: [
     UserModule,
@@ -87,14 +83,11 @@ import { PickupsModule } from "./modules/pickups/pickups.module"
     BuyerModule,
     NewslettersModule,
     ContactUsModule,
-<<<<<<< HEAD
     PickupsModule,
-    AddressesModule
-=======
+    AddressesModule,
     NotificationsApiModule,
     EventsModule,
     PickupsModule
->>>>>>> 3d0e763d886502d0cf190169fcbfc9d66e748235
   ],
   controllers: [AppController],
   providers: [

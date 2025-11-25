@@ -1,34 +1,32 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
-import { ADDRESS_STATUS } from "../enum/address.status";
-import { address_status } from "../interface/address-status.interface";
-import { User } from "@/modules/users/entity/user.entity";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm"
+import { User } from "@/modules/users/entity/user.entity"
 
 @Entity()
 export class Address {
-    @PrimaryGeneratedColumn('uuid')
-    id: string
+  @PrimaryGeneratedColumn("uuid")
+  id: string
 
-    @Column()
-    name: string
+  @Column()
+  name: string
 
-    @Column()
-    address: string
+  @Column()
+  address: string
 
-    @Column()
-    city: string
+  @Column()
+  city: string
 
-    @Column()
-    state: string
+  @Column()
+  state: string
 
-    @Column()
-    phoneNumber: string
+  @Column()
+  phoneNumber: string
 
-    @Column()
-    userId: string
+  @Column()
+  userId: string
 
-    @Column({type: 'enum', enum: ADDRESS_STATUS, default: "default"})
-    status: address_status
+  @Column({ type: "boolean", default: false })
+  default: boolean
 
-    @ManyToOne(() => User, (user) => user.addressBook)
-    user: User
+  @ManyToOne(() => User, (user) => user.addressBook)
+  user: User
 }

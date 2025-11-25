@@ -8,7 +8,8 @@ function getOptions(): PaymentModuleOption {
     providers: {
       paystack: {
         secret: process.env.PAYSTACK_SECRET || "",
-        subscriptionCode: process.env.PAYSTACK_SUB_CODE || ""
+        subscriptionCode: process.env.PAYSTACK_SUB_CODE || "",
+        callbackUrl: process.env.PAYSTACK_CALLBACK_URL
       }
     }
   }

@@ -18,6 +18,7 @@ export class UserSeeder implements Seeder {
       phoneNumber: faker.phone.number(),
       email: faker.internet.email(),
       isEmailVerified: faker.datatype.boolean(),
+      isPhoneNumberVerified: true,
       createdAt: faker.date.past(),
       updatedAt: faker.date.recent()
     }))
@@ -30,6 +31,7 @@ export class UserSeeder implements Seeder {
       phoneNumber: faker.phone.number(),
       email: "customerone@gmail.com",
       isEmailVerified: true,
+      isPhoneNumberVerified: true,
       createdAt: faker.date.past(),
       updatedAt: faker.date.recent()
     })
@@ -41,6 +43,7 @@ export class UserSeeder implements Seeder {
       role: UserRoleEnum.Customer,
       phoneNumber: faker.phone.number(),
       email: "customertwo@gmail.com",
+      isPhoneNumberVerified: true,
       isEmailVerified: true,
       createdAt: faker.date.past(),
       updatedAt: faker.date.recent()
@@ -54,6 +57,7 @@ export class UserSeeder implements Seeder {
       phoneNumber: faker.phone.number(),
       email: "vendorone@gmail.com",
       isEmailVerified: true,
+      isPhoneNumberVerified: true,
       createdAt: faker.date.past(),
       updatedAt: faker.date.recent()
     })
@@ -66,6 +70,7 @@ export class UserSeeder implements Seeder {
       phoneNumber: faker.phone.number(),
       email: "vendortwo@gmail.com",
       isEmailVerified: true,
+      isPhoneNumberVerified: true,
       createdAt: faker.date.past(),
       updatedAt: faker.date.recent()
     })
@@ -78,6 +83,7 @@ export class UserSeeder implements Seeder {
       phoneNumber: faker.phone.number(),
       email: "tobiolanitori@gmail.com",
       isEmailVerified: true,
+      isPhoneNumberVerified: true,
       createdAt: faker.date.past(),
       updatedAt: faker.date.recent()
     })
@@ -90,6 +96,7 @@ export class UserSeeder implements Seeder {
       phoneNumber: faker.phone.number(),
       email: "adminaccount@gmail.com",
       isEmailVerified: true,
+      isPhoneNumberVerified: true,
       createdAt: faker.date.past(),
       updatedAt: faker.date.recent()
     })
