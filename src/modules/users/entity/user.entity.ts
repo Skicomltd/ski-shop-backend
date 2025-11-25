@@ -63,8 +63,11 @@ export class User {
   @Column({ default: false })
   isEmailVerified: boolean
 
+  @Column({ default: false })
+  isPhoneNumberVerified: boolean
+
   @Column({ type: "enum", enum: USER_STATUS, default: "inactive" })
-  status: userStatus
+  status: userStatus // Both email and phone number are verified
 
   @CreateDateColumn()
   createdAt: Date
@@ -126,6 +129,13 @@ export class User {
 
     const salt = await bcrypt.genSalt()
     this.password = await bcrypt.hash(this.password, salt)
+  }
+
+  @BeforeInsert()
+  @BeforeUpdate()
+  updateStatusBasedOnVerification() {
+    const isActive = this.isEmailVerified && this.isPhoneNumberVerified
+    this.status = isActive ? "active" : "inactive"
   }
 
   async comparePassword(password: string) {

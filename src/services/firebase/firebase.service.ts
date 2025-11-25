@@ -4,6 +4,7 @@ import { HttpException, Injectable } from "@nestjs/common"
 import { Messaging } from "firebase-admin/lib/messaging/messaging"
 import { Message, MulticastMessage, BatchResponse, MessagingTopicManagementResponse } from "firebase-admin/lib/messaging/messaging-api"
 import { Firestore, WriteResult, DocumentData, DocumentSnapshot, CollectionReference } from "firebase-admin/lib/firestore"
+import { User } from "./interfaces/auth.interface"
 
 @Injectable()
 export class FirebaseService {
@@ -25,7 +26,7 @@ export class FirebaseService {
   /**
    * Create a new user with email/password or custom properties
    */
-  async createUser(data: { email: string; password?: string; displayName?: string; uid?: string }) {
+  async createUser(data: User) {
     try {
       return await this.getAuth().createUser(data)
     } catch (error) {
@@ -45,9 +46,20 @@ export class FirebaseService {
   }
 
   /**
+   * Get Firebase user by phone number
+   */
+  async getUserByPhone(phoneNumber: string) {
+    try {
+      return await this.getAuth().getUserByPhoneNumber(phoneNumber)
+    } catch (error) {
+      throw new HttpException(error.message, 404)
+    }
+  }
+
+  /**
    * Update user info
    */
-  async updateUser(uid: string, data: Partial<{ email: string; displayName: string; password: string }>) {
+  async updateUser(uid: string, data: Partial<User>) {
     try {
       return await this.getAuth().updateUser(uid, data)
     } catch (error) {
@@ -74,6 +86,17 @@ export class FirebaseService {
       return await this.getAuth().createCustomToken(uid, additionalClaims)
     } catch (error) {
       throw new HttpException(error.message, 500)
+    }
+  }
+
+  /**
+   * Verify Firebase ID token received from client
+   */
+  async verifyIdToken(idToken: string) {
+    try {
+      return await this.getAuth().verifyIdToken(idToken)
+    } catch (error) {
+      throw new HttpException(error.message, 401)
     }
   }
 

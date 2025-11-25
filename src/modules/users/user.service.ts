@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
 import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
 import { CreateUserDto } from "./dto/create-user-dto"
-import { ConflictException } from "@/exceptions/conflict.exception"
 import { BadReqException } from "@/exceptions/badRequest.exception"
 import { UpdateUserDto } from "./dto/update-user-dto"
 import { User, UserRoleEnum } from "./entity/user.entity"
@@ -19,12 +18,7 @@ export class UserService implements IService<User> {
   private readonly relations = ["business", "business.store"]
 
   async create(data: CreateUserDto, manager?: EntityManager): Promise<User> {
-    const exist = await this.exists({ email: data.email })
-
-    if (exist) throw new ConflictException("User exists")
-
     const repo = manager ? manager.getRepository<User>(User) : this.userRepository
-
     const createUser = repo.create({ ...data })
     return await repo.save(createUser)
   }

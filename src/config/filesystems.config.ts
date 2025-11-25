@@ -1,10 +1,10 @@
 import * as path from "path"
 import { ConfigModule, ConfigService, registerAs } from "@nestjs/config"
-import { FileSystemDriver, FileSystemModuleAsynOptions, FileSystemModuleOptions } from "@services/filesystem/interfaces/config.interface"
+import { FileSystemModuleAsynOptions, FileSystemModuleOptions } from "@services/filesystem/interfaces/config.interface"
 
 function getOptions(): FileSystemModuleOptions {
   return {
-    default: (process.env.DEFAULT_FILESYSTEM || "local") as FileSystemDriver,
+    default: process.env.DEFAULT_FILESYSTEM || "local",
     clients: {
       local: {
         driver: "local",
