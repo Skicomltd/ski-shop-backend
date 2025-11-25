@@ -2,10 +2,10 @@ import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nes
 import { map, Observable } from "rxjs"
 import { PaginationParams } from "@services/pagination/interfaces/pagination-params.interface"
 import { PaginationService } from "@services/pagination/pagination.service"
-import { ContactUs } from "../entities/contact-us.entity"
-import { ContactUsResponseMapper } from "../interface/contact-us-response-mapper.interface"
-import { IContactsUsResponse } from "../interface/contacts-us-response.interface"
-import { IContactUsResponse } from "../interface/contact-us-response.interface"
+import { ContactUs } from "../entities/contactUs.entity"
+import { ContactUsResponseMapper } from "../interface/contactUs-response-mapper.interface"
+import { IContactsUsResponse } from "../interface/contactsUs-response.interface"
+import { IContactUsResponse } from "../interface/contactUs-response.interface"
 
 type PayloadType = [ContactUs[], number]
 

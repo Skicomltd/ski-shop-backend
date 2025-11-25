@@ -1,10 +1,10 @@
 import { Controller, Get, Post, Body, Param, Delete, ParseUUIDPipe, UseInterceptors, UseGuards } from "@nestjs/common"
-import { ContactUsService } from "./contact-us.service"
-import { createContactUsSchema, CreateContactUsDto } from "./dto/create-contact-us.dto"
+import { ContactUsService } from "./contactUs.service"
+import { createContactUsSchema, CreateContactUsDto } from "./dto/create-contactUs.dto"
 import { Public } from "../auth/decorators/public.decorator"
-import { ContactsUsResponseInterceptor } from "./interceptor/contacts-us.interceptor"
-import { ContactUsResponseInterceptor } from "./interceptor/contact-us.interceptor"
-import { PolicyContactUsGuard } from "./guard/policy-contact-us.guard"
+import { ContactsUsResponseInterceptor } from "./interceptor/contactsUs.interceptor"
+import { ContactUsResponseInterceptor } from "./interceptor/contactUs.interceptor"
+import { PolicyContactUsGuard } from "./guard/policy-contactUs.guard"
 import { AppAbility } from "@services/casl/casl-ability.factory"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { Action } from "@services/casl/actions/action"
@@ -14,7 +14,7 @@ import { ContactusNotification } from "@/mails"
 import { UserService } from "../users/user.service"
 import { UserRoleEnum } from "../users/entity/user.entity"
 
-@Controller("contact-us")
+@Controller("contacts")
 export class ContactUsController {
   constructor(private readonly contactUsService: ContactUsService, private mailerService: MailService, private userService: UserService) {}
 

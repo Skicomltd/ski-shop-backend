@@ -39,7 +39,7 @@ import { SettingsModule } from "./modules/settings/settings.module"
 import { CommisionsModule } from "./modules/commisions/commisions.module"
 import { BuyerModule } from "./modules/buyer/buyer.module"
 import { NewslettersModule } from "./modules/newsletters/newsletters.module"
-import { ContactUsModule } from "./modules/contact-us/contact-us.module"
+import { ContactUsModule } from "./modules/contactUs/contactUs.module"
 import { QueuesModule } from "./queues"
 import { ServicesModule } from "./services/services.module"
 import { UtilsModule } from "./services/utils"
@@ -47,6 +47,7 @@ import { AddressesModule } from "./modules/addresses/addresses.module"
 import { NotificationsApiModule } from "./modules/notifications/notifications.module"
 import { EventsModule } from "./events/events.module"
 import { PickupsModule } from "./modules/pickups/pickups.module"
+
 @Module({
   imports: [
     UserModule,
