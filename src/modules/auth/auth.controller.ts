@@ -25,8 +25,8 @@ import {
   registerSchema,
   ResendOtpDto,
   resendOtpSchema,
-  VerifyEmailDto,
-  verifyEmailSchema
+  VerifyCodeDto,
+  verifyCodeSchema
 } from "./dto/auth.dto"
 import JwtShortTimeGuard from "./guard/jwt-short-time.guard"
 import { PasswordAuthGuard } from "./guard/password-auth.guard"
@@ -58,8 +58,11 @@ import { ApiException } from "@/exceptions/api.exception"
 import { EmailValidationMail, PasswordRestMail } from "@/mails"
 import { HelpersService, TransactionHelper } from "@/services/utils"
 import { MailService } from "@/services/mail"
-import { FileSystemService, FileUploadDto } from "@/services/filesystem"
 import { PaymentsService } from "@/services/payments"
+import { FileSystemService } from "@/services/filesystem/filesystem.service"
+import { FileUploadDto } from "@/services/filesystem/interfaces/filesystem.interface"
+import { FirebaseService } from "@/services/firebase"
+import { UnAuthorizedException } from "@/exceptions/unAuthorized.exception"
 
 @Controller("auth")
 export class AuthController {
@@ -74,7 +77,8 @@ export class AuthController {
     private readonly fileSystemService: FileSystemService,
     private readonly storeService: StoreService,
     private readonly bankService: BankService,
-    private readonly paymentsService: PaymentsService
+    private readonly paymentsService: PaymentsService,
+    private readonly firebaseService: FirebaseService
   ) {}
 
   @Public()
@@ -82,15 +86,30 @@ export class AuthController {
   @HttpCode(201)
   async register(@Body(new JoiValidationPipe(registerSchema)) registerDto: AuthDto) {
     return this.transactionHelper.runInTransaction(async (manager) => {
-      const { email, id } = await this.userService.create(registerDto, manager)
+      // Find the duplicate user
+      let user = await this.userService.findOne({ email: registerDto.email })
 
+      // If user with email is found and status is active (email and phone number are verified), throw an error.
+      if (user && user.status === "active") throw new ConflictException("user exists")
+
+      // No user found, so create user.
+      if (!user) {
+        user = await this.userService.create(registerDto, manager)
+      }
+
+      // At this point, user was either found or they have an inactive account
+      // so we generate email verification code so they start onboarding all over again.
       const code = this.helperService.generateOtp(6)
 
-      const otp = await this.authService.saveOtp({ code, email }, manager)
+      const otp = await this.authService.saveOtp({ code, email: user.email }, manager)
 
       this.mailService.queue(new EmailValidationMail(otp))
 
-      const shortTimeToken = await this.helperService.generateToken({ email, id }, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
+      const shortTimeToken = await this.helperService.generateToken(
+        { email: user.email, id: user.id },
+        this.configService.get<IAuth>("auth").shortTimeJwtSecret,
+        "1h"
+      )
 
       return { token: shortTimeToken }
     })
@@ -100,9 +119,9 @@ export class AuthController {
   @Post("/verifyemail")
   @HttpCode(200)
   @UseGuards(JwtShortTimeGuard)
-  async verifyEmail(@Req() req: Request, @Body(new JoiValidationPipe(verifyEmailSchema)) verifyEmailDto: VerifyEmailDto) {
+  async verifyEmail(@Req() req: Request, @Body(new JoiValidationPipe(verifyCodeSchema)) verifyEmailDto: VerifyCodeDto) {
     const isVerified = await this.authService.verifyCode({ email: req.user.email, code: verifyEmailDto.code })
-    await this.userService.update(req.user, { isEmailVerified: isVerified, status: "active" })
+    await this.userService.update(req.user, { isEmailVerified: isVerified })
 
     const shortTimeToken = await this.helperService.generateToken(
       { email: req.user.email, id: req.user.id },
@@ -111,6 +130,34 @@ export class AuthController {
     )
 
     return { token: shortTimeToken }
+  }
+
+  @ShortTime()
+  @Post("/verifyphonenumber")
+  @UseGuards(JwtShortTimeGuard)
+  async verifyPhoneNumber(@Req() req: Request, @Body(new JoiValidationPipe(verifyCodeSchema)) verifyPhoneNumberDto: VerifyCodeDto) {
+    try {
+      const firebaseUser = await this.firebaseService.verifyIdToken(verifyPhoneNumberDto.code)
+
+      // No associated phone number and email with idToken
+      if (!firebaseUser.email || !firebaseUser.phone_number) throw new UnAuthorizedException()
+
+      // Retrieve user
+      const user = await this.userService.findOne({ email: firebaseUser.email })
+      if (!user) throw new UnAuthorizedException()
+
+      await this.userService.update(user, { phoneNumber: firebaseUser.phone_number, isPhoneNumberVerified: true })
+
+      const shortTimeToken = await this.helperService.generateToken(
+        { email: req.user.email, id: req.user.id },
+        this.configService.get<IAuth>("auth").shortTimeJwtSecret,
+        "1h"
+      )
+
+      return { token: shortTimeToken }
+    } catch (error) {
+      throw new UnAuthorizedException("Phone number verification failed")
+    }
   }
 
   @ShortTime()
@@ -217,8 +264,8 @@ export class AuthController {
   @UseInterceptors(AuthInterceptor)
   @UseGuards(LoginValidationGuard, PasswordAuthGuard)
   async loginWeb(@Req() req: Request) {
+    if (req.user.status === "inactive") throw new UnAuthorizedException()
     const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
-
     return { user: req.user, tokens }
   }
 
@@ -229,7 +276,7 @@ export class AuthController {
   @UseGuards(LoginValidationGuard, PasswordAuthGuard)
   async loginVendor(@Req() req: Request, @Body(new JoiValidationPipe(loginSchema)) loginDto: LoginDto) {
     const user = req.user
-
+    if (req.user.status === "inactive") throw new UnAuthorizedException()
     if (user.role !== UserRoleEnum.Vendor) {
       throw new ForbiddenException(`User with role '${user.role}' cannot log in as a vendor. Only 'Vendor' role is allowed.`)
     }
@@ -251,6 +298,8 @@ export class AuthController {
   async loginCustomer(@Req() req: Request, @Body(new JoiValidationPipe(loginSchema)) loginDto: LoginDto) {
     const user = req.user
 
+    if (req.user.status === "inactive") throw new UnAuthorizedException()
+
     if (user.role !== UserRoleEnum.Customer) {
       throw new ForbiddenException(`User with role '${user.role}' cannot log in as a Customer. Only 'Customer' role is allowed.`)
     }
@@ -271,6 +320,8 @@ export class AuthController {
   @UseGuards(LoginValidationGuard, PasswordAuthGuard)
   async loginAdmin(@Req() req: Request, @Body(new JoiValidationPipe(loginSchema)) loginDto: LoginDto) {
     const user = req.user
+
+    if (req.user.status === "inactive") throw new UnAuthorizedException()
 
     if (user.role !== UserRoleEnum.Admin) {
       throw new ForbiddenException(`User with role '${user.role}' cannot log in as a Admin. Only 'Admin' role is allowed.`)
@@ -315,14 +366,19 @@ export class AuthController {
   @Post("/forgotpassword")
   @HttpCode(HttpStatus.OK)
   async forgotPassword(@Body(new JoiValidationPipe(forgotPasswordSchema)) { email }: ForgotPasswordDto, @Req() req: Request) {
-    const isMobile = req.headers.platform === "mobile"
+    const client = req.client
     const user = await this.userService.findOne({ email })
 
     if (!user) return new NotFoundException("user not found!")
 
     const token = await this.authService.forgotPassword(user)
 
-    const baseUrl = isMobile ? "https://app.skicomltd.com" : this.configService.get<IApp>("app").clientUrl
+    const baseUrl =
+      client === "customer-mobile"
+        ? "https://app.skicomltd.com"
+        : client === "vendor-mobile"
+          ? "https://vendor.skicomltd.com"
+          : this.configService.get<IApp>("app").clientUrl
 
     const link = baseUrl + `/reset-password?token=${token}`
 

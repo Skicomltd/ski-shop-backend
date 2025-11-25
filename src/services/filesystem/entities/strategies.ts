@@ -9,8 +9,8 @@ export const FILESYSTEM_STRATEGY = {
   // Google Cloud Storage
   google: "GOOGLE_STORAGE_SERVICE",
 
-  // DigitalOcean Spaces (S3-compatible)
-  digitalOcean: "DIGITALOCEAN_STORAGE_SERVICE",
+  // Spaces Spaces (S3-compatible)
+  spaces: "SPACES_STORAGE_SERVICE",
 
   // Cloudinary (cloud-based media storage and CDN)
   cloudinary: "CLOUDINARY_STORAGE_SERVICE"

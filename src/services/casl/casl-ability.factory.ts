@@ -574,18 +574,17 @@ export class CaslAbilityFactory {
     return ability
   }
 
-
   createAbilityForPickup(user: User): AppAbility {
-  const {can, cannot, build} = new AbilityBuilder(createMongoAbility)
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
 
-  if (user.role === UserRoleEnum.Admin) {
-    can(Action.Manage, Pickup)
-  } else {
-    can(Action.Read, Pickup)
-    cannot(Action.Create, Pickup)
-    cannot(Action.Update, Pickup)
-    cannot(Action.Delete, Pickup)
-  }
+    if (user.role === UserRoleEnum.Admin) {
+      can(Action.Manage, Pickup)
+    } else {
+      can(Action.Read, Pickup)
+      cannot(Action.Create, Pickup)
+      cannot(Action.Update, Pickup)
+      cannot(Action.Delete, Pickup)
+    }
 
   const ability = build({
       detectSubjectType: (item) => {
@@ -612,7 +611,7 @@ export class CaslAbilityFactory {
   }
 
 
-   const ability = build({
+    const ability = build({
       detectSubjectType: (item) => {
         return item.constructor as ExtractSubjectType<Subjects>
       }
@@ -621,5 +620,3 @@ export class CaslAbilityFactory {
     return ability
   }
 }
-
-

@@ -1,49 +1,47 @@
-import { Injectable } from '@nestjs/common';
-import { CreatePickupDto } from './dto/create-pickup.dto';
-import { UpdatePickupDto } from './dto/update-pickup.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { EntityManager, FindOptionsWhere, Repository } from 'typeorm';
-import { Pickup } from './entities/pickup.entity';
-import { IPickupQuery } from './interface/query-filter.interface';
+import { Injectable } from "@nestjs/common"
+import { CreatePickupDto } from "./dto/create-pickup.dto"
+import { UpdatePickupDto } from "./dto/update-pickup.dto"
+import { InjectRepository } from "@nestjs/typeorm"
+import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
+import { Pickup } from "./entities/pickup.entity"
+import { IPickupQuery } from "./interface/query-filter.interface"
 
 @Injectable()
 export class PickupsService implements IService<Pickup> {
-  constructor(
-    @InjectRepository(Pickup) private pickupRepository: Repository<Pickup>
-  ) {}
+  constructor(@InjectRepository(Pickup) private pickupRepository: Repository<Pickup>) {}
 
   async create(data: CreatePickupDto, manager?: EntityManager): Promise<Pickup> {
-const repo = manager ? manager.getRepository<Pickup>(Pickup) : this.pickupRepository
+    const repo = manager ? manager.getRepository<Pickup>(Pickup) : this.pickupRepository
 
     const createUser = repo.create({ ...data })
     return await repo.save(createUser)
   }
 
-  async find({limit, page, status, search}: IPickupQuery): Promise<[Pickup[], number]> {
-    const query = this.pickupRepository.createQueryBuilder('pickup')
+  async find({ limit, page, status, search }: IPickupQuery): Promise<[Pickup[], number]> {
+    const query = this.pickupRepository.createQueryBuilder("pickup")
     if (status) {
-      query.andWhere('pickup.status = :status', { status });
+      query.andWhere("pickup.status = :status", { status })
     }
     if (search) {
-      query.andWhere('LOWER(pickup.name) LIKE :search OR LOWER(pickup.address) LIKE :search', { search: `%${search.toLowerCase()}%` });
+      query.andWhere("LOWER(pickup.name) LIKE :search OR LOWER(pickup.address) LIKE :search", { search: `%${search.toLowerCase()}%` })
     }
 
     return await query
       .take(limit)
       .skip(page && page > 0 ? (page - 1) * limit : 0)
-      .getManyAndCount();
+      .getManyAndCount()
   }
 
   async findById(id: string): Promise<Pickup> {
-    return await this.pickupRepository.findOne({ where: { id } });
+    return await this.pickupRepository.findOne({ where: { id } })
   }
 
   async findOne(filter: FindOptionsWhere<Pickup>): Promise<Pickup> {
-    return await this.pickupRepository.findOne({ where: filter });
+    return await this.pickupRepository.findOne({ where: filter })
   }
 
   async exists(filter: FindOptionsWhere<Pickup>): Promise<boolean> {
-    return this.pickupRepository.exists({ where: filter });
+    return this.pickupRepository.exists({ where: filter })
   }
 
   async update(entity: Pickup, data: UpdatePickupDto, manager?: EntityManager): Promise<Pickup> {
