@@ -1,4 +1,4 @@
-import { address_status } from "./address-status.interface"
+
 
 export interface IAddressResponse {
     id: string
@@ -7,5 +7,5 @@ export interface IAddressResponse {
     city: string
     state: string
     phoneNumber: string
-    status: address_status
+    status: boolean
 }

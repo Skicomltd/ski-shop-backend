@@ -25,10 +25,10 @@ export class AddressesController {
   async create(@Body(new JoiValidationPipe(createAddressSchema)) createAddressDto: CreateAddressDto, @Req() req: Request) {
     const user = req.user
     createAddressDto.userId = user.id
-    if (createAddressDto.status === "default") {
-       const updateDefaultAddressToInActive = await this.addressesService.findOne({userId: user.id, status: "default"})
+    if (createAddressDto.status) {
+       const updateDefaultAddressToInActive = await this.addressesService.findOne({userId: user.id, status: true})
       if (updateDefaultAddressToInActive) {
-        await this.addressesService.update(updateDefaultAddressToInActive, { status: "inactive" })
+        await this.addressesService.update(updateDefaultAddressToInActive, { status: false })
       }
     }
     return this.addressesService.create(createAddressDto);
@@ -65,10 +65,10 @@ export class AddressesController {
     if (!address) {
       throw new NotFoundException("Address does not exist")
     }
-    if (updateAddressDto.status === "default") {
-      const updateDefaultAddressToInActive = await this.addressesService.findOne({userId: address.userId, status: "default"})
+    if (updateAddressDto.status) {
+      const updateDefaultAddressToInActive = await this.addressesService.findOne({userId: address.userId, status: true})
       if (updateDefaultAddressToInActive) {
-        await this.addressesService.update(updateDefaultAddressToInActive, { status: "inactive" })
+        await this.addressesService.update(updateDefaultAddressToInActive, { status: true })
       }
     } 
     return this.addressesService.update(address, updateAddressDto);

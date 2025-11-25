@@ -1,5 +1,3 @@
-import { ADDRESS_STATUS } from "../enum/address.status"
-import { address_status } from "../interface/address-status.interface"
 import * as joi from "joi"
 
 export class CreateAddressDto {
@@ -9,7 +7,7 @@ export class CreateAddressDto {
     city: string
     state: string
     phoneNumber: string
-    status: address_status
+    status: boolean
 }
 
 
@@ -19,5 +17,5 @@ export const createAddressSchema = joi.object<CreateAddressDto>({
     city: joi.string().required(),
     state: joi.string().required(),
     phoneNumber: joi.string().required(),
-    status: joi.string().valid(...ADDRESS_STATUS).required()
+    status: joi.boolean().default(true)
 })
