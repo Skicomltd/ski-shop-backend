@@ -10,7 +10,7 @@ export abstract class AddressResponseMapper implements IInterceptor {
             city: data.city,
             state: data.state,
             phoneNumber: data.phoneNumber,
-            status: data.status
+            default: data.default
         }
     }
 }

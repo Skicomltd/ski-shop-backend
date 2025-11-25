@@ -7,5 +7,5 @@ export interface IAddressResponse {
     city: string
     state: string
     phoneNumber: string
-    status: boolean
+    default: boolean
 }

@@ -7,7 +7,7 @@ export class CreateAddressDto {
     city: string
     state: string
     phoneNumber: string
-    status: boolean
+    default: boolean
 }
 
 
@@ -17,5 +17,5 @@ export const createAddressSchema = joi.object<CreateAddressDto>({
     city: joi.string().required(),
     state: joi.string().required(),
     phoneNumber: joi.string().required(),
-    status: joi.boolean().default(true)
+    default: joi.boolean().default(true)
 })

@@ -25,7 +25,7 @@ export class Address {
     userId: string
 
     @Column({type: 'boolean', default: false})
-    status: boolean
+    default: boolean
 
     @ManyToOne(() => User, (user) => user.addressBook)
     user: User

@@ -19,11 +19,11 @@ export class AddressesService implements IService<Address> {
   }
 
 
-  async find({limit, page, status, userId}: IAddressQuery): Promise<[Address[], number]> {
+  async find({limit, page, flag, userId}: IAddressQuery): Promise<[Address[], number]> {
     const query = this.addressRepository.createQueryBuilder('address')
 
-    if (status) {
-      query.andWhere("address.status = :status", { status })
+    if (flag === "default") {
+      query.andWhere("address.default = :default", { default: true })
     }
 
     if (userId) {
