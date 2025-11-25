@@ -111,8 +111,7 @@ export class User {
   @OneToMany(() => Voucher, (voucher) => voucher.user)
   vouchers: Voucher[]
 
-
-  @OneToMany(() => Address, (address) => address.user, {cascade: true})
+  @OneToMany(() => Address, (address) => address.user, { cascade: true })
   addressBook: Address[]
 
   private _previousPassword?: string

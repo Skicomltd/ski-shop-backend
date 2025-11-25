@@ -586,30 +586,28 @@ export class CaslAbilityFactory {
       cannot(Action.Delete, Pickup)
     }
 
-  const ability = build({
+    const ability = build({
       detectSubjectType: (item) => {
         return item.constructor as ExtractSubjectType<Subjects>
       }
     }) as AppAbility
 
     return ability
-}
-
-
-  createAbilityForAddress(user: User): AppAbility {
-  const {can, cannot, build} = new AbilityBuilder(createMongoAbility)
-  if (user.role === UserRoleEnum.Customer) {
-    can(Action.Read, Address, { userId: user.id})
-    can(Action.Create, Address, { userId: user.id})
-    can(Action.Update, Address, { userId: user.id})
-    can(Action.Delete, Address, { userId: user.id})
-  } else {
-    can(Action.Read, Address)
-    cannot(Action.Create, Address)
-    cannot(Action.Update, Address)
-    cannot(Action.Delete, Address)
   }
 
+  createAbilityForAddress(user: User): AppAbility {
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
+    if (user.role === UserRoleEnum.Customer) {
+      can(Action.Read, Address, { userId: user.id })
+      can(Action.Create, Address, { userId: user.id })
+      can(Action.Update, Address, { userId: user.id })
+      can(Action.Delete, Address, { userId: user.id })
+    } else {
+      can(Action.Read, Address)
+      cannot(Action.Create, Address)
+      cannot(Action.Update, Address)
+      cannot(Action.Delete, Address)
+    }
 
     const ability = build({
       detectSubjectType: (item) => {

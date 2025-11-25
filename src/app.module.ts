@@ -43,7 +43,7 @@ import { ContactUsModule } from "./modules/contact-us/contact-us.module"
 import { QueuesModule } from "./queues"
 import { ServicesModule } from "./services/services.module"
 import { UtilsModule } from "./services/utils"
-import { AddressesModule } from './modules/addresses/addresses.module';
+import { AddressesModule } from "./modules/addresses/addresses.module"
 import { NotificationsApiModule } from "./modules/notifications/notifications.module"
 import { EventsModule } from "./events/events.module"
 import { PickupsModule } from "./modules/pickups/pickups.module"
