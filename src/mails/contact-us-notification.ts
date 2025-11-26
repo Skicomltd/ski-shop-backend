@@ -1,9 +1,7 @@
 import { Attachment, Content, Envelope, Header, Mailable } from "@/services/mail"
 
-export class ContactusNotification extends Mailable {
-  constructor(
-    private readonly to: string
-  ) {
+export class ContactUsNotification extends Mailable {
+  constructor(private readonly to: string) {
     super()
   }
 
