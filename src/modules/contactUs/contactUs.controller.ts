@@ -14,7 +14,7 @@ import { ContactusNotification } from "@/mails"
 import { UserService } from "../users/user.service"
 import { UserRoleEnum } from "../users/entity/user.entity"
 
-@Controller("contacts")
+@Controller("contactUs")
 export class ContactUsController {
   constructor(private readonly contactUsService: ContactUsService, private mailerService: MailService, private userService: UserService) {}
 
