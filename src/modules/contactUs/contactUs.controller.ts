@@ -10,7 +10,7 @@ import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { Action } from "@services/casl/actions/action"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { MailService } from "@/services/mail"
-import { ContactusNotification } from "@/mails"
+import { ContactUsNotification } from "@/mails"
 import { UserService } from "../users/user.service"
 import { UserRoleEnum } from "../users/entity/user.entity"
 
@@ -26,7 +26,7 @@ export class ContactUsController {
     const adminUsers = await this.userService.find({ role: UserRoleEnum.Admin})
     if (adminUsers[0].length > 0) {
       for (const adminUser of adminUsers[0]) {
-        await this.mailerService.send(new ContactusNotification(adminUser.email))
+        await this.mailerService.send(new ContactUsNotification(adminUser.email))
       }
     }
     return contactUs
