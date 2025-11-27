@@ -17,10 +17,13 @@ export class PickupsService implements IService<Pickup> {
     return await repo.save(createUser)
   }
 
-  async find({ limit, page, status, search }: IPickupQuery): Promise<[Pickup[], number]> {
+  async find({ limit, page, status, state, search }: IPickupQuery): Promise<[Pickup[], number]> {
     const query = this.pickupRepository.createQueryBuilder("pickup")
     if (status) {
       query.andWhere("pickup.status = :status", { status })
+    }
+    if (state) {
+      query.andWhere("pickup.state = :state", { state })
     }
     if (search) {
       query.andWhere("LOWER(pickup.name) LIKE :search OR LOWER(pickup.address) LIKE :search", { search: `%${search.toLowerCase()}%` })

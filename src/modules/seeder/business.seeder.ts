@@ -37,8 +37,8 @@ export class BusinessSeeder implements Seeder {
       businessRegNumber: faker.string.alphanumeric(10),
       contactNumber: faker.phone.number(),
       address: faker.location.streetAddress(),
-      country: faker.location.country(),
-      state: faker.location.state(),
+      country: "Nigeria",
+      state: faker.helpers.arrayElement(this.states),
       kycVerificationType: faker.helpers.arrayElement(["NATIONAL_ID_CARD", "PASSPORT", "DRIVER_LICENSE"]),
       identificationNumber: faker.string.uuid(), // Unique identifier
       createdAt: faker.date.past(),
@@ -55,8 +55,8 @@ export class BusinessSeeder implements Seeder {
         businessRegNumber: faker.string.alphanumeric(10),
         contactNumber: faker.phone.number(),
         address: faker.location.streetAddress(),
-        country: faker.location.country(),
-        state: faker.location.state(),
+        country: "Nigeria",
+        state: faker.helpers.arrayElement(this.states),
         kycVerificationType: faker.helpers.arrayElement(["NATIONAL_ID_CARD", "PASSPORT", "DRIVER_LICENSE"]),
         identificationNumber: faker.string.uuid(), // Unique identifier
         createdAt: faker.date.past(),
@@ -73,4 +73,44 @@ export class BusinessSeeder implements Seeder {
   async drop(): Promise<any> {
     await this.businessRepository.delete({})
   }
+
+  private states = [
+    "Kano",
+    "Lagos",
+    "Kaduna",
+    "Katsina",
+    "Oyo",
+    "Rivers",
+    "Bauchi",
+    "Jigawa",
+    "Benue",
+    "Anambra",
+    "Borno",
+    "Delta",
+    "Imo",
+    "Niger",
+    "Akwa Ibom",
+    "Ogun",
+    "Sokoto",
+    "Ondo",
+    "Osun",
+    "Kogi",
+    "Zamfara",
+    "Enugu",
+    "Kebbi",
+    "Edo",
+    "Plateau",
+    "Adamawa",
+    "Cross River",
+    "Abia",
+    "Ekiti",
+    "Kwara",
+    "Gombe",
+    "Yobe",
+    "Taraba",
+    "Ebonyi",
+    "Nasarawa",
+    "Bayelsa",
+    "FCT"
+  ]
 }

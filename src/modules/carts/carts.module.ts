@@ -9,9 +9,10 @@ import { UserModule } from "../users/user.module"
 import { VoucherModule } from "../vouchers/voucher.module"
 import { SettingsModule } from "../settings/settings.module"
 import { CommisionsModule } from "../commisions/commisions.module"
+import { StoreModule } from "../stores/store.module"
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Cart]), ProductsModule, OrdersModule, UserModule, VoucherModule, SettingsModule, CommisionsModule],
+  imports: [TypeOrmModule.forFeature([Cart]), ProductsModule, OrdersModule, UserModule, VoucherModule, SettingsModule, CommisionsModule, StoreModule],
   controllers: [CartsController],
   providers: [CartsService],
   exports: [CartsService]

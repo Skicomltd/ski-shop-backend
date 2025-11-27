@@ -10,6 +10,7 @@ export class CreateProductDto {
   description: string
   discountPrice?: number
   stockCount: number
+  weight: number
   totalProductRatingSum?: number
   totalProductRatingCount?: number
   status: ProductStatusEnum
@@ -24,6 +25,7 @@ export class CreateProductDto {
 export const createProductSchema = joi.object({
   name: joi.string().required(),
   price: joi.number().required(),
+  weight: joi.number().required(),
   category: joi
     .string()
     .valid("clothings", "gadgets", "groceries", "women", "bodyCreamAndOil", "furniture", "tvAndHomeAppliances", "watchesAndAccessories")

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query, Req, Res, UseGuards, UseInterceptors } from "@nestjs/common"
+import { Controller, Get, Param, ParseUUIDPipe, Query, Req, Res, UseGuards, UseInterceptors } from "@nestjs/common"
 import { OrdersService } from "./orders.service"
 import { IOrdersQuery } from "./interfaces/query-filter.interface"
 import { OrdersInterceptor } from "./interceptors/orders.interceptor"
@@ -17,8 +17,6 @@ import { CsvService } from "@services/utils/csv/csv.service"
 import { OrderSummaryData } from "./interfaces/order-summary.interface"
 import { Public } from "../auth/decorators/public.decorator"
 import { FezService } from "@/services/fez"
-import { EstimateDeliveryDateDto, estimateDeliveryDateSchema } from "./dto/estimate-delivery-date.dto"
-import { JoiValidationPipe } from "@/validations/joi.validation"
 
 @Controller("orders")
 export class OrdersController {
@@ -115,27 +113,6 @@ export class OrdersController {
   @Get("/delivery-states")
   async delieveryStates() {
     return this.fezService.getStates()
-  }
-
-  @Public()
-  @Post("/estimate-delivery-date")
-  async estimateDeliveryDate(@Body(new JoiValidationPipe(estimateDeliveryDateSchema)) dto: EstimateDeliveryDateDto) {
-    const date = await this.fezService.getDeliveryDateEstimate({
-      delivery_type: "local",
-      pick_up_state: dto.pickUpState,
-      drop_off_state: dto.dropOffState
-    })
-
-    const [min, max] = date.split(" ").filter((i) => Number.isInteger(Number(i)))
-
-    const today = new Date()
-    const minDate = today.setDate(today.getDate() + Number(min))
-    const maxDate = today.setDate(today.getDate() + Number(max))
-
-    return {
-      minDate: new Date(minDate).toLocaleDateString("default", { day: "2-digit", month: "short" }),
-      maxDate: new Date(maxDate).toLocaleDateString("default", { day: "2-digit", month: "short" })
-    }
   }
 
   @UseGuards(PolicyOrderGuard)

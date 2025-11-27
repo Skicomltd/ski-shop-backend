@@ -21,6 +21,9 @@ import { BadReqException } from "@/exceptions/badRequest.exception"
 import { VoucherEnum } from "../vouchers/enum/voucher-enum"
 import { ConfigService } from "@nestjs/config"
 import { PaymentModuleOption } from "@/services/payments"
+import { EstimateDeliveryDateDto, estimateDeliveryDateSchema } from "../carts/dto/estimate-delivery-date.dto"
+import { StoreService } from "../stores/store.service"
+import { FezService } from "@/services/fez"
 
 @Controller("carts")
 export class CartsController {
@@ -32,7 +35,9 @@ export class CartsController {
     private readonly transactionHelper: TransactionHelper,
     private readonly helperService: HelpersService,
     private readonly voucherService: VoucherService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly storesService: StoreService,
+    private readonly fezService: FezService
   ) {}
 
   @Post()
@@ -100,8 +105,59 @@ export class CartsController {
         await this.voucherService.update(voucher, { orderId: order.id }, manager)
       }
 
+      if (checkoutDto.paymentMethod === "paymentOnDelivery") {
+        return {
+          checkoutUrl: "",
+          reference: order.reference,
+          checkoutCode: ""
+        }
+      }
+
       return await this.paymentsService.with(checkoutDto.paymentMethod).initiatePayment(payload)
     })
+  }
+
+  @Post("/delivery-info")
+  async estimateDeliveryDate(@Body(new JoiValidationPipe(estimateDeliveryDateSchema)) dto: EstimateDeliveryDateDto, @Req() req: Request) {
+    const user = req.user
+
+    const [cart] = await this.cartsService.find({ user: { id: user.id } })
+    if (!cart.length) throw new NotFoundException("Cart does not exist")
+
+    let maxCost = 0 // maximum cost for a single delivery
+    let earliestDay = Infinity // Earliest delivery date
+    let maximumDay = 1 // Max delivery date
+
+    for (const item of cart) {
+      const store = await this.storesService.findById(item.product.storeId)
+      const cost = await this.fezService.getDeliveryCost({
+        state: dto.dropOffState,
+        pickUpState: store.business.state,
+        weight: item.product.weight
+      })
+
+      maxCost = Math.max(maxCost, cost)
+
+      const date = await this.fezService.getDeliveryDateEstimate({
+        delivery_type: "local",
+        pick_up_state: store.business.state,
+        drop_off_state: dto.dropOffState
+      })
+
+      const [min, max] = date.split(" ").filter((i) => Number.isInteger(Number(i)))
+      earliestDay = Math.min(earliestDay, min ? Number(min) : 1)
+      maximumDay = Math.max(maximumDay, max ? Number(max) : 0)
+    }
+
+    const today = new Date()
+    const minDate = today.setDate(today.getDate() + Number(earliestDay))
+    const maxDate = today.setDate(today.getDate() + Number(maximumDay))
+
+    return {
+      cost: maxCost,
+      minDate: new Date(minDate).toLocaleDateString("default", { day: "2-digit", month: "short" }),
+      maxDate: new Date(maxDate).toLocaleDateString("default", { day: "2-digit", month: "short" })
+    }
   }
 
   @Get()

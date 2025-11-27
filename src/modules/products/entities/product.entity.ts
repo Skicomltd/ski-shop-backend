@@ -15,6 +15,9 @@ export class Product {
   @Column()
   name: string
 
+  @Column({ type: "float", default: 1 }) // in kg
+  weight: number
+
   @Column({ type: "enum", enum: ProductCategoriesEnum })
   category: ProductCategoriesEnum
 
