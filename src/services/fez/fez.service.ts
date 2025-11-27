@@ -1,7 +1,21 @@
 import { HttpService } from "@nestjs/axios"
-import { HttpException, Injectable } from "@nestjs/common"
+import { HttpException, Inject, Injectable } from "@nestjs/common"
 import { ConfigService } from "@nestjs/config"
-import { CreateOrderDto, CreateOrderResponse } from "./interfaces/orders.interface"
+import {
+  CreateOrderDto,
+  CreateOrderResponse,
+  DeliveryCostResponse,
+  DeliveryDetails,
+  DeliveryHistory,
+  EstimateDelivery,
+  EstimateDeliveryResponse,
+  GetOrderResponse,
+  OrderDetail,
+  TrackOrderResponse
+} from "./interfaces/orders.interface"
+import { AuthToken, LoginResponse } from "./interfaces/auth.interface"
+import { FEZ_CONFIG_OPTIONS } from "./entities/config"
+import { FezModuleOptions } from "./interfaces/config.interface"
 
 type Token = {
   token: string
@@ -11,19 +25,81 @@ type Token = {
 @Injectable()
 export class FezService {
   private url: string
-  private ttl = 175 // mins
   private secret: string
-  private token: Token
+  private token: Token | null = null
   private userId: string
   private password: string
 
   constructor(
     public readonly configService: ConfigService,
-    private readonly httpService: HttpService
-  ) {}
+    private readonly httpService: HttpService,
+    @Inject(FEZ_CONFIG_OPTIONS)
+    protected config: FezModuleOptions
+  ) {
+    this.url = config.url
+    this.secret = config.secret
+    this.userId = config.userId
+    this.password = config.password
+    this.token = null
+  }
 
-  public createOrder(data: CreateOrderDto): CreateOrderResponse {
-    // url = /order
+  public async createOrder(data: CreateOrderDto): Promise<CreateOrderResponse> {
+    const headers = await this.getHeaders()
+
+    try {
+      const response = await this.httpService.axiosRef.post<CreateOrderResponse>(`${this.url}/order`, data, { headers })
+      return response.data
+    } catch (error) {
+      throw new HttpException(error.message, 500)
+    }
+  }
+
+  public async getOrder(orderNo: string): Promise<OrderDetail> {
+    const headers = await this.getHeaders()
+
+    try {
+      const response = await this.httpService.axiosRef.get<GetOrderResponse>(`${this.url}/orders/${orderNo}`, { headers })
+      return response.data.orderDetails.find((i) => i.orderNo === orderNo)
+    } catch (error) {
+      throw new HttpException(error.message, 500)
+    }
+  }
+
+  public async trackOrder(orderNo: string): Promise<DeliveryHistory[]> {
+    const headers = await this.getHeaders()
+
+    try {
+      const response = await this.httpService.axiosRef.get<TrackOrderResponse>(`${this.url}/order/track/${orderNo}`, { headers })
+      return response.data.history
+    } catch (error) {
+      throw new HttpException(error.message, 500)
+    }
+  }
+
+  public getStates(): string[] {
+    return this.states
+  }
+
+  public async getDeliveryCost(data: DeliveryDetails): Promise<number> {
+    const headers = await this.getHeaders()
+
+    try {
+      const response = await this.httpService.axiosRef.post<DeliveryCostResponse>(`${this.url}/order/cost`, data, { headers })
+      return response.data.Cost.cost
+    } catch (error) {
+      throw new HttpException(error.message, 500)
+    }
+  }
+
+  public async getDeliveryDateEstimate(data: EstimateDelivery): Promise<string> {
+    const headers = await this.getHeaders()
+
+    try {
+      const response = await this.httpService.axiosRef.post<EstimateDeliveryResponse>(`${this.url}/delivery-time-estimate`, data, { headers })
+      return response.data.data.eta
+    } catch (error) {
+      throw new HttpException(error.message, 500)
+    }
   }
 
   private async getHeaders() {
@@ -37,20 +113,65 @@ export class FezService {
   }
 
   private async getToken(): Promise<string> {
-    if (this.token.expiresAt > Date.now()) return this.token.token
+    if (this.token && this.token.expiresAt > Date.now()) return this.token.token
 
     try {
-      const response = await this.httpService.axiosRef.post(`${this.url}/user/authenticate`, {
+      const response = await this.httpService.axiosRef.post<LoginResponse>(`${this.url}/user/authenticate`, {
         user_id: this.userId,
         password: this.password
       })
+
+      this.setToken(response.data.authDetails)
+      return this.token.token
     } catch (error) {
       throw new HttpException(error.message, 500)
     }
-    return ""
   }
 
-  private setToken(token: string) {
-   
+  private setToken(token: AuthToken) {
+    this.token = {
+      token: token.authToken,
+      expiresAt: new Date(token.expireToken).getTime()
+    }
   }
+
+  private states = [
+    "Kano",
+    "Lagos",
+    "Kaduna",
+    "Katsina",
+    "Oyo",
+    "Rivers",
+    "Bauchi",
+    "Jigawa",
+    "Benue",
+    "Anambra",
+    "Borno",
+    "Delta",
+    "Imo",
+    "Niger",
+    "Akwa Ibom",
+    "Ogun",
+    "Sokoto",
+    "Ondo",
+    "Osun",
+    "Kogi",
+    "Zamfara",
+    "Enugu",
+    "Kebbi",
+    "Edo",
+    "Plateau",
+    "Adamawa",
+    "Cross River",
+    "Abia",
+    "Ekiti",
+    "Kwara",
+    "Gombe",
+    "Yobe",
+    "Taraba",
+    "Ebonyi",
+    "Nasarawa",
+    "Bayelsa",
+    "FCT"
+  ]
 }

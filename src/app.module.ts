@@ -46,13 +46,14 @@ import { UtilsModule } from "./services/utils"
 import { NotificationsApiModule } from "./modules/notifications/notifications.module"
 import { EventsModule } from "./events/events.module"
 import { PickupsModule } from "./modules/pickups/pickups.module"
+import fezConfig from "./config/fez.config"
 @Module({
   imports: [
     UserModule,
     AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, authConfig, mailConfig, filesystemsConfig, logConfig, paymentConfig]
+      load: [appConfig, authConfig, mailConfig, filesystemsConfig, logConfig, paymentConfig, fezConfig]
     }),
     QueuesModule,
     TypeOrmModule.forRootAsync(databaseConfigAsync),

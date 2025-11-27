@@ -19,6 +19,8 @@ import { paymentConfigAsync } from "@/config/payment.config"
 import { NotificationsModule } from "./notifications/notifications.module"
 import { notificationConfigAsync } from "@/config/notification.config"
 import { FirebaseModule } from "./firebase"
+import { FezModule } from "./fez/fez.module"
+import { fezConfigAsync } from "@/config/fez.config"
 
 @Global()
 @Module({
@@ -33,7 +35,8 @@ import { FirebaseModule } from "./firebase"
     FirebaseModule,
     LogModule.registerAsync(logConfigAsync),
     PaymentsModule.registerAsync(paymentConfigAsync),
-    NotificationsModule.registerAsync(notificationConfigAsync)
+    NotificationsModule.registerAsync(notificationConfigAsync),
+    FezModule.registerAsync(fezConfigAsync)
   ],
   providers: [PaginationService, LogService, MailService],
   exports: [
@@ -45,7 +48,8 @@ import { FirebaseModule } from "./firebase"
     LogService,
     PaymentsModule,
     NotificationsModule,
-    FirebaseModule
+    FirebaseModule,
+    FezModule
   ]
 })
 export class ServicesModule {}

@@ -1,0 +1,1 @@
+export const FEZ_CONFIG_OPTIONS = "FEZ_CONFIG_OPTIONS"
