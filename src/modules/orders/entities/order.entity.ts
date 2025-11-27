@@ -16,6 +16,12 @@ export class Order {
   @Column({ type: "enum", default: "uninitiated", enum: ORDER_DELIVERY_STATUS })
   deliveryStatus: OrderDeliveryStatus
 
+  @Column({ type: "text" })
+  deliveryAddress: string
+
+  @Column({ type: "text", nullable: true })
+  deliveryNo: string
+
   @Column({ type: "enum", enum: PAYMENT_METHODS })
   paymentMethod: PaymentMethod
 

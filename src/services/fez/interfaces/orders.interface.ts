@@ -105,7 +105,7 @@ export type OrderStatus =
   | "Enroute To Last Mile Hub"
   | "Accepted At Last Mile Hub"
   | "Dispatched"
-  | "Dispatched"
+  | "Delivered"
 
 export interface DeliveryDetails {
   state: string // Destination state
