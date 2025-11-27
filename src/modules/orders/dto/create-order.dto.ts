@@ -5,6 +5,8 @@ import { PaymentMethod } from "../interfaces/payment-method.interface"
 export class CreateOrderDto {
   status?: OrderStatus
   deliveryStatus?: OrderDeliveryStatus
+  shippingAddress: string
+  shippingFee: number
   paymentMethod: PaymentMethod
   paidAt?: string
   buyerId: string

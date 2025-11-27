@@ -17,13 +17,19 @@ import { CsvService } from "@services/utils/csv/csv.service"
 import { OrderSummaryData } from "./interfaces/order-summary.interface"
 import { Public } from "../auth/decorators/public.decorator"
 import { FezService } from "@/services/fez"
+import { OnEvent } from "@nestjs/event-emitter"
+import { EventRegistry } from "@/events/events.registry"
+import { NotificationsService } from "@/services/notifications/notifications.service"
+import { VendorOrderItemPlacedNotification } from "@/notifications/vendors/order-item-placed.notification"
+import { CustomerOrderPlacedNotification } from "@/notifications/customers/order-placed-notification"
 
 @Controller("orders")
 export class OrdersController {
   constructor(
     private readonly ordersService: OrdersService,
     private readonly csvService: CsvService,
-    private readonly fezService: FezService
+    private readonly fezService: FezService,
+    private readonly notificationService: NotificationsService
   ) {}
 
   @UseGuards(PolicyOrderGuard)
@@ -138,4 +144,15 @@ export class OrdersController {
   @UseGuards(PolicyOrderGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Order))
   async requestDelivery() {}
+
+  @OnEvent(EventRegistry.ORDER_PLACED)
+  async handleOrderCreatedEvent(order: Order) {
+    // Notify vendors
+    for (const item of order.items) {
+      this.notificationService.notify(new VendorOrderItemPlacedNotification(item, order.id))
+    }
+
+    // Notify customer
+    this.notificationService.notify(new CustomerOrderPlacedNotification(order))
+  }
 }

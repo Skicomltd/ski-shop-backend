@@ -23,12 +23,12 @@ export interface FCMMessagePayload {
   tokens?: string[] // multiple device tokens
   topic?: string // topic name
   condition?: string // condition expression for FCM
-  data?: Record<string, string>
+  data?: Record<string, any>
   imageUrl?: string
   priority?: "normal" | "high"
-  android?: any
-  apns?: any
-  webpush?: any
+  android?: AndroidConfig
+  apns?: ApnsConfig
+  webpush?: WebpushConfig
 }
 
 /**

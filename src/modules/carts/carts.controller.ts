@@ -83,6 +83,8 @@ export class CartsController {
           buyerId: user.id,
           paymentMethod: checkoutDto.paymentMethod,
           reference,
+          shippingAddress: checkoutDto.shippingAddress,
+          shippingFee: checkoutDto.shippingFee,
           items: carts.map((cart) => ({
             quantity: cart.quantity,
             unitPrice: cart.product.discountPrice && cart.product.discountPrice > 0 ? cart.product.discountPrice : cart.product.price,

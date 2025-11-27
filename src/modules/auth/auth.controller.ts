@@ -282,7 +282,7 @@ export class AuthController {
     }
 
     if (loginDto.fcmToken) {
-      await this.userService.update(user, { fcmToken: [loginDto.fcmToken.trim()] })
+      await this.userService.update(user, { fcmTokens: [...user.fcmTokens, loginDto.fcmToken.trim()] })
     }
 
     const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
@@ -305,7 +305,7 @@ export class AuthController {
     }
 
     if (loginDto.fcmToken) {
-      await this.userService.update(user, { fcmToken: [loginDto.fcmToken.trim()] })
+      await this.userService.update(user, { fcmTokens: [...user.fcmTokens, loginDto.fcmToken.trim()] })
     }
 
     const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
@@ -328,7 +328,7 @@ export class AuthController {
     }
 
     if (loginDto.fcmToken) {
-      await this.userService.update(user, { fcmToken: [loginDto.fcmToken.trim()] })
+      await this.userService.update(user, { fcmTokens: [...user.fcmTokens, loginDto.fcmToken.trim()] })
     }
 
     const tokens = await this.authService.login({ email: req.user.email, id: req.user.id })
@@ -340,9 +340,11 @@ export class AuthController {
   @HttpCode(200)
   async logout(@Body(new JoiValidationPipe(logoutSchema)) logoutdto: LogoutDto, @Req() req: Request) {
     const user = req.user
+
     if (logoutdto.fcmToken) {
-      await this.userService.update(user, { fcmToken: [] })
+      await this.userService.update(user, { fcmTokens: user.fcmTokens.filter((t) => t !== logoutdto.fcmToken) })
     }
+
     return
   }
 

@@ -17,7 +17,10 @@ export class Order {
   deliveryStatus: OrderDeliveryStatus
 
   @Column({ type: "text" })
-  deliveryAddress: string
+  shippingAddress: string
+
+  @Column({ type: "float" })
+  shippingFee: number
 
   @Column({ type: "text", nullable: true })
   deliveryNo: string

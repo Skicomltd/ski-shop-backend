@@ -18,6 +18,8 @@ import { CommisionsService } from "../commisions/commisions.service"
 import { VoucherService } from "../vouchers/voucher.service"
 import { VoucherEnum } from "../vouchers/enum/voucher-enum"
 import { SettingsService } from "../settings/settings.service"
+import { EventEmitter2 } from "@nestjs/event-emitter"
+import { EventRegistry } from "@/events/events.registry"
 
 @Injectable()
 export class WebhookService {
@@ -34,7 +36,8 @@ export class WebhookService {
     private readonly payoutsService: PayoutsService,
     private readonly commisionService: CommisionsService,
     private readonly voucherService: VoucherService,
-    private readonly settingsService: SettingsService
+    private readonly settingsService: SettingsService,
+    private eventEmitter: EventEmitter2
   ) {}
 
   async handleChargeSuccess(data: PaystackChargeSuccess) {
@@ -107,7 +110,6 @@ export class WebhookService {
         order,
         {
           status: "paid",
-          deliveryStatus: "pending",
           paidAt: data.paidAt
         },
         manager
@@ -152,6 +154,9 @@ export class WebhookService {
       }
 
       await this.userService.update(user, { ordersCount: user.ordersCount + 1 }, manager)
+
+      // Dispatch Order Placed Event
+      this.eventEmitter.emit(EventRegistry.ORDER_PLACED, order)
     })
   }
 
