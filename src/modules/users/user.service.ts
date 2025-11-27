@@ -2,7 +2,6 @@ import { Injectable } from "@nestjs/common"
 import { InjectRepository } from "@nestjs/typeorm"
 import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
 import { CreateUserDto } from "./dto/create-user-dto"
-import { BadReqException } from "@/exceptions/badRequest.exception"
 import { UpdateUserDto } from "./dto/update-user-dto"
 import { User, UserRoleEnum } from "./entity/user.entity"
 import { IUserQuery } from "./interfaces/users-query.interface"
@@ -64,7 +63,7 @@ export class UserService implements IService<User> {
       where: filter,
       relations: this.relations
     })
-    if (!user) throw new BadReqException("User not found")
+
     return user
   }
 
