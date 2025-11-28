@@ -28,6 +28,9 @@ import { RequestedRiderNotification } from "@/notifications/vendors/requested-ri
 import { OrderStatusChangeNotification } from "@/notifications/customers/order-status-change-notification"
 import { OrderItemInterceptor } from "./interceptors/order-item.interceptor"
 import { OrderStatus } from "./interfaces/order-status"
+import { BadReqException } from "@/exceptions/badRequest.exception"
+import { InitiatePayment, PaymentModuleOption, PaymentsService } from "@/services/payments"
+import { ConfigService } from "@nestjs/config"
 
 @Controller("orders")
 export class OrdersController {
@@ -37,7 +40,9 @@ export class OrdersController {
     private readonly csvService: CsvService,
     private readonly fezService: FezService,
     private readonly notificationService: NotificationsService,
-    private readonly eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2,
+    private readonly paymentsService: PaymentsService,
+    private readonly configService: ConfigService
   ) {}
 
   @UseGuards(PolicyOrderGuard)
@@ -146,6 +151,29 @@ export class OrdersController {
     }
 
     return order
+  }
+
+  @Get(":id/pay")
+  @UseGuards(PolicyOrderGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Order))
+  async pay(@Param("id", ParseUUIDPipe) id: string) {
+    const order = await this.ordersService.findById(id)
+    if (!order || order.status !== "pending" || order.paymentMethod === "paymentOnDelivery") throw new BadReqException("order not actionable")
+
+    let amount = order.shippingInfo.shippingFee
+
+    for (const item of order.items) {
+      amount += item.quantity * item.unitPrice
+    }
+
+    const payload: InitiatePayment = {
+      amount,
+      email: order.buyer.email,
+      callback_url: this.configService.get<PaymentModuleOption>("payment").providers.paystack.callbackUrl,
+      reference: order.reference
+    }
+
+    return await this.paymentsService.with(order.paymentMethod).initiatePayment(payload)
   }
 
   @Get(":id/items/:itemId")
