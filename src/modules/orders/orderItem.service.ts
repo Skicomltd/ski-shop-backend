@@ -8,7 +8,7 @@ import { IOrderItemQuery } from "./interfaces/orderItem-query"
 export class OrderItemService implements IService<OrderItem> {
   constructor(@InjectRepository(OrderItem) private orderItemRepository: Repository<OrderItem>) {}
 
-  async create(data: unknown, manager?: EntityManager): Promise<OrderItem> {
+  async create(data: Partial<OrderItem>, manager?: EntityManager): Promise<OrderItem> {
     const repo = manager ? manager.getRepository(OrderItem) : this.orderItemRepository
     const order = repo.create(data)
     return await repo.save(order)
@@ -44,7 +44,7 @@ export class OrderItemService implements IService<OrderItem> {
     return count > 0
   }
 
-  async update(entity: OrderItem, data: unknown, manager?: EntityManager): Promise<OrderItem> {
+  async update(entity: OrderItem, data: Partial<OrderItem>, manager?: EntityManager): Promise<OrderItem> {
     const repo = manager ? manager.getRepository(OrderItem) : this.orderItemRepository
     const updated = repo.merge(entity, data)
     return await repo.save(updated)

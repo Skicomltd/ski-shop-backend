@@ -4,7 +4,6 @@ export interface OrderSummaryData {
     dateTime: Date
     totalAmount: number
     paymentStatus: string
-    orderStatus: string
   }
   products: Array<{
     name: string

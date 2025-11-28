@@ -37,7 +37,7 @@ export class WebhookService {
     private readonly commisionService: CommisionsService,
     private readonly voucherService: VoucherService,
     private readonly settingsService: SettingsService,
-    private eventEmitter: EventEmitter2
+    private readonly eventEmitter: EventEmitter2
   ) {}
 
   async handleChargeSuccess(data: PaystackChargeSuccess) {

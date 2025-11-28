@@ -18,6 +18,9 @@ export class Product {
   @Column({ type: "float", default: 1 }) // in kg
   weight: number
 
+  @Column({ type: "boolean", default: false }) // in kg
+  fragile: boolean
+
   @Column({ type: "enum", enum: ProductCategoriesEnum })
   category: ProductCategoriesEnum
 

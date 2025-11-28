@@ -1,9 +1,10 @@
 import * as Joi from "joi"
 import { PAYMENT_METHODS, PaymentMethod } from "../../orders/interfaces/payment-method.interface"
+import { ShippingAddress } from "../interfaces/shipping-address.dto"
 
 export class CheckoutDto {
   paymentMethod: PaymentMethod
-  shippingAddress: string
+  shippingAddress: ShippingAddress
   shippingFee: number
   voucherId?: string
 }

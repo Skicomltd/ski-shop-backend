@@ -1,12 +1,12 @@
 import { OrderDeliveryStatus } from "../interfaces/delivery-status"
 import { OrderStatus } from "../interfaces/order-status"
 import { PaymentMethod } from "../interfaces/payment-method.interface"
+import { ShippingInfo } from "../interfaces/shipping-info.interface"
 
 export class CreateOrderDto {
   status?: OrderStatus
   deliveryStatus?: OrderDeliveryStatus
-  shippingAddress: string
-  shippingFee: number
+  shippingInfo: ShippingInfo
   paymentMethod: PaymentMethod
   paidAt?: string
   buyerId: string

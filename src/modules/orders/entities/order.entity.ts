@@ -1,9 +1,10 @@
 import { Column, CreateDateColumn, Entity, JoinColumn, ManyToOne, OneToMany, PrimaryGeneratedColumn } from "typeorm"
+
 import { OrderItem } from "./order-item.entity"
-import { ORDER_STATUS, OrderStatus } from "../interfaces/order-status"
 import { User } from "@/modules/users/entity/user.entity"
+import { ShippingInfo } from "../interfaces/shipping-info.interface"
+import { ORDER_STATUS, OrderStatus } from "../interfaces/order-status"
 import { PAYMENT_METHODS, PaymentMethod } from "../interfaces/payment-method.interface"
-import { ORDER_DELIVERY_STATUS, OrderDeliveryStatus } from "../interfaces/delivery-status"
 
 @Entity()
 export class Order {
@@ -13,17 +14,8 @@ export class Order {
   @Column({ type: "enum", default: "pending", enum: ORDER_STATUS })
   status: OrderStatus
 
-  @Column({ type: "enum", default: "uninitiated", enum: ORDER_DELIVERY_STATUS })
-  deliveryStatus: OrderDeliveryStatus
-
-  @Column({ type: "text" })
-  shippingAddress: string
-
-  @Column({ type: "float" })
-  shippingFee: number
-
-  @Column({ type: "text", nullable: true })
-  deliveryNo: string
+  @Column("simple-json")
+  shippingInfo: ShippingInfo
 
   @Column({ type: "enum", enum: PAYMENT_METHODS })
   paymentMethod: PaymentMethod

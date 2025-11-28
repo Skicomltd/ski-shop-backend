@@ -83,8 +83,14 @@ export class CartsController {
           buyerId: user.id,
           paymentMethod: checkoutDto.paymentMethod,
           reference,
-          shippingAddress: checkoutDto.shippingAddress,
-          shippingFee: checkoutDto.shippingFee,
+          shippingInfo: {
+            recipientAddress: checkoutDto.shippingAddress.address,
+            recipientEmail: checkoutDto.shippingAddress.email,
+            recipientName: checkoutDto.shippingAddress.name,
+            recipientPhone: checkoutDto.shippingAddress.phoneNumber,
+            recipientState: checkoutDto.shippingAddress.state,
+            shippingFee: checkoutDto.shippingFee
+          },
           items: carts.map((cart) => ({
             quantity: cart.quantity,
             unitPrice: cart.product.discountPrice && cart.product.discountPrice > 0 ? cart.product.discountPrice : cart.product.price,
@@ -157,8 +163,8 @@ export class CartsController {
 
     return {
       cost: maxCost,
-      minDate: new Date(minDate).toLocaleDateString("default", { day: "2-digit", month: "short" }),
-      maxDate: new Date(maxDate).toLocaleDateString("default", { day: "2-digit", month: "short" })
+      minDate: new Date(minDate).toISOString(),
+      maxDate: new Date(maxDate).toISOString()
     }
   }
 
