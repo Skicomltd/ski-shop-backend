@@ -22,6 +22,10 @@ import { Request } from "express"
 import { BusinessService } from "../business/business.service"
 import { IStoresQuery } from "./interface/query-filter.interface"
 import { Public } from "../auth/decorators/public.decorator"
+import { OnEvent } from "@nestjs/event-emitter"
+import { EventRegistry } from "@/events/events.registry"
+import { Order } from "../orders/entities/order.entity"
+import { OrderItem } from "../orders/entities/order-item.entity"
 @Controller("stores")
 export class StoreController {
   constructor(
@@ -112,5 +116,23 @@ export class StoreController {
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, Store))
   remove(@Param("id") id: string) {
     return this.storeService.remove({ id: id })
+  }
+
+  @OnEvent(EventRegistry.ORDER_PLACED_PAID)
+  async handleUpdateStoresSales(order: Order) {
+    for (const item of order.items) {
+      const product = item.product
+      const storeId = product.user.business.store.id
+      const store = await this.storeService.findById(storeId)
+      await this.storeService.update(store, { numberOfSales: store.numberOfSales + item.quantity })
+    }
+  }
+
+  @OnEvent(EventRegistry.ORDER_PAID_AFTER_DELIVERY)
+  async updateStoreSales(_order: Order, item: OrderItem) {
+    const product = item.product
+    const storeId = product.user.business.store.id
+    const store = await this.storeService.findById(storeId)
+    await this.storeService.update(store, { numberOfSales: store.numberOfSales + item.quantity })
   }
 }

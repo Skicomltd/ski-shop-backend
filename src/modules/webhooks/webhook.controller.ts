@@ -7,6 +7,7 @@ import { FezWebhookDto } from "./dto/fez.dto"
 import { OrderItemService } from "../orders/orderItem.service"
 import { EventEmitter2 } from "@nestjs/event-emitter"
 import { EventRegistry } from "@/events/events.registry"
+import { OrdersService } from "../orders/orders.service"
 
 @Public()
 @Controller("webhooks")
@@ -14,6 +15,7 @@ export class WebhookController {
   constructor(
     private readonly webhookService: WebhookService,
     private readonly orderItemService: OrderItemService,
+    private readonly ordersService: OrdersService,
     private readonly eventEmitter: EventEmitter2
   ) {}
 
@@ -45,6 +47,12 @@ export class WebhookController {
 
     // Notify Customer + vendor
     this.eventEmitter.emit(EventRegistry.ORDER_STATUS_CHANGED, updated)
+
+    if (status === "delivered") {
+      const order = await this.ordersService.findById(orderItem.orderId)
+      this.eventEmitter.emit(EventRegistry.ORDER_PAID_AFTER_DELIVERY, order, orderItem)
+    }
+
     return
   }
 }
