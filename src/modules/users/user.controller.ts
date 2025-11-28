@@ -17,6 +17,9 @@ import { FileInterceptor } from "@nestjs/platform-express"
 import { imageFilter, memoryUpload } from "@/config/multer.config"
 import { FileUploadDto } from "@services/filesystem/interfaces/filesystem.interface"
 import { FileSystemService } from "@services/filesystem/filesystem.service"
+import { Order } from "../orders/entities/order.entity"
+import { OnEvent } from "@nestjs/event-emitter"
+import { EventRegistry } from "@/events/events.registry"
 
 @Controller("users")
 export class UserController {
@@ -96,5 +99,19 @@ export class UserController {
   @Delete("/:id")
   async remove(@Param("id", ParseUUIDPipe) id: string) {
     return await this.userService.remove({ id })
+  }
+
+  @OnEvent(EventRegistry.ORDER_PLACED)
+  async handleUpdateVendorsSalesCount(order: Order) {
+    for (const item of order.items) {
+      const vendor = await this.userService.findOne({ id: item.product.user.id })
+      await this.userService.update(vendor, { itemsCount: vendor.itemsCount + 1 })
+    }
+  }
+
+  @OnEvent(EventRegistry.ORDER_PLACED)
+  async handleUpdateCustomerOrderCount(order: Order) {
+    const user = await this.userService.findOne({ id: order.buyerId })
+    await this.userService.update(user, { ordersCount: user.ordersCount + 1 })
   }
 }

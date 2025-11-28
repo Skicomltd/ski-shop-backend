@@ -1,32 +1,28 @@
 import { Injectable } from "@nestjs/common"
+import { EventEmitter2 } from "@nestjs/event-emitter"
+
+import { Ad } from "../ads/entities/ad.entity"
+import { AdsService } from "../ads/ads.service"
+import { UserService } from "../users/user.service"
+import { StoreService } from "../stores/store.service"
+import { Order } from "../orders/entities/order.entity"
 import { OrdersService } from "../orders/orders.service"
-import { PaymentsService } from "@services/payments/payments.service"
-import { PaystackChargeSuccess, PaystackTransferData } from "@services/payments/interfaces/paystack.interface"
-import { CartsService } from "../carts/carts.service"
+import { PayoutsService } from "../payouts/payouts.service"
+import { vendonEnumType } from "../stores/entities/store.entity"
+import { WithdrawalsService } from "../withdrawals/withdrawals.service"
 import { SubscriptionService } from "../subscription/subscription.service"
 import { Subscription, SubscriptionEnum } from "../subscription/entities/subscription.entity"
-import { UserService } from "../users/user.service"
-import { Order } from "../orders/entities/order.entity"
-import { StoreService } from "../stores/store.service"
-import { TransactionHelper } from "@services/utils/transactions/transactions.service"
-import { WithdrawalsService } from "../withdrawals/withdrawals.service"
-import { PayoutsService } from "../payouts/payouts.service"
-import { AdsService } from "../ads/ads.service"
-import { Ad } from "../ads/entities/ad.entity"
-import { vendonEnumType } from "../stores/entities/store.entity"
-import { CommisionsService } from "../commisions/commisions.service"
-import { VoucherService } from "../vouchers/voucher.service"
-import { VoucherEnum } from "../vouchers/enum/voucher-enum"
-import { SettingsService } from "../settings/settings.service"
-import { EventEmitter2 } from "@nestjs/event-emitter"
+
 import { EventRegistry } from "@/events/events.registry"
+import { PaymentsService } from "@services/payments/payments.service"
+import { TransactionHelper } from "@services/utils/transactions/transactions.service"
+import { PaystackChargeSuccess, PaystackTransferData } from "@services/payments/interfaces/paystack.interface"
 
 @Injectable()
 export class WebhookService {
   constructor(
     private orderService: OrdersService,
     private readonly paymentsService: PaymentsService,
-    private readonly cartsService: CartsService,
     private readonly subscriptionService: SubscriptionService,
     private readonly userService: UserService,
     private readonly storeService: StoreService,
@@ -34,9 +30,6 @@ export class WebhookService {
     private readonly transactionHelper: TransactionHelper,
     private readonly withdrawalsService: WithdrawalsService,
     private readonly payoutsService: PayoutsService,
-    private readonly commisionService: CommisionsService,
-    private readonly voucherService: VoucherService,
-    private readonly settingsService: SettingsService,
     private readonly eventEmitter: EventEmitter2
   ) {}
 
@@ -61,7 +54,7 @@ export class WebhookService {
     }
 
     if (order) {
-      await this.handleChargeSuccessForOrders(order, data)
+      await this.handleChargeSuccessForOrders(order)
     }
   }
 
@@ -97,67 +90,21 @@ export class WebhookService {
     return
   }
 
-  async handleChargeSuccessForOrders(order: Order, data: PaystackChargeSuccess) {
+  async handleChargeSuccessForOrders(order: Order) {
     if (!order || order.status === "paid") {
       return
     }
 
-    await this.transactionHelper.runInTransaction(async (manager) => {
-      await this.cartsService.remove({ user: { id: order.buyerId } }, manager)
-      const user = await this.userService.findOne({ id: order.buyerId })
-
-      await this.orderService.update(
-        order,
-        {
-          status: "paid",
-          paidAt: data.paidAt
-        },
-        manager
-      )
-
-      const voucher = await this.voucherService.findOne({ orderId: order.id })
-      if (voucher) {
-        await this.voucherService.update(voucher, { status: VoucherEnum.REDEEMED }, manager)
-      }
-
-      for (const item of order.items) {
-        const product = item.product
-        const storeId = product.user.business.store.id
-        const total = item.unitPrice * item.quantity
-        const commission = await this.commisionService.calculateOrderItemCommission(item)
-        const vendor = await this.userService.findOne({ id: item.product.user.id })
-
-        const totalAfterCommission = total - commission
-        const payout = await this.payoutsService.findOne({ storeId })
-
-        const store = await this.storeService.findById(storeId)
-        await this.storeService.update(store, { numberOfSales: store.numberOfSales + item.quantity }, manager)
-
-        if (!payout) {
-          await this.payoutsService.create({ storeId, total: totalAfterCommission, available: totalAfterCommission }, manager)
-        } else {
-          await this.payoutsService.update(payout, payout.handleVendorOrder(totalAfterCommission), manager)
-        }
-
-        const setting = await this.settingsService.findOneSetting()
-
-        await this.commisionService.create(
-          {
-            amount: commission,
-            value: setting.revenueSetting.fulfillmentFeePercentage,
-            storeId,
-            orderItemId: item.id
-          },
-          manager
-        )
-        await this.userService.update(vendor, { itemsCount: vendor.itemsCount + 1 }, manager)
-      }
-
-      await this.userService.update(user, { ordersCount: user.ordersCount + 1 }, manager)
-
-      // Dispatch Order Placed Event
-      this.eventEmitter.emit(EventRegistry.ORDER_PLACED, order)
-    })
+    // Delete the user Cart -> cart controller
+    // Update order status to paid and send notification to vendors and customer -> order controller
+    // Redeem voucher -> voucher controller
+    // Update buyer order count -> user controller
+    // For each order item:
+    //    - update each store number of sales -> store controller
+    //    - Increment store payout balance -> payout controller
+    //    - Keep record of skicom's commission -> commmision controller
+    //    - update vendor order count -> user controller
+    this.eventEmitter.emit(EventRegistry.ORDER_PLACED, order)
   }
 
   async handleInvoiceCreate(data: PaystackChargeSuccess) {

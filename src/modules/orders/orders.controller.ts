@@ -210,6 +210,12 @@ export class OrdersController {
 
   @OnEvent(EventRegistry.ORDER_PLACED)
   async handleOrderCreatedEvent(order: Order) {
+    // update order payement status to paid if payment type is not payment of delivery
+    // It was paid for by one of the other payment gateways
+    if (order.paymentMethod !== "paymentOnDelivery") {
+      await this.ordersService.update(order, { status: "paid", paidAt: new Date().toISOString() })
+    }
+
     // Notify vendors
     for (const item of order.items) {
       this.notificationService.notify(new VendorOrderItemPlacedNotification(item, order.id))

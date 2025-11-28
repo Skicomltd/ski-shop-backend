@@ -14,6 +14,9 @@ import { AppAbility } from "@services/casl/casl-ability.factory"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { Voucher } from "./entities/voucher.entity"
 import { Action } from "@services/casl/actions/action"
+import { EventRegistry } from "@/events/events.registry"
+import { OnEvent } from "@nestjs/event-emitter"
+import { Order } from "../orders/entities/order.entity"
 
 @Controller("vouchers")
 export class VoucherController {
@@ -78,5 +81,14 @@ export class VoucherController {
   @Delete(":id")
   remove(@Param("id") id: string) {
     return this.voucherService.remove({ id })
+  }
+
+  @OnEvent(EventRegistry.ORDER_PLACED)
+  async handleReedemVoucher(order: Order) {
+    const voucher = await this.voucherService.findOne({ orderId: order.id })
+
+    if (voucher) {
+      await this.voucherService.update(voucher, { status: VoucherEnum.REDEEMED })
+    }
   }
 }

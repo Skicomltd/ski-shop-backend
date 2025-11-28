@@ -24,6 +24,9 @@ import { PaymentModuleOption } from "@/services/payments"
 import { EstimateDeliveryDateDto, estimateDeliveryDateSchema } from "../carts/dto/estimate-delivery-date.dto"
 import { StoreService } from "../stores/store.service"
 import { FezService } from "@/services/fez"
+import { Order } from "../orders/entities/order.entity"
+import { OnEvent } from "@nestjs/event-emitter"
+import { EventRegistry } from "@/events/events.registry"
 
 @Controller("carts")
 export class CartsController {
@@ -196,5 +199,10 @@ export class CartsController {
     const count = await this.cartsService.remove({ id })
     if (count > 0) return "cart deleted successfully"
     return "Not deleted"
+  }
+
+  @OnEvent(EventRegistry.ORDER_PLACED)
+  async handleOrderPlaced(order: Order) {
+    await this.cartsService.remove({ user: { id: order.buyerId } })
   }
 }
