@@ -219,4 +219,13 @@ export class OrdersController {
     const placedOrder = await this.ordersService.findById(order.orderId)
     this.notificationService.notify(new OrderStatusChangeNotification(order, placedOrder.buyer))
   }
+
+  @OnEvent(EventRegistry.ORDER_STATUS_CHANGED)
+  async handleOrderStatusChange(order: OrderItem) {
+    // Notify customer
+    const placedOrder = await this.ordersService.findById(order.orderId)
+    this.notificationService.notify(new OrderStatusChangeNotification(order, placedOrder.buyer))
+
+    //If status is delivered, send mail
+  }
 }
