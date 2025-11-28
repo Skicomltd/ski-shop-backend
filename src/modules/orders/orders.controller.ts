@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Query, Req, Res, UseGuards, UseInterceptors } from "@nestjs/common"
+import { Controller, Get, Param, ParseUUIDPipe, Query, Req, Res, UseGuards, UseInterceptors } from "@nestjs/common"
 import { OrdersService } from "./orders.service"
 import { IOrdersQuery } from "./interfaces/query-filter.interface"
 import { OrdersInterceptor } from "./interceptors/orders.interceptor"
@@ -22,8 +22,6 @@ import { EventRegistry } from "@/events/events.registry"
 import { NotificationsService } from "@/services/notifications/notifications.service"
 import { VendorOrderItemPlacedNotification } from "@/notifications/vendors/order-item-placed.notification"
 import { CustomerOrderPlacedNotification } from "@/notifications/customers/order-placed-notification"
-import { JoiValidationPipe } from "@/validations/joi.validation"
-import { createRequestDeliverySchema, RequestDeliveryDto } from "./dto/request-delivery.dto"
 import { OrderItemService } from "./orderItem.service"
 import { OrderItem } from "./entities/order-item.entity"
 import { RequestedRiderNotification } from "@/notifications/vendors/requested-rider-notification"
@@ -149,12 +147,23 @@ export class OrdersController {
     return order
   }
 
+  @Get(":id/items/:itemId")
+  @UseGuards(PolicyOrderGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Order))
+  @UseInterceptors(OrderItemInterceptor)
+  async getOrderItem(@Param("itemId", ParseUUIDPipe) itemId: string) {
+    const orderItem = await this.orderItemsService.findById(itemId)
+    const history = await this.fezService.trackOrder(orderItem.deliveryNo)
+    return { ...orderItem, history: history.map((h) => ({ ...h, orderStatus: this.orderItemsService.mapFezStatus(h.orderStatus) })) }
+  }
+
+  @Get(":id/items/:itemId/request-delivery")
   @UseGuards(PolicyOrderGuard)
   @UseInterceptors(OrderItemInterceptor)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Order))
-  async requestDelivery(@Body(new JoiValidationPipe(createRequestDeliverySchema)) requestDeliveryDto: RequestDeliveryDto) {
-    const order = await this.ordersService.findById(requestDeliveryDto.orderId)
-    const orderItem = await this.orderItemsService.findById(requestDeliveryDto.orderItemId)
+  async requestDelivery(@Param("id", ParseUUIDPipe) id: string, @Param("itemId", ParseUUIDPipe) itemId: string) {
+    const order = await this.ordersService.findById(id)
+    const orderItem = await this.orderItemsService.findById(itemId)
 
     const delivery = await this.fezService.createOrder({
       batchId: order.id,
