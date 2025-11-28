@@ -45,6 +45,7 @@ export class ProductSeeder implements Seeder {
         images: Array.from({ length: faker.number.int({ min: 1, max: 3 }) }, () => faker.image.url({ width: 300, height: 300 })),
         status: faker.helpers.arrayElement(Object.values(ProductStatusEnum)),
         weight: 1,
+        fragile: false,
         storeId: store.id,
         userId: store.business.user.id, // User from store's business
         store, // ManyToOne relationship

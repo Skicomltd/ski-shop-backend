@@ -49,9 +49,10 @@ export class VendorController {
   @UseGuards(PolicyVendorGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, "VENDOR"))
   @UseInterceptors(VendorInterceptor)
-  @Get("profile")
-  findOne(@Req() req: Request) {
-    return req.user
+  @Get("/:id/profile")
+  async findOne(@Param("id", new ParseUUIDPipe()) id: string) {
+    const vendor = await this.userService.findById(id)
+    return vendor
   }
 
   @UseGuards(PolicyVendorGuard)

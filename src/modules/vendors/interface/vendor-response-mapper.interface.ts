@@ -10,7 +10,8 @@ export abstract class VendorResponseMapper implements IInterceptor {
         email: data.email,
         phoneNumber: data.phoneNumber,
         firstName: data.firstName,
-        lastName: data.lastName
+        lastName: data.lastName,
+        createdAt: data.createdAt.toISOString()
       },
       business: {
         id: data.business.id,
@@ -18,13 +19,15 @@ export abstract class VendorResponseMapper implements IInterceptor {
         address: data.business.address,
         country: data.business.country,
         state: data.business.state,
-        type: data.business.type
+        type: data.business.type,
+        kycStatus: data.business.kycStatus
       },
       store: {
         id: data.business.store.id,
         description: data.business.store.description,
         name: data.business.store.name,
-        logo: data.business.store.logo
+        logo: data.business.store.logo,
+        isStarSeller: data.business.store.isStarSeller
       }
     }
   }
