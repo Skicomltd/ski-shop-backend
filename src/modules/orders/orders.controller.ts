@@ -26,6 +26,8 @@ import { JoiValidationPipe } from "@/validations/joi.validation"
 import { createRequestDeliverySchema, RequestDeliveryDto } from "./dto/request-delivery.dto"
 import { OrderItemService } from "./orderItem.service"
 import { OrderItem } from "./entities/order-item.entity"
+import { RequestedRiderNotification } from "@/notifications/vendors/requested-rider-notification"
+import { OrderStatusChangeNotification } from "@/notifications/customers/order-status-change-notification"
 
 @Controller("orders")
 export class OrdersController {
@@ -207,11 +209,11 @@ export class OrdersController {
 
   @OnEvent(EventRegistry.ORDER_DELIVERY_REQUESTED)
   async handleDeliveryRequested(order: OrderItem) {
-    // // Notify vendors
-    // for (const item of order.items) {
-    //   this.notificationService.notify(new VendorOrderItemPlacedNotification(item, order.id))
-    // }
-    // // Notify customer
-    // this.notificationService.notify(new CustomerOrderPlacedNotification(order))
+    // Notify vendor
+    this.notificationService.notify(new RequestedRiderNotification(order))
+
+    // Notify customer
+    const placedOrder = await this.ordersService.findById(order.orderId)
+    this.notificationService.notify(new OrderStatusChangeNotification(order, placedOrder.buyer))
   }
 }

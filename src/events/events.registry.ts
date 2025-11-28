@@ -6,8 +6,8 @@ export const EventRegistry = {
   ORDER_PALCED_CUSTOMER: "order.placed.customer",
 
   ORDER_DELIVERY_REQUESTED: "order.delivery.requested",
-  ORDER_DELIVERY_REQUESTED_VENDOR: "order.delivery.requested.vendor",
-  ORDER_DELIVERY_REQUESTED_CUSTOMER: "order.delivery.requested.customer"
+
+  ORDER_STATUS_CHANGED: "order.status.change"
 } as const
 
 export type EventNameType = (typeof EventRegistry)[keyof typeof EventRegistry]
