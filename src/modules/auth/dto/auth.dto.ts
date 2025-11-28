@@ -43,7 +43,7 @@ export const registerSchema = joi.object({
 })
 
 export const verifyCodeSchema = joi.object({
-  code: joi.number().required()
+  code: joi.string().required()
 })
 
 export const resendOtpSchema = joi.object({
