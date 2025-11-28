@@ -28,6 +28,7 @@ import { OrderItemService } from "./orderItem.service"
 import { OrderItem } from "./entities/order-item.entity"
 import { RequestedRiderNotification } from "@/notifications/vendors/requested-rider-notification"
 import { OrderStatusChangeNotification } from "@/notifications/customers/order-status-change-notification"
+import { OrderItemInterceptor } from "./interceptors/order-item.interceptor"
 
 @Controller("orders")
 export class OrdersController {
@@ -149,6 +150,7 @@ export class OrdersController {
   }
 
   @UseGuards(PolicyOrderGuard)
+  @UseInterceptors(OrderItemInterceptor)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Order))
   async requestDelivery(@Body(new JoiValidationPipe(createRequestDeliverySchema)) requestDeliveryDto: RequestDeliveryDto) {
     const order = await this.ordersService.findById(requestDeliveryDto.orderId)
@@ -194,6 +196,7 @@ export class OrdersController {
 
     // Notify customer of updated status
     this.eventEmitter.emit(EventRegistry.ORDER_DELIVERY_REQUESTED, updatedItem)
+    return updatedItem
   }
 
   @OnEvent(EventRegistry.ORDER_PLACED)

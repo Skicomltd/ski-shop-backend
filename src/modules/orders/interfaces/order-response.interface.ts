@@ -6,7 +6,6 @@ export interface IOrderResponse {
   id: string
   products: OrderItemResponse[]
   status: OrderStatus
-  deliveryStatus: OrderDeliveryStatus
   totalAmount: number
   buyer: IdName & { address: string; phoneNumber: string }
   createdAt: string
@@ -23,4 +22,6 @@ export interface OrderItemResponse {
   subtotal: number
   vendor: IdName
   quantity: number
+  deliveryStatus: OrderDeliveryStatus
+  deliveryNo: string | null
 }
