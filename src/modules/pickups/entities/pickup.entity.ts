@@ -17,6 +17,9 @@ export class Pickup {
   address: string
 
   @Column()
+  state: string
+
+  @Column()
   phoneNumber: string
 
   @Column({ type: "enum", enum: PICKUP_STATUS, default: "active" })

@@ -9,7 +9,7 @@ export class CreateUserDto {
   phoneNumber?: string
   profileImage?: string
   role: UserRoleEnum
-  fcmToken?: string[]
+  fcmTokens?: string[]
   email: string
   isEmailVerified?: boolean
   isPhoneNumberVerified?: boolean

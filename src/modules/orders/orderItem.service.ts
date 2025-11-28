@@ -4,11 +4,14 @@ import { InjectRepository } from "@nestjs/typeorm"
 import { EntityManager, FindManyOptions, FindOptionsWhere, Repository } from "typeorm"
 import { IOrderItemQuery } from "./interfaces/orderItem-query"
 
+import { OrderStatus } from "@/services/fez"
+import { OrderDeliveryStatus } from "./interfaces/delivery-status"
+
 @Injectable()
 export class OrderItemService implements IService<OrderItem> {
   constructor(@InjectRepository(OrderItem) private orderItemRepository: Repository<OrderItem>) {}
 
-  async create(data: unknown, manager?: EntityManager): Promise<OrderItem> {
+  async create(data: Partial<OrderItem>, manager?: EntityManager): Promise<OrderItem> {
     const repo = manager ? manager.getRepository(OrderItem) : this.orderItemRepository
     const order = repo.create(data)
     return await repo.save(order)
@@ -44,7 +47,7 @@ export class OrderItemService implements IService<OrderItem> {
     return count > 0
   }
 
-  async update(entity: OrderItem, data: unknown, manager?: EntityManager): Promise<OrderItem> {
+  async update(entity: OrderItem, data: Partial<OrderItem>, manager?: EntityManager): Promise<OrderItem> {
     const repo = manager ? manager.getRepository(OrderItem) : this.orderItemRepository
     const updated = repo.merge(entity, data)
     return await repo.save(updated)
@@ -64,5 +67,30 @@ export class OrderItemService implements IService<OrderItem> {
       .getRawOne()
 
     return Number(result.total) || 0
+  }
+
+  mapFezStatus(status: OrderStatus): OrderDeliveryStatus {
+    switch (status) {
+      case "Pending Pick-Up":
+        return "pending"
+
+      case "Assigned To A Rider":
+        return "assigned"
+
+      case "Picked-Up":
+        return "picked_up"
+
+      case "Enroute To Last Mile Hub":
+        return "in_transit"
+
+      case "Accepted At Last Mile Hub":
+        return "arrived_at_hub"
+
+      case "Dispatched":
+        return "out_for_delivery"
+
+      case "Delivered":
+        return "delivered"
+    }
   }
 }

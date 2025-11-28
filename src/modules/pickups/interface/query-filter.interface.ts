@@ -4,4 +4,5 @@ import { Pickup } from "../entities/pickup.entity"
 
 export interface IPickupQuery extends PaginationParams, FindOptionsWhere<Pickup> {
   search?: string
+  state?: string
 }

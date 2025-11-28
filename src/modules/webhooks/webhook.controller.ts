@@ -3,18 +3,24 @@ import { WebhookService } from "./webhook.service"
 import { PaystackWebhookGuard } from "./guard/paystack.guard"
 import { Public } from "../auth/decorators/public.decorator"
 import { PaystackChargeSuccess, PaystackTransferData, PaystackWebhook } from "@services/payments/interfaces/paystack.interface"
+import { FezWebhookDto } from "./dto/fez.dto"
+import { OrderItemService } from "../orders/orderItem.service"
+import { EventEmitter2 } from "@nestjs/event-emitter"
+import { EventRegistry } from "@/events/events.registry"
 
 @Public()
 @Controller("webhooks")
 export class WebhookController {
-  constructor(private readonly webhookService: WebhookService) {}
+  constructor(
+    private readonly webhookService: WebhookService,
+    private readonly orderItemService: OrderItemService,
+    private readonly eventEmitter: EventEmitter2
+  ) {}
 
   @Public()
   @UseGuards(PaystackWebhookGuard)
   @Post("paystack")
   async handlePaystackWebhook(@Body() body: PaystackWebhook) {
-    console.error("webhook ran")
-
     if (body.event === "charge.success") {
       this.webhookService.handleChargeSuccess(body.data as PaystackChargeSuccess)
     } else if (body.event === "invoice.create") {
@@ -26,5 +32,19 @@ export class WebhookController {
     } else if (body.event === "transfer.reversed") {
       this.webhookService.handleTransferFailed(body.data as PaystackTransferData)
     }
+  }
+
+  @Public()
+  @Post("fez")
+  async handleFezWebhook(@Body() body: FezWebhookDto) {
+    const orderItem = await this.orderItemService.findById(body.orderNumber)
+    if (!orderItem) return
+
+    const status = this.orderItemService.mapFezStatus(body.status)
+    const updated = await this.orderItemService.update(orderItem, { deliveryStatus: status })
+
+    // Notify Customer + vendor
+    this.eventEmitter.emit(EventRegistry.ORDER_STATUS_CHANGED, updated)
+    return
   }
 }

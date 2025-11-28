@@ -5,6 +5,7 @@ export interface IPickupResponse {
   name: string
   contactPerson: string
   address: string
+  state: string
   phoneNumber: string
   status: pickup_status
 }

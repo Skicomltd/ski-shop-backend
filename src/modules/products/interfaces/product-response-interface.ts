@@ -12,6 +12,7 @@ export interface IProductResponse {
   stockCount: number
   reviewsCount: number
   images: string[]
+  weight: number
   status: ProductStatusEnum
   store: IdName
   user: IdName

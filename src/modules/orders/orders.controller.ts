@@ -15,12 +15,28 @@ import { UserRoleEnum } from "../users/entity/user.entity"
 import { Response } from "express"
 import { CsvService } from "@services/utils/csv/csv.service"
 import { OrderSummaryData } from "./interfaces/order-summary.interface"
+import { Public } from "../auth/decorators/public.decorator"
+import { FezService } from "@/services/fez"
+import { EventEmitter2, OnEvent } from "@nestjs/event-emitter"
+import { EventRegistry } from "@/events/events.registry"
+import { NotificationsService } from "@/services/notifications/notifications.service"
+import { VendorOrderItemPlacedNotification } from "@/notifications/vendors/order-item-placed.notification"
+import { CustomerOrderPlacedNotification } from "@/notifications/customers/order-placed-notification"
+import { OrderItemService } from "./orderItem.service"
+import { OrderItem } from "./entities/order-item.entity"
+import { RequestedRiderNotification } from "@/notifications/vendors/requested-rider-notification"
+import { OrderStatusChangeNotification } from "@/notifications/customers/order-status-change-notification"
+import { OrderItemInterceptor } from "./interceptors/order-item.interceptor"
 
 @Controller("orders")
 export class OrdersController {
   constructor(
     private readonly ordersService: OrdersService,
-    private readonly csvService: CsvService
+    private readonly orderItemsService: OrderItemService,
+    private readonly csvService: CsvService,
+    private readonly fezService: FezService,
+    private readonly notificationService: NotificationsService,
+    private readonly eventEmitter: EventEmitter2
   ) {}
 
   @UseGuards(PolicyOrderGuard)
@@ -58,7 +74,7 @@ export class OrdersController {
           product: item.product.name,
           orderId: order.id,
           customerName: order.buyer.getFullName(),
-          status: order.deliveryStatus,
+          status: item.deliveryStatus,
           dateAndTime: order.createdAt.toISOString(),
           amount: item.unitPrice * item.quantity
         }
@@ -85,7 +101,6 @@ export class OrdersController {
       order: {
         dateTime: order.paidAt,
         id: order.id,
-        orderStatus: order.deliveryStatus,
         paymentStatus: order.status,
         totalAmount: order.items.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0)
       },
@@ -106,6 +121,12 @@ export class OrdersController {
     res.send(pdfBuffer)
   }
 
+  @Public()
+  @Get("/delivery-states")
+  async delieveryStates() {
+    return this.fezService.getStates()
+  }
+
   @UseGuards(PolicyOrderGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Order))
   @UseInterceptors(OrderInterceptor)
@@ -124,5 +145,96 @@ export class OrdersController {
     }
 
     return order
+  }
+
+  @Get(":id/items/:itemId")
+  @UseGuards(PolicyOrderGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Order))
+  @UseInterceptors(OrderItemInterceptor)
+  async getOrderItem(@Param("itemId", ParseUUIDPipe) itemId: string) {
+    const orderItem = await this.orderItemsService.findById(itemId)
+    const history = await this.fezService.trackOrder(orderItem.deliveryNo)
+    return { ...orderItem, history: history.map((h) => ({ ...h, orderStatus: this.orderItemsService.mapFezStatus(h.orderStatus) })) }
+  }
+
+  @Get(":id/items/:itemId/request-delivery")
+  @UseGuards(PolicyOrderGuard)
+  @UseInterceptors(OrderItemInterceptor)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Order))
+  async requestDelivery(@Param("id", ParseUUIDPipe) id: string, @Param("itemId", ParseUUIDPipe) itemId: string) {
+    const order = await this.ordersService.findById(id)
+    const orderItem = await this.orderItemsService.findById(itemId)
+
+    const delivery = await this.fezService.createOrder({
+      batchId: order.id,
+      uniqueId: orderItem.id,
+      recipientName: order.buyer.getFullName(),
+      recipientAddress: order.shippingInfo.recipientAddress,
+      recipientState: order.shippingInfo.recipientState,
+      recipientPhone: order.shippingInfo.recipientPhone,
+      recipientEmail: order.shippingInfo.recipientEmail,
+      custToken: order.shippingInfo.recipientPhone.substring(-4),
+      itemDescription: orderItem.product.description,
+      valueOfItem: String(orderItem.unitPrice * orderItem.quantity),
+      weight: orderItem.product.weight * orderItem.quantity,
+      pickUpState: orderItem.product.store.business.state,
+      pickUpAddress: orderItem.product.store.business.address,
+      pickUpDate: new Date().toISOString(),
+      isItemCod: order.paymentMethod === "paymentOnDelivery",
+      cashOnDeliveryAmount: order.shippingInfo.shippingFee + (orderItem.unitPrice + orderItem.quantity),
+      fragile: orderItem.product.fragile
+    })
+
+    const deliveryNo = delivery.orderNos[orderItem.id]
+
+    const expectedAt = await this.fezService.getDeliveryDateEstimate({
+      delivery_type: "local",
+      pick_up_state: orderItem.product.store.business.state,
+      drop_off_state: order.shippingInfo.recipientState
+    })
+
+    const [min] = expectedAt.split(" ").filter((i) => Number.isInteger(Number(i)))
+    const today = new Date()
+    const expctedAt = today.setDate(today.getDate() + Number(min))
+
+    const updatedItem = await this.orderItemsService.update(orderItem, {
+      deliveryNo,
+      expectedAt: new Date(expctedAt),
+      deliveryStatus: "pending"
+    })
+
+    // Notify customer of updated status
+    this.eventEmitter.emit(EventRegistry.ORDER_DELIVERY_REQUESTED, updatedItem)
+    return updatedItem
+  }
+
+  @OnEvent(EventRegistry.ORDER_PLACED)
+  async handleOrderCreatedEvent(order: Order) {
+    // Notify vendors
+    for (const item of order.items) {
+      this.notificationService.notify(new VendorOrderItemPlacedNotification(item, order.id))
+    }
+
+    // Notify customer
+    this.notificationService.notify(new CustomerOrderPlacedNotification(order))
+  }
+
+  @OnEvent(EventRegistry.ORDER_DELIVERY_REQUESTED)
+  async handleDeliveryRequested(order: OrderItem) {
+    // Notify vendor
+    this.notificationService.notify(new RequestedRiderNotification(order))
+
+    // Notify customer
+    const placedOrder = await this.ordersService.findById(order.orderId)
+    this.notificationService.notify(new OrderStatusChangeNotification(order, placedOrder.buyer))
+  }
+
+  @OnEvent(EventRegistry.ORDER_STATUS_CHANGED)
+  async handleOrderStatusChange(order: OrderItem) {
+    // Notify customer
+    const placedOrder = await this.ordersService.findById(order.orderId)
+    this.notificationService.notify(new OrderStatusChangeNotification(order, placedOrder.buyer))
+
+    //If status is delivered, send mail
   }
 }

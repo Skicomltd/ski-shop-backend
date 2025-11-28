@@ -37,7 +37,7 @@ export class BuyerController {
         vendorName: item.product.store.name,
         dateOrdered: order.paidAt,
         totalAmount: order.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0),
-        status: order.deliveryStatus
+        status: order.status
       }))
     })
 

@@ -176,7 +176,7 @@ export class CaslAbilityFactory {
   }
 
   createAbilityForUserOrders(user: User): AppAbility {
-    const { can, build } = new AbilityBuilder(createMongoAbility)
+    const { can, cannot, build } = new AbilityBuilder(createMongoAbility)
 
     if (user.role === UserRoleEnum.Vendor) {
       can(Action.Read, Order)
@@ -185,9 +185,9 @@ export class CaslAbilityFactory {
       can(Action.Delete, Order, { buyerId: user.id })
     } else if (user.role === UserRoleEnum.Customer) {
       can(Action.Read, Order, { buyerId: user.id })
-      can(Action.Create, Order)
-      can(Action.Update, Order, { buyerId: user.id })
-      can(Action.Delete, Order, { buyerId: user.id })
+      cannot(Action.Create, Order)
+      cannot(Action.Update, Order, { buyerId: user.id })
+      cannot(Action.Delete, Order, { buyerId: user.id })
     } else if (user.role === UserRoleEnum.Admin) {
       can(Action.Manage, Order)
     }

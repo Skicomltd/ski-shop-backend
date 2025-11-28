@@ -8,6 +8,7 @@ export abstract class PickupResponseMapper implements IInterceptor {
       name: data.name,
       contactPerson: data.contactPerson,
       address: data.address,
+      state: data.state,
       phoneNumber: data.phoneNumber,
       status: data.status
     }

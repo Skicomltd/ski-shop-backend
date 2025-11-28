@@ -54,7 +54,7 @@ export class OrdersService implements IService<Order> {
     }
 
     if (deliveryStatus) {
-      query.andWhere("order.deliveryStatus = :deliveryStatus", { deliveryStatus })
+      query.andWhere("item.deliveryStatus = :deliveryStatus", { deliveryStatus })
     }
 
     if (status) {
@@ -210,7 +210,7 @@ export class OrdersService implements IService<Order> {
 
     return orders.map((ord) => ({
       id: ord.id,
-      status: ord.deliveryStatus,
+      status: ord.status,
       buyerName: ord.buyer.getFullName(),
       totalAmount: ord.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0),
       dateOrdered: ord.createdAt
@@ -287,7 +287,7 @@ export class OrdersService implements IService<Order> {
     yPos = this.pdfService.addTwoColumnPair(
       doc,
       "Order Status:",
-      data.order.orderStatus || "-",
+      data.order.paymentStatus || "-",
       "", // Empty for single row if needed
       "",
       yPos
