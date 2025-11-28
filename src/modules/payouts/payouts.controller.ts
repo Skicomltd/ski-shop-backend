@@ -13,6 +13,7 @@ import { EventRegistry } from "@/events/events.registry"
 import { OnEvent } from "@nestjs/event-emitter"
 import { Order } from "../orders/entities/order.entity"
 import { CommisionsService } from "../commisions/commisions.service"
+import { OrderItem } from "../orders/entities/order-item.entity"
 
 @Controller("payouts")
 export class PayoutsController {
@@ -47,7 +48,7 @@ export class PayoutsController {
     return await this.payoutsService.payoutStats()
   }
 
-  @OnEvent(EventRegistry.ORDER_PLACED)
+  @OnEvent(EventRegistry.ORDER_PLACED_PAID)
   async handleUpdateStoresPayout(order: Order) {
     for (const item of order.items) {
       const product = item.product
@@ -64,5 +65,22 @@ export class PayoutsController {
 
       await this.payoutsService.update(payout, payout.handleVendorOrder(totalAfterCommission))
     }
+  }
+
+  @OnEvent(EventRegistry.ORDER_PAID_AFTER_DELIVERY)
+  async handleUpdateStorePayout(_order: Order, item: OrderItem) {
+    const product = item.product
+    const storeId = product.user.business.store.id
+    const payout = await this.payoutsService.findOne({ storeId })
+    const total = item.unitPrice * item.quantity
+    const commission = await this.commisionService.calculateOrderItemCommission(item)
+    const totalAfterCommission = total - commission
+
+    if (!payout) {
+      await this.payoutsService.create({ storeId, total: totalAfterCommission, available: totalAfterCommission })
+      return
+    }
+
+    await this.payoutsService.update(payout, payout.handleVendorOrder(totalAfterCommission))
   }
 }

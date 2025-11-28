@@ -104,7 +104,7 @@ export class WebhookService {
     //    - Increment store payout balance -> payout controller
     //    - Keep record of skicom's commission -> commmision controller
     //    - update vendor order count -> user controller
-    this.eventEmitter.emit(EventRegistry.ORDER_PLACED, order)
+    this.eventEmitter.emit(EventRegistry.ORDER_PLACED_PAID, order)
   }
 
   async handleInvoiceCreate(data: PaystackChargeSuccess) {

@@ -20,6 +20,7 @@ import { FileSystemService } from "@services/filesystem/filesystem.service"
 import { Order } from "../orders/entities/order.entity"
 import { OnEvent } from "@nestjs/event-emitter"
 import { EventRegistry } from "@/events/events.registry"
+import { OrderItem } from "../orders/entities/order-item.entity"
 
 @Controller("users")
 export class UserController {
@@ -101,7 +102,7 @@ export class UserController {
     return await this.userService.remove({ id })
   }
 
-  @OnEvent(EventRegistry.ORDER_PLACED)
+  @OnEvent(EventRegistry.ORDER_PLACED_PAID)
   async handleUpdateVendorsSalesCount(order: Order) {
     for (const item of order.items) {
       const vendor = await this.userService.findOne({ id: item.product.user.id })
@@ -109,9 +110,16 @@ export class UserController {
     }
   }
 
-  @OnEvent(EventRegistry.ORDER_PLACED)
+  @OnEvent(EventRegistry.ORDER_PLACED_PAID)
+  @OnEvent(EventRegistry.ORDER_PAID_AFTER_DELIVERY)
   async handleUpdateCustomerOrderCount(order: Order) {
     const user = await this.userService.findOne({ id: order.buyerId })
     await this.userService.update(user, { ordersCount: user.ordersCount + 1 })
+  }
+
+  @OnEvent(EventRegistry.ORDER_PAID_AFTER_DELIVERY)
+  async handleUpdateVendorSalesCount(_order: Order, item: OrderItem) {
+    const vendor = await this.userService.findOne({ id: item.product.user.id })
+    await this.userService.update(vendor, { itemsCount: vendor.itemsCount + 1 })
   }
 }

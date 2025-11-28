@@ -25,7 +25,7 @@ import { EstimateDeliveryDateDto, estimateDeliveryDateSchema } from "../carts/dt
 import { StoreService } from "../stores/store.service"
 import { FezService } from "@/services/fez"
 import { Order } from "../orders/entities/order.entity"
-import { OnEvent } from "@nestjs/event-emitter"
+import { EventEmitter2, OnEvent } from "@nestjs/event-emitter"
 import { EventRegistry } from "@/events/events.registry"
 
 @Controller("carts")
@@ -40,7 +40,8 @@ export class CartsController {
     private readonly voucherService: VoucherService,
     private readonly configService: ConfigService,
     private readonly storesService: StoreService,
-    private readonly fezService: FezService
+    private readonly fezService: FezService,
+    private readonly eventEmitter: EventEmitter2
   ) {}
 
   @Post()
@@ -117,6 +118,8 @@ export class CartsController {
       }
 
       if (checkoutDto.paymentMethod === "paymentOnDelivery") {
+        this.eventEmitter.emit(EventRegistry.ORDER_PLACED_POD, order)
+
         return {
           checkoutUrl: "",
           reference: order.reference,
@@ -201,7 +204,8 @@ export class CartsController {
     return "Not deleted"
   }
 
-  @OnEvent(EventRegistry.ORDER_PLACED)
+  @OnEvent(EventRegistry.ORDER_PLACED_PAID)
+  @OnEvent(EventRegistry.ORDER_PLACED_POD)
   async handleOrderPlaced(order: Order) {
     await this.cartsService.remove({ user: { id: order.buyerId } })
   }

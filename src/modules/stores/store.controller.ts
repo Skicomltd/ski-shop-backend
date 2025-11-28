@@ -25,6 +25,7 @@ import { Public } from "../auth/decorators/public.decorator"
 import { OnEvent } from "@nestjs/event-emitter"
 import { EventRegistry } from "@/events/events.registry"
 import { Order } from "../orders/entities/order.entity"
+import { OrderItem } from "../orders/entities/order-item.entity"
 @Controller("stores")
 export class StoreController {
   constructor(
@@ -117,7 +118,7 @@ export class StoreController {
     return this.storeService.remove({ id: id })
   }
 
-  @OnEvent(EventRegistry.ORDER_PLACED)
+  @OnEvent(EventRegistry.ORDER_PLACED_PAID)
   async handleUpdateStoresSales(order: Order) {
     for (const item of order.items) {
       const product = item.product
@@ -125,5 +126,13 @@ export class StoreController {
       const store = await this.storeService.findById(storeId)
       await this.storeService.update(store, { numberOfSales: store.numberOfSales + item.quantity })
     }
+  }
+
+  @OnEvent(EventRegistry.ORDER_PAID_AFTER_DELIVERY)
+  async updateStoreSales(_order: Order, item: OrderItem) {
+    const product = item.product
+    const storeId = product.user.business.store.id
+    const store = await this.storeService.findById(storeId)
+    await this.storeService.update(store, { numberOfSales: store.numberOfSales + item.quantity })
   }
 }

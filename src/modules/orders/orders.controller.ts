@@ -27,6 +27,7 @@ import { OrderItem } from "./entities/order-item.entity"
 import { RequestedRiderNotification } from "@/notifications/vendors/requested-rider-notification"
 import { OrderStatusChangeNotification } from "@/notifications/customers/order-status-change-notification"
 import { OrderItemInterceptor } from "./interceptors/order-item.interceptor"
+import { OrderStatus } from "./interfaces/order-status"
 
 @Controller("orders")
 export class OrdersController {
@@ -208,7 +209,7 @@ export class OrdersController {
     return updatedItem
   }
 
-  @OnEvent(EventRegistry.ORDER_PLACED)
+  @OnEvent(EventRegistry.ORDER_PLACED_PAID)
   async handleOrderCreatedEvent(order: Order) {
     // update order payement status to paid if payment type is not payment of delivery
     // It was paid for by one of the other payment gateways
@@ -223,6 +224,39 @@ export class OrdersController {
 
     // Notify customer
     this.notificationService.notify(new CustomerOrderPlacedNotification(order))
+  }
+
+  @OnEvent(EventRegistry.ORDER_PLACED_POD)
+  async handleOrderCreatedPODEvent(order: Order) {
+    // update order status to unpaid.
+    await this.ordersService.update(order, { status: "unpaid" })
+
+    // Notify vendors
+    for (const item of order.items) {
+      this.notificationService.notify(new VendorOrderItemPlacedNotification(item, order.id))
+    }
+
+    // Notify customer
+    this.notificationService.notify(new CustomerOrderPlacedNotification(order))
+  }
+
+  @OnEvent(EventRegistry.ORDER_PAID_AFTER_DELIVERY)
+  async handleOrderPaidAfterDelivery(order: Order) {
+    if (order.paymentMethod === "paymentOnDelivery") {
+      // go through each item and check their delivery status
+      let status: OrderStatus = "paid"
+
+      for (const item of order.items) {
+        // For an order item to be delivered, then it has been paid for.
+        // if all have been delivered, payment status = paid
+        // if some yet to be delivered, payment status = partially_paid
+        if (item.deliveryStatus !== "delivered") {
+          status = "partially_paid"
+        }
+      }
+
+      await this.ordersService.update(order, { status })
+    }
   }
 
   @OnEvent(EventRegistry.ORDER_DELIVERY_REQUESTED)

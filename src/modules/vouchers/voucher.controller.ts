@@ -83,7 +83,8 @@ export class VoucherController {
     return this.voucherService.remove({ id })
   }
 
-  @OnEvent(EventRegistry.ORDER_PLACED)
+  @OnEvent(EventRegistry.ORDER_PLACED_PAID)
+  @OnEvent(EventRegistry.ORDER_PAID_AFTER_DELIVERY)
   async handleReedemVoucher(order: Order) {
     const voucher = await this.voucherService.findOne({ orderId: order.id })
 
