@@ -16,14 +16,18 @@ import { UserRoleEnum } from "../users/entity/user.entity"
 
 @Controller("contactUs")
 export class ContactUsController {
-  constructor(private readonly contactUsService: ContactUsService, private mailerService: MailService, private userService: UserService) {}
+  constructor(
+    private readonly contactUsService: ContactUsService,
+    private mailerService: MailService,
+    private userService: UserService
+  ) {}
 
   @Public()
   @UseInterceptors(ContactUsResponseInterceptor)
   @Post()
   async create(@Body(new JoiValidationPipe(createContactUsSchema)) createContactUsDto: CreateContactUsDto) {
     const contactUs = await this.contactUsService.create(createContactUsDto)
-    const adminUsers = await this.userService.find({ role: UserRoleEnum.Admin})
+    const adminUsers = await this.userService.find({ role: UserRoleEnum.Admin })
     if (adminUsers[0].length > 0) {
       for (const adminUser of adminUsers[0]) {
         await this.mailerService.send(new ContactUsNotification(adminUser.email))
