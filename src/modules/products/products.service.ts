@@ -125,9 +125,16 @@ export class ProductsService implements IService<Product> {
     }
 
     if (search) {
-      query.andWhere("LOWER(product.name) LIKE :search", {
-        search: `%${search.toLowerCase()}%`
-      })
+      const term = `%${search.toLowerCase()}%`
+
+      query.andWhere(
+        `(LOWER(product.name) LIKE :term
+      OR LOWER(user.firstName) LIKE :term
+      OR LOWER(user.lastName) LIKE :term
+      OR LOWER(user.email) LIKE :term
+    )`,
+        { term }
+      )
     }
 
     if (rating && Number(rating) !== 0) {
