@@ -76,7 +76,7 @@ jobs:
              echo '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}' > $DEPLOY_PATH/fire-base-admin.json
 
          - name: Install dependencies 🚀
-           run: npm install --prefix $DEPLOY_PATH
+           run: npm ci --prefix $DEPLOY_PATH
 
          - name: Drop All Tables ❌
            run: npm run migration:drop --prefix $DEPLOY_PATH
