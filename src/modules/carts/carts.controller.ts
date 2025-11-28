@@ -138,7 +138,7 @@ export class CartsController {
     const [cart] = await this.cartsService.find({ user: { id: user.id } })
     if (!cart.length) throw new NotFoundException("Cart does not exist")
 
-    let maxCost = 0 // maximum cost for a single delivery
+    let totalCost = 0 // total cost of all deliveries
     let earliestDay = Infinity // Earliest delivery date
     let maximumDay = 1 // Max delivery date
 
@@ -150,7 +150,7 @@ export class CartsController {
         weight: item.product.weight
       })
 
-      maxCost = Math.max(maxCost, cost)
+      totalCost += cost
 
       const date = await this.fezService.getDeliveryDateEstimate({
         delivery_type: "local",
@@ -168,7 +168,7 @@ export class CartsController {
     const maxDate = today.setDate(today.getDate() + Number(maximumDay))
 
     return {
-      cost: maxCost,
+      cost: totalCost,
       minDate: new Date(minDate).toISOString(),
       maxDate: new Date(maxDate).toISOString()
     }
