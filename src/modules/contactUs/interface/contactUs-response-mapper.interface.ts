@@ -1,5 +1,5 @@
-import { ContactUs } from "../entities/contact-us.entity"
-import { IContactUsResponse } from "./contact-us-response.interface"
+import { ContactUs } from "../entities/contactUs.entity"
+import { IContactUsResponse } from "./contactUs-response.interface"
 
 export abstract class ContactUsResponseMapper implements IInterceptor {
   transform(data: ContactUs): IContactUsResponse {

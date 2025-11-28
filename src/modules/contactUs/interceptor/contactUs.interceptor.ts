@@ -1,8 +1,8 @@
 import { map, Observable } from "rxjs"
 import { CallHandler, ExecutionContext, Injectable, NestInterceptor } from "@nestjs/common"
-import { ContactUsResponseMapper } from "../interface/contact-us-response-mapper.interface"
-import { ContactUs } from "../entities/contact-us.entity"
-import { IContactUsResponse } from "../interface/contact-us-response.interface"
+import { ContactUsResponseMapper } from "../interface/contactUs-response-mapper.interface"
+import { ContactUs } from "../entities/contactUs.entity"
+import { IContactUsResponse } from "../interface/contactUs-response.interface"
 
 @Injectable()
 export class ContactUsResponseInterceptor extends ContactUsResponseMapper implements NestInterceptor<ContactUs, IContactUsResponse> {

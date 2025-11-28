@@ -1,24 +1,35 @@
 import { Controller, Get, Post, Body, Param, Delete, ParseUUIDPipe, UseInterceptors, UseGuards } from "@nestjs/common"
-import { ContactUsService } from "./contact-us.service"
-import { createContactUsSchema, CreateContactUsDto } from "./dto/create-contact-us.dto"
+import { ContactUsService } from "./contactUs.service"
+import { createContactUsSchema, CreateContactUsDto } from "./dto/create-contactUs.dto"
 import { Public } from "../auth/decorators/public.decorator"
-import { ContactsUsResponseInterceptor } from "./interceptor/contacts-us.interceptor"
-import { ContactUsResponseInterceptor } from "./interceptor/contact-us.interceptor"
-import { PolicyContactUsGuard } from "./guard/policy-contact-us.guard"
+import { ContactsUsResponseInterceptor } from "./interceptor/contactsUs.interceptor"
+import { ContactUsResponseInterceptor } from "./interceptor/contactUs.interceptor"
+import { PolicyContactUsGuard } from "./guard/policy-contactUs.guard"
 import { AppAbility } from "@services/casl/casl-ability.factory"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { Action } from "@services/casl/actions/action"
 import { JoiValidationPipe } from "@/validations/joi.validation"
+import { MailService } from "@/services/mail"
+import { ContactUsNotification } from "@/mails"
+import { UserService } from "../users/user.service"
+import { UserRoleEnum } from "../users/entity/user.entity"
 
-@Controller("contact-us")
+@Controller("contactUs")
 export class ContactUsController {
-  constructor(private readonly contactUsService: ContactUsService) {}
+  constructor(private readonly contactUsService: ContactUsService, private mailerService: MailService, private userService: UserService) {}
 
   @Public()
   @UseInterceptors(ContactUsResponseInterceptor)
   @Post()
-  create(@Body(new JoiValidationPipe(createContactUsSchema)) createContactUsDto: CreateContactUsDto) {
-    return this.contactUsService.create(createContactUsDto)
+  async create(@Body(new JoiValidationPipe(createContactUsSchema)) createContactUsDto: CreateContactUsDto) {
+    const contactUs = await this.contactUsService.create(createContactUsDto)
+    const adminUsers = await this.userService.find({ role: UserRoleEnum.Admin})
+    if (adminUsers[0].length > 0) {
+      for (const adminUser of adminUsers[0]) {
+        await this.mailerService.send(new ContactUsNotification(adminUser.email))
+      }
+    }
+    return contactUs
   }
 
   @UseGuards(PolicyContactUsGuard)

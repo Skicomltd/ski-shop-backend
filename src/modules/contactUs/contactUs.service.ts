@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common"
-import { CreateContactUsDto } from "./dto/create-contact-us.dto"
-import { UpdateContactUsDto } from "./dto/update-contact-us.dto"
 import { InjectRepository } from "@nestjs/typeorm"
-import { ContactUs } from "./entities/contact-us.entity"
 import { EntityManager, FindOptionsWhere, Repository } from "typeorm"
+import { CreateContactUsDto } from "./dto/create-contactUs.dto"
+import { ContactUs } from "./entities/contactUs.entity"
+import { UpdateContactUsDto } from "./dto/update-contactUs.dto"
 
 @Injectable()
 export class ContactUsService implements IService<ContactUs> {
