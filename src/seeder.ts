@@ -43,6 +43,7 @@ import { RevenueSettingSeeder } from "./modules/seeder/revenue-setting.seeder"
 import { Play2WinSeeder } from "./modules/seeder/play-2-win.seeder"
 import { PromotionSettingSeeder } from "./modules/seeder/promotion-setting.seeder"
 import { GeneralSeeder } from "./modules/seeder/general.seeder"
+import { Address } from "./modules/addresses/entities/address.entity"
 
 seeder({
   imports: [
@@ -75,7 +76,8 @@ seeder({
       RevenueSetting,
       Play2winSetting,
       PromotionSetting,
-      GeneralSetting
+      GeneralSetting,
+      Address
     ])
   ],
   providers: [UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder, PromotionSeeder, PlanSeeder]
