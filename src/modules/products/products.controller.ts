@@ -148,6 +148,18 @@ export class ProductsController {
     return await this.productsService.saved({ ...query, userId: req.user.id })
   }
 
+  @Public()
+  @Get("/hand-picked")
+  async handPickedProducts(@Req() req: Request) {
+    const authHeader = req.headers["authorization"]
+
+    const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null
+
+    console.log(token)
+
+    return { token }
+  }
+
   @Get("/categories")
   @Public()
   async categories() {
