@@ -9,6 +9,7 @@ export class CreateProductDto {
   category: ProductCategoriesEnum
   description: string
   discountPrice?: number
+  unitsSold?: number
   stockCount: number
   weight: number
   fragile: boolean

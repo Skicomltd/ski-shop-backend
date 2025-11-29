@@ -281,4 +281,11 @@ export class ProductsService implements IService<Product> {
 
     return { totalProduct, totalPublishedOrDraftProduct }
   }
+
+  async topSellingProducts({ limit = 10, page = 1, category }: IProductsQuery = {}) {
+    const skip = (page - 1) * limit
+    const where: FindOptionsWhere<Product> = {}
+    if (category) where.category = category
+    return this.productRepository.findAndCount({ order: { unitsSold: "DESC" }, take: limit, skip, where })
+  }
 }
