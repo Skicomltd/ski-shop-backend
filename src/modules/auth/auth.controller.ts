@@ -140,13 +140,9 @@ export class AuthController {
       const firebaseUser = await this.firebaseService.verifyIdToken(verifyPhoneNumberDto.code)
 
       // No associated phone number and email with idToken
-      if (!firebaseUser.email || !firebaseUser.phone_number) throw new UnAuthorizedException()
+      if (!firebaseUser.phone_number) throw new UnAuthorizedException()
 
-      // Retrieve user
-      const user = await this.userService.findOne({ email: firebaseUser.email })
-      if (!user) throw new UnAuthorizedException()
-
-      await this.userService.update(user, { phoneNumber: firebaseUser.phone_number, isPhoneNumberVerified: true })
+      await this.userService.update(req.user, { phoneNumber: firebaseUser.phone_number, isPhoneNumberVerified: true })
 
       const shortTimeToken = await this.helperService.generateToken(
         { email: req.user.email, id: req.user.id },
@@ -156,6 +152,7 @@ export class AuthController {
 
       return { token: shortTimeToken }
     } catch (error) {
+      console.error(error)
       throw new UnAuthorizedException("Phone number verification failed")
     }
   }
