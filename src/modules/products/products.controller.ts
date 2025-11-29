@@ -240,6 +240,14 @@ export class ProductsController {
     return this.productsService.findOne({ id: id })
   }
 
+  @Public()
+  @Get("/:id/similar")
+  @UseInterceptors(ProductsInterceptor)
+  async getSimilarProducts(@Param("id", ParseUUIDPipe) productId: string) {
+    const product = await this.productsService.findById(productId)
+    return await this.productsService.getSimilarProducts(product, 5)
+  }
+
   @Patch(":id")
   @UseGuards(OwnProductGuard)
   @UseGuards(PoliciesGuard)

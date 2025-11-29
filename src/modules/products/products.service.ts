@@ -288,4 +288,22 @@ export class ProductsService implements IService<Product> {
     if (category) where.category = category
     return this.productRepository.findAndCount({ order: { unitsSold: "DESC" }, take: limit, skip, where })
   }
+
+  async getSimilarProducts(product: Product, limit: number) {
+    const qb = this.productRepository.createQueryBuilder("p").leftJoinAndSelect("p.store", "store").leftJoinAndSelect("p.user", "user")
+
+    qb.where("p.id != :id", { id: product.id })
+
+    // Same category
+    qb.andWhere("p.category = :category", { category: product.category })
+
+    // Same vendor (optional fallback)
+    qb.orWhere("p.userId = :userId", { userId: product.userId })
+
+    qb.orderBy("p.unitsSold", "DESC") // most relevant first
+
+    qb.take(limit)
+
+    return qb.getManyAndCount()
+  }
 }
