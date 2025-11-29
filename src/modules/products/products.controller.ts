@@ -40,6 +40,7 @@ import { ProductCategoriesEnum } from "../common/types"
 import { SaveProductDto, saveProductSchema } from "./dto/save-product.dto"
 import { CsvService } from "@services/utils/csv/csv.service"
 import { Response } from "express"
+import { OptionalJwtGuard } from "../auth/guard/optional-jwt.guard"
 @Controller("products")
 export class ProductsController {
   constructor(
@@ -149,15 +150,11 @@ export class ProductsController {
   }
 
   @Public()
+  @UseGuards(OptionalJwtGuard)
   @Get("/hand-picked")
   async handPickedProducts(@Req() req: Request) {
-    const authHeader = req.headers["authorization"]
-
-    const token = authHeader?.startsWith("Bearer ") ? authHeader.slice(7) : null
-
-    console.log(token)
-
-    return { token }
+    console.error("user: ", req.user)
+    console.error("client: ", req.client)
   }
 
   @Get("/categories")
