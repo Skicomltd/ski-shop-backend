@@ -74,65 +74,44 @@ export class ProductsService implements IService<Product> {
       .leftJoinAndSelect("product.store", "store")
       .leftJoinAndSelect("product.user", "user")
       .leftJoinAndSelect("product.reviews", "reviews")
-      .orderBy("product.createdAt", orderBy)
       .addGroupBy("product.id")
       .addGroupBy("reviews.id")
       .addGroupBy("store.id")
       .addGroupBy("user.id")
 
-    if (storeId) {
-      query.andWhere("product.storeId = :storeId", { storeId })
-    }
+    if (storeId) query.andWhere("product.storeId = :storeId", { storeId })
 
-    if (status) {
-      if (status !== ProductStatusEnum.draft && status !== ProductStatusEnum.published) throw new BadReqException("invalid status")
+    if (status && (status === ProductStatusEnum.draft || status === ProductStatusEnum.published)) {
       query.andWhere("product.status = :status", { status })
     }
 
-    if (stockCount) {
-      query.andWhere("product.stockCount > :stockCount", { stockCount })
-    }
+    if (stockCount) query.andWhere("product.stockCount > :stockCount", { stockCount })
 
     if (categories) {
       const cats = categories.split(",")
       query.andWhere("product.category IN (:...cats)", { cats })
     }
 
-    if (vendor) {
-      query.andWhere("store.type = :vendor", { vendor })
-    }
+    if (vendor) query.andWhere("store.type = :vendor", { vendor })
 
-    // subscribed vendors
-    if (flag === "top") {
-      query.andWhere("store.isStarSeller = true")
-    }
+    // Promote star sellers to top
+    // This will order by store.isStarSeller DESC first, then createdAt (or other sorting)
+    query.addOrderBy("store.isStarSeller", "DESC")
 
-    // promoted products
-    if (flag === "featured") {
-      query.innerJoin("product.ads", "ad").andWhere("ad.type = :adType", { adType: PromotionTypeEnum.FEATURED })
-    }
+    if (flag === "featured") query.innerJoin("product.ads", "ad").andWhere("ad.type = :adType", { adType: PromotionTypeEnum.FEATURED })
+    if (flag === "banner") query.innerJoin("product.ads", "ad").andWhere("ad.type = :adType", { adType: PromotionTypeEnum.BANNER })
+    if (flag === "search") query.innerJoin("product.ads", "ad").andWhere("ad.type = :adType", { adType: PromotionTypeEnum.SEARCH })
 
-    if (flag === "banner") {
-      query.innerJoin("product.ads", "ad").andWhere("ad.type = :adType", { adType: PromotionTypeEnum.BANNER })
-    }
-
-    if (flag === "search") {
-      query.innerJoin("product.ads", "ad").andWhere("ad.type = :adType", { adType: PromotionTypeEnum.SEARCH })
-    }
-
-    if (sortBy) {
-      query.orderBy("product.price", sortBy)
-    }
+    if (sortBy) query.addOrderBy("product.price", sortBy)
+    else query.addOrderBy("product.createdAt", orderBy) // fallback order
 
     if (search) {
       const term = `%${search.toLowerCase()}%`
-
       query.andWhere(
         `(LOWER(product.name) LIKE :term
       OR LOWER(user.firstName) LIKE :term
       OR LOWER(user.lastName) LIKE :term
-      OR LOWER(user.email) LIKE :term
-    )`,
+      OR LOWER(user.email) LIKE :term)`,
         { term }
       )
     }
@@ -140,8 +119,7 @@ export class ProductsService implements IService<Product> {
     if (rating && Number(rating) !== 0) {
       query.andWhere(
         `product.totalProductRatingCount > 0
-    AND ROUND(product.totalProductRatingSum / product.totalProductRatingCount, 1) = :rating
-  `,
+      AND ROUND(product.totalProductRatingSum / product.totalProductRatingCount, 1) = :rating`,
         { rating: Number(rating) }
       )
     }
@@ -156,6 +134,108 @@ export class ProductsService implements IService<Product> {
       .skip(page && page > 0 ? (page - 1) * limit : 0)
       .getManyAndCount()
   }
+
+  // async find({
+  //   page,
+  //   limit,
+  //   status,
+  //   stockCount = -1,
+  //   storeId,
+  //   categories,
+  //   vendor,
+  //   flag,
+  //   search,
+  //   rating,
+  //   orderBy = "ASC",
+  //   sortBy,
+  //   userId
+  // }: IProductsQuery) {
+  //   const query = this.productRepository
+  //     .createQueryBuilder("product")
+  //     .leftJoinAndSelect("product.store", "store")
+  //     .leftJoinAndSelect("product.user", "user")
+  //     .leftJoinAndSelect("product.reviews", "reviews")
+  //     .orderBy("product.createdAt", orderBy)
+  //     .addGroupBy("product.id")
+  //     .addGroupBy("reviews.id")
+  //     .addGroupBy("store.id")
+  //     .addGroupBy("user.id")
+
+  //   if (storeId) {
+  //     query.andWhere("product.storeId = :storeId", { storeId })
+  //   }
+
+  //   if (status) {
+  //     if (status !== ProductStatusEnum.draft && status !== ProductStatusEnum.published) throw new BadReqException("invalid status")
+  //     query.andWhere("product.status = :status", { status })
+  //   }
+
+  //   if (stockCount) {
+  //     query.andWhere("product.stockCount > :stockCount", { stockCount })
+  //   }
+
+  //   if (categories) {
+  //     const cats = categories.split(",")
+  //     query.andWhere("product.category IN (:...cats)", { cats })
+  //   }
+
+  //   if (vendor) {
+  //     query.andWhere("store.type = :vendor", { vendor })
+  //   }
+
+  //   // Promote star sellers to top
+  //   // This will order by store.isStarSeller DESC first, then createdAt (or other sorting)
+  //   query.addOrderBy("store.isStarSeller", "DESC")
+
+  //   // promoted products
+  //   if (flag === "featured") {
+  //     query.innerJoin("product.ads", "ad").andWhere("ad.type = :adType", { adType: PromotionTypeEnum.FEATURED })
+  //   }
+
+  //   if (flag === "banner") {
+  //     query.innerJoin("product.ads", "ad").andWhere("ad.type = :adType", { adType: PromotionTypeEnum.BANNER })
+  //   }
+
+  //   if (flag === "search") {
+  //     query.innerJoin("product.ads", "ad").andWhere("ad.type = :adType", { adType: PromotionTypeEnum.SEARCH })
+  //   }
+
+  //   if (sortBy) {
+  //     query.orderBy("product.price", sortBy)
+  //   }
+
+  //   if (search) {
+  //     const term = `%${search.toLowerCase()}%`
+
+  //     query.andWhere(
+  //       `(LOWER(product.name) LIKE :term
+  //     OR LOWER(user.firstName) LIKE :term
+  //     OR LOWER(user.lastName) LIKE :term
+  //     OR LOWER(user.email) LIKE :term
+  //   )`,
+  //       { term }
+  //     )
+  //   }
+
+  //   if (rating && Number(rating) !== 0) {
+  //     query.andWhere(
+  //       `product.totalProductRatingCount > 0
+  //   AND ROUND(product.totalProductRatingSum / product.totalProductRatingCount, 1) = :rating
+  // `,
+  //       { rating: Number(rating) }
+  //     )
+  //   }
+
+  //   if (userId) {
+  //     query.leftJoinAndSelect("product.savedBy", "savedBy", "savedBy.userId = :userId", { userId })
+  //     query.addGroupBy("savedBy.id")
+  //   }
+
+  //   return await query
+  //     .take(limit)
+  //     .skip(page && page > 0 ? (page - 1) * limit : 0)
+  //     .getManyAndCount()
+  // }
 
   async findOne(filter: FindOptionsWhere<Product>): Promise<Product> {
     const product = await this.productRepository.findOne({
