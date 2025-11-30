@@ -1,11 +1,10 @@
 import { ProductCategoriesEnum, ProductStatusEnum } from "@/modules/common/types"
 import { Store } from "@/modules/stores/entities/store.entity"
 import { User } from "@/modules/users/entity/user.entity"
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany, BeforeUpdate, BeforeInsert } from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, ManyToOne, OneToMany } from "typeorm"
 import { SavedProduct } from "./saved-product.entity"
 import { Review } from "@/modules/reviews/entities/review.entity"
 import { Ad } from "@/modules/ads/entities/ad.entity"
-import { BadReqException } from "@/exceptions/badRequest.exception"
 
 @Entity()
 export class Product {
@@ -48,6 +47,9 @@ export class Product {
   @Column({ type: "int", default: 0 })
   totalProductRatingCount: number
 
+  @Column({ type: "int", default: 0 })
+  unitsSold: number
+
   @Column()
   storeId: string
 
@@ -74,10 +76,4 @@ export class Product {
 
   @UpdateDateColumn()
   updatedAt: Date
-
-  @BeforeUpdate()
-  @BeforeInsert()
-  async validatePrices() {
-    if (this.discountPrice > this.price) throw new BadReqException("Discount price cannot be greater than the original price")
-  }
 }

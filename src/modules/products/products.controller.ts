@@ -40,6 +40,12 @@ import { ProductCategoriesEnum } from "../common/types"
 import { SaveProductDto, saveProductSchema } from "./dto/save-product.dto"
 import { CsvService } from "@services/utils/csv/csv.service"
 import { Response } from "express"
+import { OptionalJwtGuard } from "../auth/guard/optional-jwt.guard"
+import { OnEvent } from "@nestjs/event-emitter"
+import { EventRegistry } from "@/events/events.registry"
+import { Order } from "../orders/entities/order.entity"
+import { OrderItem } from "../orders/entities/order-item.entity"
+import { OrdersService } from "../orders/orders.service"
 @Controller("products")
 export class ProductsController {
   constructor(
@@ -47,7 +53,8 @@ export class ProductsController {
     private storeService: StoreService,
     private fileSystem: FileSystemService,
     private dtoMapper: DtoMapper,
-    private readonly csvService: CsvService
+    private readonly csvService: CsvService,
+    private readonly ordersService: OrdersService
   ) {}
 
   @Post()
@@ -148,6 +155,78 @@ export class ProductsController {
     return await this.productsService.saved({ ...query, userId: req.user.id })
   }
 
+  @Public()
+  @UseGuards(OptionalJwtGuard)
+  @UseInterceptors(ProductsInterceptor)
+  @Get("/hand-picked")
+  async handPickedProducts(@Req() req: Request) {
+    const user = req.user
+
+    // ----------------------------
+    // CASE 1: Public (unauthenticated)
+    // ----------------------------
+    if (!user) {
+      return await this.productsService.topSellingProducts({ limit: 5 })
+    }
+
+    // ----------------------------
+    // CASE 2: Authenticated – personalize
+    // ----------------------------
+    const categoriesMap = new Map<ProductCategoriesEnum, number>()
+
+    // get the user orders
+    const [orders] = await this.ordersService.find({ buyerId: user.id })
+
+    // count category frequency
+    for (const order of orders) {
+      for (const item of order.items) {
+        const category = item.product.category
+        categoriesMap.set(category, (categoriesMap.get(category) || 0) + 1)
+      }
+    }
+
+    // if the user has never purchased anything → fallback
+    if (categoriesMap.size === 0) {
+      return await this.productsService.topSellingProducts({ limit: 5 })
+    }
+
+    // sort categories by frequency, highest first
+    const sortedCategories = [...categoriesMap.entries()].sort((a, b) => b[1] - a[1]).map(([cat]) => cat)
+
+    const result: Product[] = []
+
+    // fetch top-selling products from each category
+    for (const category of sortedCategories) {
+      if (result.length >= 5) break
+
+      const [products] = await this.productsService.topSellingProducts({ limit: 1, category })
+
+      if (products.length > 0) {
+        result.push(products[0])
+      }
+    }
+
+    // If we still don't have 5, fill the rest with global top sellers
+    if (result.length < 5) {
+      const needed = 5 - result.length
+      const [globalTop] = await this.productsService.topSellingProducts({
+        limit: needed
+      })
+
+      // Ensure no duplicates
+      for (const product of globalTop) {
+        if (!result.find((p) => p.id === product.id)) {
+          result.push(product)
+        }
+        if (result.length >= 5) break
+      }
+    }
+
+    const tp = result.slice(0, 5)
+
+    return [tp, 5]
+  }
+
   @Get("/categories")
   @Public()
   async categories() {
@@ -159,6 +238,14 @@ export class ProductsController {
   @UseInterceptors(ProductInterceptor)
   findOne(@Param("id", ParseUUIDPipe) id: string) {
     return this.productsService.findOne({ id: id })
+  }
+
+  @Public()
+  @Get("/:id/similar")
+  @UseInterceptors(ProductsInterceptor)
+  async getSimilarProducts(@Param("id", ParseUUIDPipe) productId: string) {
+    const product = await this.productsService.findById(productId)
+    return await this.productsService.getSimilarProducts(product, 5)
   }
 
   @Patch(":id")
@@ -200,5 +287,17 @@ export class ProductsController {
     )
 
     return await this.productsService.remove({ id })
+  }
+
+  @OnEvent(EventRegistry.ORDER_PLACED_PAID)
+  async handleIncrementOrdersUnitSold(order: Order) {
+    for (const item of order.items) {
+      await this.productsService.update(item.product, { unitsSold: item.product.unitsSold + item.quantity })
+    }
+  }
+
+  @OnEvent(EventRegistry.ORDER_PAID_AFTER_DELIVERY)
+  async handleIncrementOrderUnitSold(_order: Order, item: OrderItem) {
+    await this.productsService.update(item.product, { unitsSold: item.product.unitsSold + item.quantity })
   }
 }
