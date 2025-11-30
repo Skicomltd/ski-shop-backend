@@ -18,6 +18,7 @@ import { ConflictException } from "@/exceptions/conflict.exception"
 import { ReviewsInterceptor } from "./interceptor/reviews.interceptor"
 import { StoreService } from "../stores/store.service"
 import { TransactionHelper } from "@services/utils/transactions/transactions.service"
+import { Public } from "../auth/decorators/public.decorator"
 
 @Controller("reviews")
 export class ReviewsController {
@@ -76,17 +77,15 @@ export class ReviewsController {
     })
   }
 
+  @Public()
   @UseInterceptors(ReviewsInterceptor)
-  @UseGuards(PolicyReviewGuard)
-  @CheckPolicies((ability) => ability.can(Action.Read, Review))
   @Get()
   async findAll(@Query() query: IReviewQuery) {
     return await this.reviewsService.find(query)
   }
 
+  @Public()
   @UseInterceptors(ReviewInterceptor)
-  @UseGuards(PolicyReviewGuard)
-  @CheckPolicies((ability) => ability.can(Action.Read, Review))
   @Get(":id")
   async findOne(@Param("id", ParseUUIDPipe) id: string) {
     return await this.reviewsService.findOne({ id })
