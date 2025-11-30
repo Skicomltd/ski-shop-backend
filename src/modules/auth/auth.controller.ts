@@ -87,7 +87,7 @@ export class AuthController {
   async register(@Body(new JoiValidationPipe(registerSchema)) registerDto: AuthDto) {
     return this.transactionHelper.runInTransaction(async (manager) => {
       // Find the duplicate user
-      let user = await this.userService.findOne({ email: registerDto.email })
+      let user = await this.userService.findOne({ email: registerDto.email.toLowerCase() })
 
       // If user with email is found and status is active (email and phone number are verified), throw an error.
       if (user && user.status === "active") throw new ConflictException("user exists")
