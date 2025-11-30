@@ -16,15 +16,15 @@ export class JwtGuard extends AuthGuard("jwt") {
     const isPublic = this.reflector.getAllAndOverride("isPublic", [context.getHandler(), context.getClass()])
     const isShortTime = this.reflector.getAllAndOverride("isShortTime", [context.getHandler(), context.getClass()])
 
-    // // Retrieve and validate the client type.
-    // // Client type = Vendor mobile app, customer mobile app, or monolith web.
-    // const validationResult = clientTypeSchema.safeParse(request.headers["x-client-type"])
+    // Retrieve and validate the client type.
+    // Client type = Vendor mobile app, customer mobile app, or monolith web.
+    const validationResult = clientTypeSchema.safeParse(request.headers["x-client-type"])
 
-    // // Unauthenticated if authenticated request is made without a client type header.
-    // if (!validationResult.success) return false
+    // Unauthenticated if authenticated request is made without a client type header.
+    if (!validationResult.success) return false
 
-    // // Attach the client type to the request to be accessible accross the application.
-    // request.client = validationResult.data
+    // Attach the client type to the request to be accessible accross the application.
+    request.client = validationResult.data
 
     // Allow client if it is a public or a short time token request
     if (isPublic || isShortTime) return true
