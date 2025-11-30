@@ -34,7 +34,11 @@ export class LoginAuthDto {
 export const registerSchema = joi.object({
   firstName: joi.string().required(),
   lastName: joi.string().required(),
-  email: joi.string().email().required(),
+  email: joi.string().email().lowercase().trim()
+    .custom((value: string) => {
+      return value.toLowerCase();
+    }, 'Convert email to lowercase')
+    .required(),
   role: joi.string().valid("customer", "vendor", "admin").required(),
   password: joi.string().required(),
   confirmPassword: joi.string().valid(joi.ref("password")).required().messages({
@@ -51,7 +55,13 @@ export const resendOtpSchema = joi.object({
 })
 
 export const loginSchema = joi.object({
-  email: joi.string().email().required(),
+  email: joi.string()
+    .email()
+    .trim()
+    .custom((value: string) => {
+      return value.toLowerCase();
+    }, 'lowercase email')
+    .required(),
   password: joi.string().required(),
   fcmToken: joi.string().optional()
 })

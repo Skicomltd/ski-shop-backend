@@ -49,13 +49,13 @@ export class AuthService {
   }
 
   async validateEmail(email: string): Promise<User | null> {
-    const user = await this.userService.findOne({ email })
+    const user = await this.userService.findOne({ email: email.toLowerCase() })
     if (!user) return null
     return user
   }
 
   async validateUser(loginDto: LoginDto) {
-    const user = await this.userService.findOne({ email: loginDto.email, isEmailVerified: true })
+    const user = await this.userService.findOne({ email: loginDto.email.toLowerCase(), isEmailVerified: true })
 
     if (!user) throw new NotFoundException("Invalid Credentials")
 

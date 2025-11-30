@@ -1,13 +1,11 @@
-import { Request } from "express"
-import { Observable } from "rxjs"
+import { UnAuthorizedException } from "@/exceptions/unAuthorized.exception"
+import { User } from "@/modules/users/entity/user.entity"
+import { ExecutionContext, Injectable } from "@nestjs/common"
 import { Reflector } from "@nestjs/core"
 import { AuthGuard } from "@nestjs/passport"
-import { ExecutionContext, Injectable } from "@nestjs/common"
-
-import { User } from "@/modules/users/entity/user.entity"
+import { Request } from "express"
+import { Observable } from "rxjs"
 import { clientTypeSchema } from "../dto/client-type.dto"
-import { UnAuthorizedException } from "@/exceptions/unAuthorized.exception"
-
 @Injectable()
 export class JwtGuard extends AuthGuard("jwt") {
   constructor(private reflector: Reflector) {
