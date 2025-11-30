@@ -137,6 +137,14 @@ export class User {
     this.status = isActive ? "active" : "inactive"
   }
 
+  @BeforeInsert()
+  @BeforeUpdate()
+  normalizeEmail() {
+    if (this.email) {
+      this.email = this.email.toLowerCase().trim()
+    }
+  }
+
   async comparePassword(password: string) {
     return await bcrypt.compare(password, this.password)
   }
