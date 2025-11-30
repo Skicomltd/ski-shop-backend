@@ -20,7 +20,7 @@ Before diving in, make sure you check the following resources:
 
 ## 🚀 Features
 
-* **Employee Management** – handle employee profiles and role assignments.
+* **Employee Management** – handle employee profiles and role assignment.
 * **Payroll Processing** – approval workflows, payroll runs, and payslip management.
 * **Notifications** – in-app, email, SMS, and push notifications.
 * **Events & Queues** – central registries for consistent event and queue naming across the system.
