@@ -29,6 +29,7 @@ import { WithdrawalsService } from "../withdrawals/withdrawals.service"
 import { ProductStatusEnum } from "../common/types"
 import { PdfInterface } from "@services/utils/pdf/interface/pdf.interface"
 import { VendorService } from "./vendor.service"
+import { VendorPerformanceResponse } from "./interface/vendor-performance.interface"
 
 @Controller("vendors")
 export class VendorController {
@@ -53,6 +54,54 @@ export class VendorController {
   async findOne(@Param("id", new ParseUUIDPipe()) id: string) {
     const vendor = await this.userService.findById(id)
     return vendor
+  }
+
+  @Get("/:id/performance")
+  @UseGuards(PolicyVendorGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, "VENDOR"))
+  async vendorsPerformance(@Param("id", new ParseUUIDPipe()) id: string) {
+    // 1. First: Get the store (required for storeId)
+    const store = await this.storeService.findOne({
+      business: { user: { id } }
+    })
+
+    if (!store) {
+      throw new NotFoundException("Vendor store does not exist")
+    }
+
+    const storeId = store.id
+
+    const [[products, productCount], [orders, orderCount], [publishedProducts, publishedCount], orderMetrics, [lastOrderArray]] = await Promise.all([
+      this.productService.find({ userId: id }),
+      this.orderService.find({ items: { storeId } }),
+      this.productService.find({ userId: id, status: ProductStatusEnum.published }),
+      this.orderService.getStoreRevenueMetrics(storeId),
+      this.orderService.find({
+        items: { storeId },
+        orderBy: "DESC",
+        limit: 1
+      })
+    ])
+
+    const lastOrderData = lastOrderArray[0] || null
+    const lastOrder = lastOrderData
+      ? {
+          id: lastOrderData.id,
+          totalAmount: lastOrderData.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0),
+          date: lastOrderData.paidAt || lastOrderData.createdAt
+        }
+      : null
+
+    const vendorPerformance: VendorPerformanceResponse = {
+      totalProducts: productCount,
+      totalOrders: orderCount,
+      totalPublishedProducts: publishedCount,
+      averageOrderValue: orderMetrics.averageOrderValue,
+      totalSales: orderMetrics.totalRevenue,
+      lastOrder
+    }
+
+    return vendorPerformance
   }
 
   @UseGuards(PolicyVendorGuard)
