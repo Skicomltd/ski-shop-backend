@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseInterceptors, Query, UseGuards, Res } from "@nestjs/common"
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseInterceptors, Query, UseGuards, Res, ParseUUIDPipe } from "@nestjs/common"
 import { SubscriptionService } from "./subscription.service"
 import { createSubcriptionSchema, CreateSubscriptionDto } from "./dto/create-subscription.dto"
 import { UpdateSubscriptionDto } from "./dto/update-subscription.dto"
@@ -14,10 +14,11 @@ import { PolicySubscriptionGuard } from "./guard/policy-subscription.guard"
 import { CheckPolicies } from "../auth/decorators/policies-handler.decorator"
 import { AppAbility } from "@services/casl/casl-ability.factory"
 import { Action } from "@services/casl/actions/action"
-import { Subscription } from "./entities/subscription.entity"
+import { Subscription, SubscriptionEnum } from "./entities/subscription.entity"
 import { v4 as uuidv4 } from "uuid"
 import { Response } from "express"
 import { CsvService } from "@services/utils/csv/csv.service"
+import { BadReqException } from "@/exceptions/badRequest.exception"
 
 @Controller("subscriptions")
 export class SubscriptionController {
@@ -96,6 +97,24 @@ export class SubscriptionController {
     res.send(data)
   }
 
+
+  @UseGuards(PolicySubscriptionGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Subscription))
+  @UseInterceptors(SubscriptionsInterceptor)
+  @Get("/vendor/:id") 
+  async getVendorActiveSubscription(@Param("id", ParseUUIDPipe) id: string) {
+    const [subscriptions, count] = await this.subscriptionService.find({
+      vendorId: id,
+      status: SubscriptionEnum.ACTIVE
+    })
+
+    if (subscriptions.length === 0) {
+      throw new BadReqException("Vendor currently have no active subscriptions")
+    }
+
+    return [subscriptions, count]
+  }
+
   @UseGuards(PolicySubscriptionGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, Subscription))
   @Get("/subscriber")
@@ -107,14 +126,14 @@ export class SubscriptionController {
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Subscription))
   @UseInterceptors(SubscriptionInterceptor)
   @Get(":id")
-  async findOne(@Param("id") id: string) {
+  async findOne(@Param("id", ParseUUIDPipe) id: string) {
     return await this.subscriptionService.findOne({ id: id })
   }
 
   @UseGuards(PolicySubscriptionGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Subscription))
   @Patch(":id")
-  async update(@Param("id") id: string, @Body() updateSubscriptionDto: UpdateSubscriptionDto) {
+  async update(@Param("id", ParseUUIDPipe) id: string, @Body() updateSubscriptionDto: UpdateSubscriptionDto) {
     const subscription = await this.subscriptionService.findOne({ id: id })
     if (!subscription) {
       throw new NotFoundException("Subscription does not exist")
@@ -125,7 +144,7 @@ export class SubscriptionController {
   @UseGuards(PolicySubscriptionGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, Subscription))
   @Delete(":id")
-  remove(@Param("id") id: string) {
+  remove(@Param("id", ParseUUIDPipe) id: string) {
     return this.subscriptionService.remove({ id: id })
   }
 }
