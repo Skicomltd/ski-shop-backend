@@ -71,10 +71,8 @@ export class VendorController {
 
     const storeId = store.id
 
-    const [[products, productCount], [orders, orderCount], [publishedProducts, publishedCount], orderMetrics, [lastOrderArray]] = await Promise.all([
-      this.productService.find({ userId: id }),
-      this.orderService.find({ items: { storeId } }),
-      this.productService.find({ userId: id, status: ProductStatusEnum.published }),
+    const [{totalProduct, totalPublishedOrDraftProduct}, orderMetrics, [lastOrderArray]] = await Promise.all([
+      this.productService.getProductCounts(storeId, ProductStatusEnum.published),
       this.orderService.getStoreRevenueMetrics(storeId),
       this.orderService.find({
         items: { storeId },
@@ -93,9 +91,9 @@ export class VendorController {
       : null
 
     const vendorPerformance: VendorPerformanceResponse = {
-      totalProducts: productCount,
-      totalOrders: orderCount,
-      totalPublishedProducts: publishedCount,
+      totalProducts: totalProduct,
+      totalOrders: orderMetrics.totalOrders,
+      totalPublishedProducts: totalPublishedOrDraftProduct,
       averageOrderValue: orderMetrics.averageOrderValue,
       totalSales: orderMetrics.totalRevenue,
       lastOrder
