@@ -100,19 +100,19 @@ export class SubscriptionController {
 
   @UseGuards(PolicySubscriptionGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Subscription))
-  @UseInterceptors(SubscriptionsInterceptor)
+  @UseInterceptors(SubscriptionInterceptor)
   @Get("/vendor/:id") 
   async getVendorActiveSubscription(@Param("id", ParseUUIDPipe) id: string) {
-    const [subscriptions, count] = await this.subscriptionService.find({
+    const subscription = await this.subscriptionService.findOne({
       vendorId: id,
       status: SubscriptionEnum.ACTIVE
     })
 
-    if (subscriptions.length === 0) {
+    if (!subscription) {
       throw new BadReqException("Vendor currently have no active subscriptions")
     }
 
-    return [subscriptions, count]
+    return subscription
   }
 
   @UseGuards(PolicySubscriptionGuard)
