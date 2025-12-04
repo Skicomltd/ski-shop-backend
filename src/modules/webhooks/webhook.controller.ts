@@ -8,8 +8,10 @@ import { OrderItemService } from "../orders/orderItem.service"
 import { EventEmitter2 } from "@nestjs/event-emitter"
 import { EventRegistry } from "@/events/events.registry"
 import { OrdersService } from "../orders/orders.service"
+import { Webhook } from "../auth/decorators/webhook.decorator"
 
 @Public()
+@Webhook()
 @Controller("webhooks")
 export class WebhookController {
   constructor(
@@ -37,6 +39,7 @@ export class WebhookController {
   }
 
   @Public()
+  @Webhook()
   @Post("fez")
   async handleFezWebhook(@Body() body: FezWebhookDto) {
     const orderItem = await this.orderItemService.findById(body.orderNumber)

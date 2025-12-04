@@ -139,11 +139,12 @@ export class CartsController {
     if (!cart.length) throw new NotFoundException("Cart does not exist")
 
     let totalCost = 0 // total cost of all deliveries
-    let earliestDay = Infinity // Earliest delivery date
+    let earliestDay = 1 // Earliest delivery date
     let maximumDay = 1 // Max delivery date
 
     for (const item of cart) {
       const store = await this.storesService.findById(item.product.storeId)
+
       const cost = await this.fezService.getDeliveryCost({
         state: dto.dropOffState,
         pickUpState: store.business.state,

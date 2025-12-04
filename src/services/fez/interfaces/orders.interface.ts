@@ -1,6 +1,8 @@
-export interface CreateOrderDto {
-  batchId: string // Order ID
-  uniqueId: string // Order item ID
+export type CreateOrderDto = CreateOrder[]
+
+type CreateOrder = {
+  BatchID: string // Order ID
+  uniqueID: string // Order item ID
 
   recipientAddress: string
   recipientState: string
@@ -8,7 +10,7 @@ export interface CreateOrderDto {
   recipientPhone: string
   recipientEmail: string
 
-  custToken: string // 4-digit unique code (to be emailed)
+  CustToken: string // 4-digit unique code (to be emailed)
 
   itemDescription: string
   valueOfItem: string // They sent as string; keep same

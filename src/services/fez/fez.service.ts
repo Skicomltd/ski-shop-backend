@@ -47,7 +47,7 @@ export class FezService {
     const headers = await this.getHeaders()
 
     try {
-      const response = await this.httpService.axiosRef.post<CreateOrderResponse>(`${this.url}/order`, data, { headers })
+      const response = await this.httpService.axiosRef.post<CreateOrderResponse>(`${this.url}/order`, { ...data }, { headers })
       return response.data
     } catch (error) {
       throw new HttpException(error.message, 500)
