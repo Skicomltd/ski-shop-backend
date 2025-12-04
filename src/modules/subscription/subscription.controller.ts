@@ -97,11 +97,10 @@ export class SubscriptionController {
     res.send(data)
   }
 
-
   @UseGuards(PolicySubscriptionGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, Subscription))
   @UseInterceptors(SubscriptionInterceptor)
-  @Get("/vendor/:id") 
+  @Get("/vendor/:id")
   async getVendorActiveSubscription(@Param("id", ParseUUIDPipe) id: string) {
     const subscription = await this.subscriptionService.findOne({
       vendorId: id,
