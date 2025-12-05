@@ -22,6 +22,77 @@ export class ProductsService implements IService<Product> {
 
   private relations = ["user", "store"]
 
+  private getQuery({ storeId, status, stockCount = -1, categories, vendor, flag, search, rating, userId, sortBy, orderBy = "ASC" }: IProductsQuery) {
+    const query = this.productRepository
+      .createQueryBuilder("product")
+      .leftJoinAndSelect("product.store", "store")
+      .leftJoinAndSelect("product.user", "user")
+      .leftJoinAndSelect("product.reviews", "reviews")
+      .addGroupBy("product.id")
+      .addGroupBy("reviews.id")
+      .addGroupBy("store.id")
+      .addGroupBy("user.id")
+      .addOrderBy("store.isStarSeller", "DESC")
+
+    if (storeId) {
+      query.andWhere("product.storeId = :storeId", { storeId })
+    }
+
+    if (status && (status === ProductStatusEnum.draft || status === ProductStatusEnum.published)) {
+      query.andWhere("product.status = :status", { status })
+    }
+
+    if (stockCount) {
+      query.andWhere("product.stockCount > :stockCount", { stockCount })
+    }
+
+    if (categories) {
+      const cats = categories.split(",")
+      query.andWhere("product.category IN (:...cats)", { cats })
+    }
+
+    if (vendor) {
+      query.andWhere("store.type = :vendor", { vendor })
+    }
+
+    // Flag-based ad joins
+    if (flag === "featured") query.innerJoin("product.ads", "ad", "ad.type = :adType", { adType: PromotionTypeEnum.FEATURED })
+    if (flag === "banner") query.innerJoin("product.ads", "ad", "ad.type = :adType", { adType: PromotionTypeEnum.BANNER })
+    if (flag === "search") query.innerJoin("product.ads", "ad", "ad.type = :adType", { adType: PromotionTypeEnum.SEARCH })
+
+    if (search) {
+      const term = `%${search.toLowerCase()}%`
+      query.andWhere(
+        `(LOWER(product.name) LIKE :term OR 
+        LOWER(user.firstName) LIKE :term OR 
+        LOWER(user.lastName) LIKE :term OR 
+        LOWER(user.email) LIKE :term)`,
+        { term }
+      )
+    }
+
+    if (rating && Number(rating) !== 0) {
+      query.andWhere(
+        `product.totalProductRatingCount > 0 AND 
+       ROUND(product.totalProductRatingSum / product.totalProductRatingCount, 1) = :rating`,
+        { rating: Number(rating) }
+      )
+    }
+
+    if (userId) {
+      query.leftJoinAndSelect("product.savedBy", "savedBy", "savedBy.userId = :userId", { userId })
+      query.addGroupBy("savedBy.id")
+    }
+
+    if (sortBy) {
+      query.addOrderBy("product.price", sortBy)
+    } else {
+      query.addOrderBy("product.createdAt", orderBy)
+    }
+
+    return query
+  }
+
   async create(createProductDto: CreateProductDto, manager?: EntityManager): Promise<Product> {
     const repo = manager ? manager.getRepository(Product) : this.productRepository
 
@@ -54,80 +125,8 @@ export class ProductsService implements IService<Product> {
     return [products, count]
   }
 
-  async find({
-    page,
-    limit,
-    status,
-    stockCount = -1,
-    storeId,
-    categories,
-    vendor,
-    flag,
-    search,
-    rating,
-    orderBy = "ASC",
-    sortBy,
-    userId
-  }: IProductsQuery) {
-    const query = this.productRepository
-      .createQueryBuilder("product")
-      .leftJoinAndSelect("product.store", "store")
-      .leftJoinAndSelect("product.user", "user")
-      .leftJoinAndSelect("product.reviews", "reviews")
-      .addGroupBy("product.id")
-      .addGroupBy("reviews.id")
-      .addGroupBy("store.id")
-      .addGroupBy("user.id")
-
-    if (storeId) query.andWhere("product.storeId = :storeId", { storeId })
-
-    if (status && (status === ProductStatusEnum.draft || status === ProductStatusEnum.published)) {
-      query.andWhere("product.status = :status", { status })
-    }
-
-    if (stockCount) query.andWhere("product.stockCount > :stockCount", { stockCount })
-
-    if (categories) {
-      const cats = categories.split(",")
-      query.andWhere("product.category IN (:...cats)", { cats })
-    }
-
-    if (vendor) query.andWhere("store.type = :vendor", { vendor })
-
-    // Promote star sellers to top
-    // This will order by store.isStarSeller DESC first, then createdAt (or other sorting)
-    query.addOrderBy("store.isStarSeller", "DESC")
-
-    if (flag === "featured") query.innerJoin("product.ads", "ad").andWhere("ad.type = :adType", { adType: PromotionTypeEnum.FEATURED })
-    if (flag === "banner") query.innerJoin("product.ads", "ad").andWhere("ad.type = :adType", { adType: PromotionTypeEnum.BANNER })
-    if (flag === "search") query.innerJoin("product.ads", "ad").andWhere("ad.type = :adType", { adType: PromotionTypeEnum.SEARCH })
-
-    if (sortBy) query.addOrderBy("product.price", sortBy)
-    else query.addOrderBy("product.createdAt", orderBy) // fallback order
-
-    if (search) {
-      const term = `%${search.toLowerCase()}%`
-      query.andWhere(
-        `(LOWER(product.name) LIKE :term
-      OR LOWER(user.firstName) LIKE :term
-      OR LOWER(user.lastName) LIKE :term
-      OR LOWER(user.email) LIKE :term)`,
-        { term }
-      )
-    }
-
-    if (rating && Number(rating) !== 0) {
-      query.andWhere(
-        `product.totalProductRatingCount > 0
-      AND ROUND(product.totalProductRatingSum / product.totalProductRatingCount, 1) = :rating`,
-        { rating: Number(rating) }
-      )
-    }
-
-    if (userId) {
-      query.leftJoinAndSelect("product.savedBy", "savedBy", "savedBy.userId = :userId", { userId })
-      query.addGroupBy("savedBy.id")
-    }
+  async find({ limit, page, ...filters }: IProductsQuery) {
+    const query = this.getQuery(filters)
 
     return await query
       .take(limit)
@@ -350,16 +349,10 @@ export class ProductsService implements IService<Product> {
     return updatedImages
   }
 
-  async getProductCounts(storeId: string, status: ProductStatusEnum): Promise<{ totalProduct: number; totalPublishedOrDraftProduct: number }> {
-    const totalProduct = await this.productRepository.createQueryBuilder("product").where("product.storeId = :storeId", { storeId }).getCount()
+  async count(filters: IProductsQuery): Promise<number> {
+    const query = this.getQuery(filters)
 
-    const totalPublishedOrDraftProduct = await this.productRepository
-      .createQueryBuilder("product")
-      .where("product.storeId = :storeId", { storeId })
-      .andWhere("product.status = :status", { status: status })
-      .getCount()
-
-    return { totalProduct, totalPublishedOrDraftProduct }
+    return query.getCount()
   }
 
   async topSellingProducts({ limit = 10, page = 1, category }: IProductsQuery = {}) {
