@@ -14,7 +14,7 @@ export default registerAs(
   "app",
   (): IApp => ({
     name: process.env.APP_NAME,
-    env: (process.env.NODE_ENV as ENV) || "development",
+    env: (process.env.NODE_ENV as ENV) || "development", //  comment
     url: process.env.APP_URL || "http://localhost:5000",
     clientUrl: process.env.CLIENT_URL,
     port: Number(process.env.PORT) || 5000
