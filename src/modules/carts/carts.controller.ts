@@ -106,7 +106,7 @@ export class CartsController {
       )
 
       const payload: InitiatePayment = {
-        amount,
+        amount: amount + checkoutDto.shippingFee,
         email: user.email,
         callback_url: this.configService.get<PaymentModuleOption>("payment").providers.paystack.callbackUrl,
         reference: order.reference
