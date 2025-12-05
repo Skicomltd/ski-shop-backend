@@ -29,6 +29,7 @@ import { WithdrawalsService } from "../withdrawals/withdrawals.service"
 import { ProductStatusEnum } from "../common/types"
 import { PdfInterface } from "@services/utils/pdf/interface/pdf.interface"
 import { VendorService } from "./vendor.service"
+import { VendorPerformanceResponse } from "./interface/vendor-performance.interface"
 
 @Controller("vendors")
 export class VendorController {
@@ -55,6 +56,53 @@ export class VendorController {
     return vendor
   }
 
+  @Get("/:id/performance")
+  @UseGuards(PolicyVendorGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, "VENDOR"))
+  async vendorsPerformance(@Param("id", new ParseUUIDPipe()) id: string) {
+    // 1. First: Get the store (required for storeId)
+    const store = await this.storeService.findOne({
+      business: { user: { id } }
+    })
+
+    if (!store) {
+      throw new NotFoundException("Vendor store does not exist")
+    }
+
+    const storeId = store.id
+
+    const [totalProduct, totalPublishedProduct, orderMetrics, [lastOrderArray]] = await Promise.all([
+      this.productService.count({storeId}),
+      this.productService.count({storeId, status: ProductStatusEnum.published}),
+      this.orderService.getStoreRevenueMetrics(storeId),
+      this.orderService.find({
+        items: { storeId },
+        orderBy: "DESC",
+        limit: 1
+      })
+    ])
+
+    const lastOrderData = lastOrderArray[0] || null
+    const lastOrder = lastOrderData
+      ? {
+          id: lastOrderData.id,
+          totalAmount: lastOrderData.items.reduce((sum, item) => sum + item.unitPrice * item.quantity, 0),
+          date: lastOrderData.paidAt || lastOrderData.createdAt
+        }
+      : null
+
+    const vendorPerformance: VendorPerformanceResponse = {
+      totalProducts: totalProduct,
+      totalOrders: orderMetrics.totalOrders,
+      totalPublishedProducts: totalPublishedProduct,
+      averageOrderValue: orderMetrics.averageOrderValue,
+      totalSales: orderMetrics.totalRevenue,
+      lastOrder
+    }
+
+    return vendorPerformance
+  }
+
   @UseGuards(PolicyVendorGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Manage, "VENDOR"))
   @Get("/download/:id")
@@ -68,7 +116,10 @@ export class VendorController {
 
     const latestSubscription = await this.subscriptionService.findLatestByUserId(user.id)
     const productCounts = user.business?.store?.id
-      ? await this.productService.getProductCounts(user.business.store.id, ProductStatusEnum.published)
+      ? {
+        totalProduct: await this.productService.count({storeId: user.business.store.id}),
+        totalPublishedOrDraftProduct: await this.productService.count({storeId: user.business.store.id, status: ProductStatusEnum.published})
+      }
       : { totalProduct: 0, totalPublishedOrDraftProduct: 0 }
 
     const orders = user.business?.store?.id
