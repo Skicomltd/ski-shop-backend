@@ -41,6 +41,8 @@ export class CustomerOrderPlacedNotification extends NotificationContract {
   }
 
   toPush(): PushMessage {
+    console.error("tokens: ", this.order.buyer.fcmTokens)
+
     return new FcmMessage({
       title: this.title,
       body: this.body,
