@@ -71,8 +71,9 @@ export class VendorController {
 
     const storeId = store.id
 
-    const [{totalProduct, totalPublishedOrDraftProduct}, orderMetrics, [lastOrderArray]] = await Promise.all([
-      this.productService.getProductCounts(storeId, ProductStatusEnum.published),
+    const [totalProduct, totalPublishedProduct, orderMetrics, [lastOrderArray]] = await Promise.all([
+      this.productService.count({storeId}),
+      this.productService.count({storeId, status: ProductStatusEnum.published}),
       this.orderService.getStoreRevenueMetrics(storeId),
       this.orderService.find({
         items: { storeId },
@@ -93,7 +94,7 @@ export class VendorController {
     const vendorPerformance: VendorPerformanceResponse = {
       totalProducts: totalProduct,
       totalOrders: orderMetrics.totalOrders,
-      totalPublishedProducts: totalPublishedOrDraftProduct,
+      totalPublishedProducts: totalPublishedProduct,
       averageOrderValue: orderMetrics.averageOrderValue,
       totalSales: orderMetrics.totalRevenue,
       lastOrder
@@ -115,7 +116,10 @@ export class VendorController {
 
     const latestSubscription = await this.subscriptionService.findLatestByUserId(user.id)
     const productCounts = user.business?.store?.id
-      ? await this.productService.getProductCounts(user.business.store.id, ProductStatusEnum.published)
+      ? {
+        totalProduct: await this.productService.count({storeId: user.business.store.id}),
+        totalPublishedOrDraftProduct: await this.productService.count({storeId: user.business.store.id, status: ProductStatusEnum.published})
+      }
       : { totalProduct: 0, totalPublishedOrDraftProduct: 0 }
 
     const orders = user.business?.store?.id
