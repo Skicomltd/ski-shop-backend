@@ -256,8 +256,10 @@ export class ProductsController {
   async update(
     @Param("id", ParseUUIDPipe) id: string,
     @Body(new JoiValidationPipe(updateProductSchema)) updateProductDto: UpdateProductDto,
-    @UploadedFiles() uploadedFiles: Array<CustomFile>
+    @UploadedFiles() uploadedFiles: Array<CustomFile>,
+    @Req() req: Request
   ) {
+    console.error("request: ", req)
     const product = await this.productsService.findOne({ id: id })
 
     const images = await this.productsService.handleImageUploads(uploadedFiles, product.images, updateProductDto.images || [])

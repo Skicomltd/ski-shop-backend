@@ -31,6 +31,7 @@ import { OrderStatus } from "./interfaces/order-status"
 import { BadReqException } from "@/exceptions/badRequest.exception"
 import { InitiatePayment, PaymentModuleOption, PaymentsService } from "@/services/payments"
 import { ConfigService } from "@nestjs/config"
+import { BusinessService } from "../business/business.service"
 
 @Controller("orders")
 export class OrdersController {
@@ -42,7 +43,8 @@ export class OrdersController {
     private readonly notificationService: NotificationsService,
     private readonly eventEmitter: EventEmitter2,
     private readonly paymentsService: PaymentsService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    private readonly businessService: BusinessService
   ) {}
 
   @UseGuards(PolicyOrderGuard)
@@ -194,31 +196,40 @@ export class OrdersController {
     const order = await this.ordersService.findById(id)
     const orderItem = await this.orderItemsService.findById(itemId)
 
-    const delivery = await this.fezService.createOrder({
-      batchId: order.id,
-      uniqueId: orderItem.id,
-      recipientName: order.buyer.getFullName(),
-      recipientAddress: order.shippingInfo.recipientAddress,
-      recipientState: order.shippingInfo.recipientState,
-      recipientPhone: order.shippingInfo.recipientPhone,
-      recipientEmail: order.shippingInfo.recipientEmail,
-      custToken: order.shippingInfo.recipientPhone.substring(-4),
-      itemDescription: orderItem.product.description,
-      valueOfItem: String(orderItem.unitPrice * orderItem.quantity),
-      weight: orderItem.product.weight * orderItem.quantity,
-      pickUpState: orderItem.product.store.business.state,
-      pickUpAddress: orderItem.product.store.business.address,
-      pickUpDate: new Date().toISOString(),
-      isItemCod: order.paymentMethod === "paymentOnDelivery",
-      cashOnDeliveryAmount: order.shippingInfo.shippingFee + (orderItem.unitPrice + orderItem.quantity),
-      fragile: orderItem.product.fragile
-    })
+    if (!order || !orderItem || order.id !== orderItem.orderId) throw new BadReqException("invalid order")
+
+    // vendor business data
+    const business = await this.businessService.findOne({ store: { id: orderItem.product.storeId } })
+    if (!business) throw new BadReqException("vendor business not configured")
+
+    const delivery = await this.fezService.createOrder([
+      {
+        BatchID: order.id,
+        uniqueID: orderItem.id,
+        recipientName: order.buyer.getFullName(),
+        recipientAddress: order.shippingInfo.recipientAddress,
+        recipientState: order.shippingInfo.recipientState,
+        recipientPhone: order.shippingInfo.recipientPhone,
+        recipientEmail: order.shippingInfo.recipientEmail,
+        CustToken: order.shippingInfo.recipientPhone.substring(-4),
+        itemDescription: orderItem.product.description,
+        valueOfItem: String(orderItem.unitPrice * orderItem.quantity),
+        weight: orderItem.product.weight * orderItem.quantity,
+        pickUpState: business.state,
+        pickUpAddress: business.address,
+        pickUpDate: new Date().toISOString(),
+        isItemCod: order.paymentMethod === "paymentOnDelivery",
+        cashOnDeliveryAmount:
+          order.paymentMethod === "paymentOnDelivery" ? order.shippingInfo.shippingFee + (orderItem.unitPrice + orderItem.quantity) : null,
+        fragile: orderItem.product.fragile
+      }
+    ])
 
     const deliveryNo = delivery.orderNos[orderItem.id]
 
     const expectedAt = await this.fezService.getDeliveryDateEstimate({
       delivery_type: "local",
-      pick_up_state: orderItem.product.store.business.state,
+      pick_up_state: business.state,
       drop_off_state: order.shippingInfo.recipientState
     })
 

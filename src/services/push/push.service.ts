@@ -50,19 +50,19 @@ export class PushService {
     if (!this.firebaseService) throw new Error("FirebaseService not initialized")
 
     if (message.token) {
-      await this.firebaseService.sendMessage(message.toTokenPayload(this.options.fcm))
+      await this.firebaseService.sendMessage(message.toTokenPayload(this.options?.fcm))
     }
 
     if (message.tokens) {
-      await this.firebaseService.sendMulticast(message.toTokensPayload(this.options.fcm))
+      await this.firebaseService.sendMulticast(message.toTokensPayload(this.options?.fcm))
     }
 
     if (message.topic) {
-      await this.firebaseService.sendMessage(message.toTopicPayload(this.options.fcm))
+      await this.firebaseService.sendMessage(message.toTopicPayload(this.options?.fcm))
     }
 
     if (message.condition) {
-      await this.firebaseService.sendMessage(message.toConditionPayload(this.options.fcm))
+      await this.firebaseService.sendMessage(message.toConditionPayload(this.options?.fcm))
     }
   }
 

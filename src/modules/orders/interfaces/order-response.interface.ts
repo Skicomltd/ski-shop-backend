@@ -1,10 +1,11 @@
 import { OrderDeliveryStatus } from "./delivery-status"
 import { OrderStatus } from "./order-status"
 import { PaymentMethod } from "./payment-method.interface"
+import { ShippingInfo } from "./shipping-info.interface"
 
 export interface IOrderResponse {
   id: string
-  products: OrderItemResponse[]
+  items: OrderItemResponse[]
   status: OrderStatus
   totalAmount: number
   buyer: IdName & { address: string; phoneNumber: string }
@@ -12,13 +13,17 @@ export interface IOrderResponse {
   paidAt: Date
   reference: string
   paymentMethod: PaymentMethod
+  shippingInfo: ShippingInfo
 }
 
 export interface OrderItemResponse {
   id: string
-  name: string
-  images: string[]
-  price: number
+  product: {
+    id: string
+    name: string
+    images: string[]
+    price: number
+  }
   subtotal: number
   vendor: IdName
   quantity: number

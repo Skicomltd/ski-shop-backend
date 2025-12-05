@@ -19,9 +19,12 @@ export class OrderItemInterceptor implements NestInterceptor<OrderItemWithHistor
     return next.handle().pipe(
       map((data) => ({
         id: data.product.id,
-        name: data.product.name,
-        images: data.product.images,
-        price: data.unitPrice,
+        product: {
+          id: data.product.id,
+          name: data.product.name,
+          images: data.product.images,
+          price: data.unitPrice
+        },
         subtotal: data.unitPrice * data.quantity,
         quantity: data.quantity,
         deliveryStatus: data.deliveryStatus,

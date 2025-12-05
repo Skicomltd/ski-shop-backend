@@ -13,7 +13,13 @@ export const checkoutSchema = Joi.object({
   paymentMethod: Joi.string()
     .valid(...PAYMENT_METHODS)
     .required(),
-  shippingAddress: Joi.string().required(),
+  shippingAddress: Joi.object({
+    address: Joi.string().required(),
+    email: Joi.string().required(),
+    name: Joi.string().required(),
+    phoneNumber: Joi.string().required(),
+    state: Joi.string().required()
+  }),
   shippingFee: Joi.number().required(),
   voucherId: Joi.string().uuid().optional()
 })
