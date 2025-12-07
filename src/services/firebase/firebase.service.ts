@@ -96,6 +96,8 @@ export class FirebaseService {
     try {
       return await this.getAuth().verifyIdToken(idToken)
     } catch (error) {
+      // eslint-disable-next-line no-console
+      console.log("verify id token error", error)
       throw new HttpException(error.message, 401)
     }
   }
