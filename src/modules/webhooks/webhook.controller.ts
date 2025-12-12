@@ -37,12 +37,14 @@ export class WebhookController {
       this.webhookService.handleTransferFailed(body.data as PaystackTransferData)
     }
   }
-
+  // webhook came in from fez! { orderNumber: 'NOPB04122542', status: 'Enroute To Last Mile Hub' }
   @Public()
   @Webhook()
   @Post("fez")
   async handleFezWebhook(@Body() body: FezWebhookDto) {
-    const orderItem = await this.orderItemService.findById(body.orderNumber)
+    console.error("webhook came in from fez!", body)
+
+    const orderItem = await this.orderItemService.findOne({ deliveryNo: body.orderNumber })
     if (!orderItem) return
 
     const status = this.orderItemService.mapFezStatus(body.status)

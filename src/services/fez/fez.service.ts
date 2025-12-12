@@ -51,7 +51,7 @@ export class FezService {
       return response.data
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.log("create order error: ", error)
+      console.log("create order error: ", error.data)
       throw new HttpException(error.message, 500)
     }
   }
