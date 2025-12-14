@@ -2,7 +2,7 @@ export const EventRegistry = {
   CREATE_NOTIFICATION: "notification.create",
 
   ORDER_PLACED_PAID: "order.placed.paid",
-  ORDER_PLACED_POD: "order.placed.pod", // payment on delivery
+  ORDER_PLACED_POD: "order.placed.pod", // payment on deliver
   ORDER_PALCED_VENDOR: "order.placed.vendor",
   ORDER_PALCED_CUSTOMER: "order.placed.customer",
 
