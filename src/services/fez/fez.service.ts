@@ -46,12 +46,15 @@ export class FezService {
   public async createOrder(data: CreateOrderDto): Promise<CreateOrderResponse> {
     const headers = await this.getHeaders()
 
+    // eslint-disable-next-line no-console
+    console.log("headers", headers)
+
     try {
       const response = await this.httpService.axiosRef.post<CreateOrderResponse>(`${this.url}/order`, { ...data }, { headers })
       return response.data
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.log("create order error: ", error.data)
+      console.log("create order error: ", error)
       throw new HttpException(error.message, 500)
     }
   }

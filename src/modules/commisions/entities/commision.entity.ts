@@ -20,7 +20,7 @@ export class Commision {
   value: number // % deducted
 
   @OneToOne(() => OrderItem)
-  @JoinColumn()
+  @JoinColumn({ name: "orderItemId" })
   orderItem: OrderItem
 
   @ManyToOne(() => Store, (store) => store.commisions)
