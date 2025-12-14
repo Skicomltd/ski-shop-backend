@@ -127,7 +127,7 @@ export class FezService {
       })
 
       this.setToken(response.data.authDetails)
-      return this.token.token
+      return response.data.authDetails.authToken
     } catch (error) {
       throw new HttpException(error.message, 500)
     }
