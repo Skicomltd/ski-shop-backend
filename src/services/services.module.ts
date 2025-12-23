@@ -21,6 +21,7 @@ import { notificationConfigAsync } from "@/config/notification.config"
 import { FirebaseModule } from "./firebase"
 import { FezModule } from "./fez/fez.module"
 import { fezConfigAsync } from "@/config/fez.config"
+import { CacheManagerModule } from "./cachemanager/cacheManager.module"
 
 @Global()
 @Module({
@@ -36,7 +37,8 @@ import { fezConfigAsync } from "@/config/fez.config"
     LogModule.registerAsync(logConfigAsync),
     PaymentsModule.registerAsync(paymentConfigAsync),
     NotificationsModule.registerAsync(notificationConfigAsync),
-    FezModule.registerAsync(fezConfigAsync)
+    FezModule.registerAsync(fezConfigAsync),
+    CacheManagerModule
   ],
   providers: [PaginationService, LogService, MailService],
   exports: [
@@ -49,7 +51,8 @@ import { fezConfigAsync } from "@/config/fez.config"
     PaymentsModule,
     NotificationsModule,
     FirebaseModule,
-    FezModule
+    FezModule,
+    CacheManagerModule
   ]
 })
 export class ServicesModule {}

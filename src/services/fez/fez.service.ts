@@ -16,6 +16,7 @@ import {
 import { AuthToken, LoginResponse } from "./interfaces/auth.interface"
 import { FEZ_CONFIG_OPTIONS } from "./entities/config"
 import { FezModuleOptions } from "./interfaces/config.interface"
+import { CacheManagerService } from "../cachemanager/cacheManager.service"
 
 type Token = {
   token: string
@@ -26,21 +27,21 @@ type Token = {
 export class FezService {
   private url: string
   private secret: string
-  private token: Token | null = null
   private userId: string
   private password: string
+  private readonly TOKEN_CACHE_KEY = "fez:auth:token"
 
   constructor(
     public readonly configService: ConfigService,
     private readonly httpService: HttpService,
     @Inject(FEZ_CONFIG_OPTIONS)
-    protected config: FezModuleOptions
+    protected config: FezModuleOptions,
+    private readonly cacheManager: CacheManagerService
   ) {
     this.url = config.url
     this.secret = config.secret
     this.userId = config.userId
     this.password = config.password
-    this.token = null
   }
 
   public async createOrder(data: CreateOrderDto): Promise<CreateOrderResponse> {
@@ -118,7 +119,11 @@ export class FezService {
   }
 
   private async getToken(): Promise<string> {
-    if (this.token && this.token.expiresAt > Date.now()) return this.token.token
+    const cachedToken = await this.cacheManager.get<Token>(this.TOKEN_CACHE_KEY)
+
+    if (cachedToken && cachedToken.expiresAt > Date.now()) {
+      return cachedToken.token
+    }
 
     try {
       const response = await this.httpService.axiosRef.post<LoginResponse>(`${this.url}/user/authenticate`, {
@@ -133,11 +138,18 @@ export class FezService {
     }
   }
 
-  private setToken(token: AuthToken) {
-    this.token = {
+  private async setToken(token: AuthToken): Promise<void> {
+    const expiresAt = new Date(token.expireToken).getTime()
+    const tokenData: Token = {
       token: token.authToken,
-      expiresAt: new Date(token.expireToken).getTime()
+      expiresAt
     }
+
+    // Calculate TTL in seconds (time until expiration)
+    const ttl = Math.floor((expiresAt - Date.now()) / 1000)
+
+    // Store token in cache with TTL
+    await this.cacheManager.set(this.TOKEN_CACHE_KEY, tokenData, ttl)
   }
 
   private states = [
