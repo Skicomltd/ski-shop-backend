@@ -63,6 +63,7 @@ import { FileSystemService } from "@/services/filesystem/filesystem.service"
 import { FileUploadDto } from "@/services/filesystem/interfaces/filesystem.interface"
 import { FirebaseService } from "@/services/firebase"
 import { UnAuthorizedException } from "@/exceptions/unAuthorized.exception"
+import { Webhook } from "./decorators/webhook.decorator"
 
 @Controller("auth")
 export class AuthController {
@@ -346,6 +347,7 @@ export class AuthController {
   }
 
   @Public()
+  @Webhook() // This is temporary. Create and Use google decorator instead
   @Get("/oauth/google/redirect")
   @UseGuards(GoogleOAuthGuard)
   async googleLogin() {}
