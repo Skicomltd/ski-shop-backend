@@ -120,7 +120,8 @@ export class FezService {
 
   private async getToken(): Promise<string> {
     const cachedToken = await this.cacheManager.get<Token>(this.TOKEN_CACHE_KEY)
-
+    // eslint-disable-next-line no-console
+    console.log("cached Token: ", cachedToken)
     if (cachedToken && cachedToken.expiresAt > Date.now()) {
       return cachedToken.token
     }
