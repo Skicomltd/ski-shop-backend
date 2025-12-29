@@ -30,6 +30,6 @@ services:
     restart: always
 
 volumes:
-  postgres_data_dev:
+  postgres_data_development:
   postgres_data_staging:
-  postgres_data_prod:
+  postgres_data_production:
