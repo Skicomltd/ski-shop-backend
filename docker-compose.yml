@@ -1,9 +1,7 @@
-version: "3.9"
-
 services:
   api:
-    image: ghcr.io/skicomltd/ski-shop-backend:latest
-    container_name: skicom-shop
+    image: ghcr.io/skicomltd/ski-shop-backend:${NODE_ENV}
+    container_name: skicom-shop-${NODE_ENV}
     restart: always
     env_file:
       - .env
@@ -17,7 +15,7 @@ services:
 
   postgres:
     image: postgres:16-alpine
-    container_name: postgres
+    container_name: postgres-${NODE_ENV}
     restart: always
     environment:
       POSTGRES_DB: ${DB_NAME}
@@ -30,7 +28,7 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: redis
+    container_name: redis-${NODE_ENV}
     restart: always
     ports:
        - "6379:6379"
