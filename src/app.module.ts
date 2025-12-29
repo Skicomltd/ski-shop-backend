@@ -49,13 +49,14 @@ import { EventsModule } from "./events/events.module"
 import { PickupsModule } from "./modules/pickups/pickups.module"
 import fezConfig from "./config/fez.config"
 import pushConfig from "./config/push.config"
+import redisConfig from "./config/redis.config"
 @Module({
   imports: [
     UserModule,
     AuthModule,
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [appConfig, authConfig, mailConfig, filesystemsConfig, logConfig, paymentConfig, fezConfig, pushConfig]
+      load: [appConfig, authConfig, mailConfig, filesystemsConfig, logConfig, paymentConfig, fezConfig, pushConfig, redisConfig]
     }),
     QueuesModule,
     TypeOrmModule.forRootAsync(databaseConfigAsync),

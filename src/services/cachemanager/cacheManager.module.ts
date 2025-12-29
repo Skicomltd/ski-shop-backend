@@ -3,8 +3,7 @@ import { Module } from "@nestjs/common"
 import { ConfigModule, ConfigService } from "@nestjs/config"
 import { CacheManagerService } from "./cacheManager.service"
 import { createKeyv } from "@keyv/redis"
-import cacheConfig from "./entities/config"
-import { ICacheConfig } from "./interface/cacheManager.interface"
+import cacheConfig, { IRedisConfig } from "../../config/redis.config"
 
 @Module({
   imports: [
@@ -12,7 +11,7 @@ import { ICacheConfig } from "./interface/cacheManager.interface"
     CacheModule.registerAsync({
       imports: [ConfigModule.forFeature(cacheConfig)],
       useFactory: async (configService: ConfigService) => {
-        const config = configService.get<ICacheConfig>("cache")
+        const config = configService.get<IRedisConfig>("redis")
 
         return {
           stores: [createKeyv(config.url)],
