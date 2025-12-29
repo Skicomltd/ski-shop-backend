@@ -10,7 +10,7 @@ services:
     volumes:
       - ./firebase-admin.json:/app/firebase-admin.json:ro
     ports:
-      - "${PORT}:3000"
+      - "${HOST_PORT}:${PORT}"
     depends_on:
       - postgres
       - redis
