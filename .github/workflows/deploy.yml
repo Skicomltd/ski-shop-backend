@@ -67,3 +67,38 @@ jobs:
             echo "🚀 Restarting containers"
             docker compose pull
             docker compose up -d --force-recreate
+
+  deploy-staging:
+    if: github.ref == 'refs/heads/staging'
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy Staging
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.DROPLET_HOST }}
+          username: tobi
+          key: ${{ secrets.DROPLET_SSH_KEY }}
+          script: |
+            set -e
+            cd /var/www/skishop/staging
+
+            echo "🔐 Writing .env"
+            cat <<'EOF' > .env
+            ${{ secrets.ENV_STAGING }}
+            EOF
+
+            echo "🧱 Writing docker-compose.yml"
+            cat <<'EOF' > docker-compose.yml
+            ${{ secrets.DOCKER_COMPOSE }}
+            EOF
+
+            echo "🔥 Writing Firebase credentials"
+            cat <<'EOF' > firebase-admin.json
+            ${{ secrets.FIREBASE_STAGING }}
+            EOF
+
+            echo "🚀 Restarting containers"
+            docker compose pull
+            docker compose up -d --force-recreate
