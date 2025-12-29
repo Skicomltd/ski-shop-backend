@@ -50,12 +50,20 @@ jobs:
             cd /var/www/skishop/dev
 
             echo "🔐 Writing .env"
-            echo "${{ secrets.ENV_DEV }}" > .env
+            cat <<'EOF' > .env
+            ${{ secrets.ENV_DEV }}
+            EOF
+
+            echo "🧱 Writing docker-compose.yml"
+            cat <<'EOF' > docker-compose.yml
+            ${{ secrets.DOCKER_COMPOSE }}
+            EOF
 
             echo "🔥 Writing Firebase credentials"
-            echo '${{ secrets.FIREBASE_DEV }}' > firebase-admin.json
+            cat <<'EOF' > firebase-admin.json
+            ${{ secrets.FIREBASE_DEV }}
+            EOF
 
-            echo "🚀 restarting containers"
-            docker compose down
-            docker compose up -d
-
+            echo "🚀 Restarting containers"
+            docker compose pull
+            docker compose up -d --force-recreate
