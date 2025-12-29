@@ -49,9 +49,6 @@ jobs:
             set -e
             cd /var/www/skishop/dev
 
-            echo "📄 Writing docker-compose.yml"
-            echo "${{ secrets.COMPOSE }}" > docker-compose.yml
-
             echo "🔐 Writing .env"
             echo "${{ secrets.ENV_DEV }}" > .env
 

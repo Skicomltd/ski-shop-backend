@@ -38,4 +38,3 @@ lerna-debug.log*
 .env*
 uploads
 fire-base-admin.json
-docker-compose.yml

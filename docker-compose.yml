@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  api:
+    image: ghcr.io/skicomltd/ski-shop-backend:latest
+    container_name: skicom-shop
+    restart: always
+    env_file:
+      - .env
+    volumes:
+      - ./firebase-admin.json:/app/firebase-admin.json:ro
+    ports:
+      - "${PORT}:3000"
+    depends_on:
+      - postgres
+      - redis
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT}:5432"
+
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    ports:
+       - "6379:6379"
+
+volumes:
+  postgres_data:
