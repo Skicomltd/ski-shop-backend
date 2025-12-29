@@ -55,6 +55,7 @@ jobs:
             echo "🔥 Writing Firebase credentials"
             echo '${{ secrets.FIREBASE_DEV }}' > firebase-admin.json
 
-            echo "🚀 Pulling & restarting containers"
-            docker compose pull
+            echo "🚀 restarting containers"
+            docker compose down
             docker compose up -d
+
