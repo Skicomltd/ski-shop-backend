@@ -9,9 +9,13 @@ import { clientTypeSchema } from "../dto/client-type.dto"
 import { IS_WEBHOOK } from "../decorators/webhook.decorator"
 import { IS_SHORT_TIME } from "../decorators/short-time.decorator"
 import { IS_PUBLIC_KEY } from "../decorators/public.decorator"
+import { ConfigService } from "@nestjs/config"
 @Injectable()
 export class JwtGuard extends AuthGuard("jwt") {
-  constructor(private reflector: Reflector) {
+  constructor(
+    private reflector: Reflector,
+    private readonly configService: ConfigService
+  ) {
     super()
   }
   canActivate(context: ExecutionContext): Promise<boolean> | boolean | Observable<boolean> {
@@ -26,6 +30,11 @@ export class JwtGuard extends AuthGuard("jwt") {
 
     // Unauthenticated if authenticated request is made without a client type header and request is not a webhook request.
     if (!validationResult.success && !isWebhook) return false
+
+    // if request is from mobile, update client url to https://skicomltd.com
+    if (validationResult.data !== "web" && !isWebhook) {
+      this.configService.set("payment.providers.paystack.callbackUrl", "https://skicomltd.com")
+    }
 
     // Attach the client type to the request to be accessible accross the application.
     request.client = validationResult.data
