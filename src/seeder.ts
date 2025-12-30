@@ -82,8 +82,8 @@ seeder({
   ],
   providers: [UserSeeder, BusinessSeeder, StoreSeeder, BankSeeder, ProductSeeder, PromotionSeeder, PlanSeeder]
 }).run([
-  UserSeeder,
   BusinessSeeder,
+  UserSeeder,
   StoreSeeder,
   BankSeeder,
   ProductSeeder,
