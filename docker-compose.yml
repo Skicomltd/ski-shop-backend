@@ -1,6 +1,6 @@
 services:
   api:
-    image: ghcr.io/skicomltd/ski-shop-backend:${NODE_ENV}
+    image: ghcr.io/skicomltd/ski-shop-backend:${IMAGE_TAG}
     container_name: skicom-shop-${NODE_ENV}
     restart: always
     env_file:
