@@ -26,7 +26,7 @@ services:
           npx typeorm schema:drop -d ./dist/db/typeorm.config.js &&
           npx typeorm migration:run -d ./dist/db/typeorm.config.js &&
           echo 'Seeding database...' &&
-          node dist/src/seeder --refresh;
+          node dist/src/seeder;
         else
           npx typeorm migration:run -d ./dist/db/typeorm.config.js;
         fi
