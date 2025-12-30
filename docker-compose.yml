@@ -24,7 +24,9 @@ services:
         echo 'Running migrations...' &&
         if [ \"$NODE_ENV\" = \"development\" ]; then
           npx typeorm schema:drop -d ./dist/db/typeorm.config.js &&
-          npx typeorm migration:run -d ./dist/db/typeorm.config.js;
+          npx typeorm migration:run -d ./dist/db/typeorm.config.js &&
+          echo 'Seeding database...' &&
+          node dist/src/seeder --refresh;
         else
           npx typeorm migration:run -d ./dist/db/typeorm.config.js;
         fi
