@@ -20,15 +20,15 @@ services:
     depends_on:
       - postgres
     command: >
-      sh -c "
-      echo 'Running migrations...' &&
-      if [ \"$NODE_ENV\" = \"development\" ]; then
-        typeorm schema:drop -d ./dist/db/typeorm.config.js &&
-        typeorm migration:run -d ./dist/db/typeorm.config.js;
-      else
-        typeorm migration:run -d ./dist/db/typeorm.config.js;
-      fi
-      "
+        sh -c "
+        echo 'Running migrations...' &&
+        if [ \"$NODE_ENV\" = \"development\" ]; then
+          npx typeorm schema:drop -d ./dist/db/typeorm.config.js &&
+          npx typeorm migration:run -d ./dist/db/typeorm.config.js;
+        else
+          npx typeorm migration:run -d ./dist/db/typeorm.config.js;
+        fi
+        "
 
   postgres:
     image: postgres:16-alpine
