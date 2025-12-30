@@ -33,6 +33,6 @@ export class GeneralSeeder implements Seeder {
   }
 
   async drop(): Promise<any> {
-    await this.generalRepository.clear()
+    await this.generalRepository.delete({})
   }
 }

@@ -32,6 +32,6 @@ export class PromotionSettingSeeder implements Seeder {
     await this.promotionSettingRepository.save(promotionSettingEntity)
   }
   async drop(): Promise<any> {
-    await this.promotionSettingRepository.clear()
+    await this.promotionSettingRepository.delete({})
   }
 }

@@ -43,6 +43,6 @@ export class BankSeeder implements Seeder {
   }
 
   async drop(): Promise<any> {
-    await this.bankRepository.clear()
+    await this.bankRepository.delete({})
   }
 }

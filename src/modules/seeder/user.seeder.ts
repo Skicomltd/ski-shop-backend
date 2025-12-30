@@ -106,6 +106,6 @@ export class UserSeeder implements Seeder {
   }
 
   async drop(): Promise<any> {
-    await this.userRepository.clear()
+    await this.userRepository.delete({})
   }
 }
