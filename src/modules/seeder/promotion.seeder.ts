@@ -49,6 +49,6 @@ export class PromotionSeeder implements Seeder {
   }
 
   async drop(): Promise<any> {
-    await this.promotionRepository.delete({})
+    await this.promotionRepository.clear()
   }
 }

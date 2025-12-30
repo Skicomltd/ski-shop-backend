@@ -61,7 +61,7 @@ export class ProductSeeder implements Seeder {
   }
 
   async drop(): Promise<any> {
-    await this.productRepository.delete({})
+    await this.productRepository.clear()
   }
 
   async getArrayOfCategories() {

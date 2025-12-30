@@ -26,6 +26,6 @@ export class PlanSeeder implements Seeder {
   }
 
   async drop(): Promise<any> {
-    await this.planRepository.delete({})
+    await this.planRepository.clear()
   }
 }

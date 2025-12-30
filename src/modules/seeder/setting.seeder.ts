@@ -14,6 +14,6 @@ export class SettingSeeder implements Seeder {
   }
 
   async drop(): Promise<any> {
-    await this.settingRepository.delete({})
+    await this.settingRepository.clear()
   }
 }

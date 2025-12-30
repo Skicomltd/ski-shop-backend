@@ -71,7 +71,7 @@ export class BusinessSeeder implements Seeder {
   }
 
   async drop(): Promise<any> {
-    await this.businessRepository.delete({})
+    await this.businessRepository.clear()
   }
 
   private states = [

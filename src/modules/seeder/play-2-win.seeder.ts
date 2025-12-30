@@ -33,6 +33,6 @@ export class Play2WinSeeder implements Seeder {
     await this.play2WinSettingRepository.save(play2winEntity)
   }
   async drop(): Promise<any> {
-    await this.play2WinSettingRepository.delete({})
+    await this.play2WinSettingRepository.clear()
   }
 }
