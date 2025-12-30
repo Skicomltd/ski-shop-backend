@@ -17,6 +17,8 @@ services:
     image: ghcr.io/skicomltd/ski-shop-backend:${IMAGE_TAG}
     env_file:
       - .env
+    volumes:
+      - ./firebase-admin.json:/app/firebase-admin.json:ro
     depends_on:
       - postgres
     command: >
