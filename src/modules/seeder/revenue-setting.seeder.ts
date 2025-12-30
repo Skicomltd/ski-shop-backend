@@ -39,6 +39,6 @@ export class RevenueSettingSeeder implements Seeder {
   }
 
   async drop(): Promise<any> {
-    await this.revenueSettingRepository.delete({})
+    await this.revenueSettingRepository.deleteAll()
   }
 }

@@ -63,6 +63,6 @@ export class StoreSeeder implements Seeder {
   }
 
   async drop(): Promise<any> {
-    await this.storeRepository.clear()
+    await this.storeRepository.deleteAll()
   }
 }
