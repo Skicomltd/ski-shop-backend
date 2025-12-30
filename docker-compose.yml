@@ -21,10 +21,12 @@ services:
       - postgres
     command: >
       sh -c "
+      echo 'Running migrations...' &&
       if [ \"$NODE_ENV\" = \"development\" ]; then
-        npm run migration:dev:reset;
+        typeorm schema:drop -d ./dist/db/typeorm.config.js &&
+        typeorm migration:run -d ./dist/db/typeorm.config.js;
       else
-        npm run migration:run;
+        typeorm migration:run -d ./dist/db/typeorm.config.js;
       fi
       "
 

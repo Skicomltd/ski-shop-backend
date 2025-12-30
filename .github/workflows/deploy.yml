@@ -66,8 +66,13 @@ jobs:
 
             echo "🚀 Restarting containers"
             docker compose pull
-            docker compose run --rm migrate || exit 1
-            docker compose up -d --force-recreate
+
+            echo "🗄 Running migrations"
+            docker compose run --rm migrate
+
+            echo "🚀 Starting API"
+            docker compose up -d --force-recreate api
+
 
   deploy-staging:
     if: github.ref == 'refs/heads/staging'
