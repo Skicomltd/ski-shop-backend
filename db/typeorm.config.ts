@@ -2,6 +2,8 @@ import { DataSource } from "typeorm"
 import "tsconfig-paths/register"
 import "dotenv/config"
 
+const isLocal = process.env.NODE_ENV === "local"
+
 const dataSource = new DataSource({
   type: "postgres",
   host: process.env.DB_HOST,
@@ -10,8 +12,8 @@ const dataSource = new DataSource({
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
   synchronize: false, // Always false when using migrations
-  entities: ["src/**/*.entity{.ts,.js}"],
-  migrations: ["db/migrations/*.ts"],
+  entities: [isLocal ? "src/**/*.entity.ts" : "dist/**/*.entity.js"], // If deploying with docker, migration is in the dist directory
+  migrations: [isLocal ? "db/migrations/*.ts" : "dist/db/migrations/*.js"],
   migrationsTableName: "migrations",
   logging: false
 })

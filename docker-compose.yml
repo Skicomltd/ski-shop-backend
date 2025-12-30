@@ -13,6 +13,21 @@ services:
       - postgres
       - redis
 
+  migrate:
+    image: ghcr.io/skicomltd/ski-shop-backend:${IMAGE_TAG}
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+    command: >
+      sh -c "
+      if [ \"$NODE_ENV\" = \"development\" ]; then
+        npm run migration:dev:reset;
+      else
+        npm run migration:run;
+      fi
+      "
+
   postgres:
     image: postgres:16-alpine
     container_name: postgres-${NODE_ENV}
