@@ -89,12 +89,12 @@ export class UserSeeder implements Seeder {
     })
 
     users.push({
-      firstName: "admin",
-      lastName: "Account",
+      firstName: "Skicom",
+      lastName: "Admin",
       password: "password1234",
       role: UserRoleEnum.Admin,
       phoneNumber: faker.phone.number(),
-      email: "adminaccount@gmail.com",
+      email: "dev@skicomltd.com",
       isEmailVerified: true,
       isPhoneNumberVerified: true,
       createdAt: faker.date.past(),
