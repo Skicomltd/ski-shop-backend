@@ -2,7 +2,13 @@ import { Body, Controller, Post, UseGuards } from "@nestjs/common"
 import { WebhookService } from "./webhook.service"
 import { PaystackWebhookGuard } from "./guard/paystack.guard"
 import { Public } from "../auth/decorators/public.decorator"
-import { PaystackChargeSuccess, PaystackTransferData, PaystackWebhook } from "@services/payments/interfaces/paystack.interface"
+import {
+  PaystackChargeSuccess,
+  PaystackTransferData,
+  PaystackWebhook,
+  SubscriptionDisableData,
+  SubscriptionNotRenewData
+} from "@services/payments/interfaces/paystack.interface"
 import { FezWebhookDto } from "./dto/fez.dto"
 import { OrderItemService } from "../orders/orderItem.service"
 import { EventEmitter2 } from "@nestjs/event-emitter"
@@ -35,6 +41,10 @@ export class WebhookController {
       this.webhookService.handleTransferFailed(body.data as PaystackTransferData)
     } else if (body.event === "transfer.reversed") {
       this.webhookService.handleTransferFailed(body.data as PaystackTransferData)
+    } else if (body.event === "subscription.not_renew") {
+      this.webhookService.handleSubscriptionNotRenewing(body.data as SubscriptionNotRenewData)
+    } else if (body.event === "subscription.disable") {
+      this.webhookService.handleSubscriptionDisabled(body.data as SubscriptionDisableData)
     }
   }
   // webhook came in from fez! { orderNumber: 'NOPB04122542', status: 'Enroute To Last Mile Hub' }

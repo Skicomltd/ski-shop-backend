@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, UseInterceptors, Query, UseGuards, Res, ParseUUIDPipe } from "@nestjs/common"
+import { Controller, Get, Post, Body, Patch, Param, Req, UseInterceptors, Query, UseGuards, Res, ParseUUIDPipe } from "@nestjs/common"
 import { SubscriptionService } from "./subscription.service"
 import { createSubcriptionSchema, CreateSubscriptionDto } from "./dto/create-subscription.dto"
 import { UpdateSubscriptionDto } from "./dto/update-subscription.dto"
@@ -141,9 +141,10 @@ export class SubscriptionController {
   }
 
   @UseGuards(PolicySubscriptionGuard)
-  @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, Subscription))
-  @Delete(":id")
-  remove(@Param("id", ParseUUIDPipe) id: string) {
-    return this.subscriptionService.remove({ id: id })
+  @Get(":id/manage")
+  async manage(@Param("id", ParseUUIDPipe) id: string) {
+    const subscription = await this.subscriptionService.findById(id)
+    if (!subscription) throw new NotFoundException("subscription not found")
+    return await this.paymentService.manageSubscription(subscription.subscriptionCode)
   }
 }

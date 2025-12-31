@@ -16,7 +16,12 @@ import { Subscription, SubscriptionEnum } from "../subscription/entities/subscri
 import { EventRegistry } from "@/events/events.registry"
 import { PaymentsService } from "@services/payments/payments.service"
 import { TransactionHelper } from "@services/utils/transactions/transactions.service"
-import { PaystackChargeSuccess, PaystackTransferData } from "@services/payments/interfaces/paystack.interface"
+import {
+  PaystackChargeSuccess,
+  PaystackTransferData,
+  SubscriptionDisableData,
+  SubscriptionNotRenewData
+} from "@services/payments/interfaces/paystack.interface"
 
 @Injectable()
 export class WebhookService {
@@ -86,6 +91,34 @@ export class WebhookService {
     }
 
     await this.storeService.update(store, { isStarSeller: true, type: vendonEnumType.PREMIUM })
+
+    return
+  }
+
+  async handleSubscriptionNotRenewing(data: SubscriptionNotRenewData) {
+    const subscription = await this.subscriptionService.findOne({ subscriptionCode: data.subscription_code })
+    if (!subscription) return
+
+    await this.subscriptionService.update(subscription, { status: SubscriptionEnum.INACTIVE })
+  }
+
+  async handleSubscriptionDisabled(data: SubscriptionDisableData) {
+    const subscription = await this.subscriptionService.findOne({ subscriptionCode: data.subscription_code })
+    if (!subscription) return
+
+    const vendor = await this.userService.findOne({ id: subscription.vendorId })
+
+    if (!vendor) return
+
+    await this.subscriptionService.update(subscription, { status: SubscriptionEnum.INACTIVE })
+
+    const store = await this.storeService.findOne({ id: vendor.business.store.id })
+
+    if (!store) {
+      return
+    }
+
+    await this.storeService.update(store, { isStarSeller: false, type: vendonEnumType.BASIC })
 
     return
   }

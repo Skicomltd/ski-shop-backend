@@ -78,6 +78,10 @@ export class PaymentsService implements IPaymentService {
     return await this.with(this.options.default).getSubscription(data)
   }
 
+  async manageSubscription(code: string): Promise<string> {
+    return await this.with(this.options.default).manageSubscription(code)
+  }
+
   /** Check the balance of the payment provider account */
   async checkBalance() {
     return await this.with(this.options.default).checkBalance()

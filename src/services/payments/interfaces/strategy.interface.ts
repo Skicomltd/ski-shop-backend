@@ -7,6 +7,7 @@ export interface IPaymentService {
   createPaymentPlan: (data: CreatePlan) => Promise<PaymentPlanResponse>
   createSubscription: (data: CreateSubscription) => Promise<SubscriptionResponse>
   getSubscription: (data: GetSubscription) => Promise<GetSubscriptionResponse>
+  manageSubscription: (code: string) => Promise<string>
   checkBalance: () => Promise<CheckBalance>
   getBanks: (currency?: Currency) => Promise<Bank[]>
   createTransferRecipient: (data: CreateTransferRecipient) => Promise<CreateTransferRecipientResponse>

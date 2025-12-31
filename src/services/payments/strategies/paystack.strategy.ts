@@ -23,6 +23,7 @@ import {
 import {
   CreatePaystackTransferRecipient,
   GetSubscriptionPaystackResponse,
+  ManageSubscriptionResponse,
   PaystackBalanceResponse,
   PaystackCreateRcipientResponse,
   PaystackGetBanksResponse,
@@ -149,6 +150,28 @@ export class PaystackStrategy implements IPaymentService {
       accessCode: data.access_code,
       reference: data.reference
     }
+  }
+
+  async manageSubscription(code: string): Promise<string> {
+    const headers = {
+      Authorization: `Bearer ${this.secret}`,
+      "Content-Type": "application/json"
+    }
+
+    const observable = this.httpService.get<ManageSubscriptionResponse>(`${this.url}/subscription/${code}/manage/link`, { headers })
+
+    const { data } = await firstValueFrom(
+      observable.pipe(
+        map((res) => {
+          return res.data
+        }),
+        catchError((error: AxiosError) => {
+          throw error
+        })
+      )
+    )
+
+    return data.link
   }
 
   async getSubscription({ code }: GetSubscription): Promise<GetSubscriptionResponse> {

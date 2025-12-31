@@ -10,6 +10,8 @@ export type PaystackEventType =
   | "customeridentification.success"
   | "dedicatedaccount.assign.failed"
   | "dedicatedaccount.assign.success"
+  | "subscription.not_renew"
+  | "subscription.disable"
 
 // type PaystackWebhookBody<T> = PaystackChargeSuccess<T> | PaystackTransferData
 
@@ -121,6 +123,8 @@ export type PaystackBalanceResponse = PaystackApiResponse<
     balance: number
   }>
 >
+
+export type ManageSubscriptionResponse = PaystackApiResponse<{ link: string }>
 
 export type PaystackGetBanksResponse = PaystackApiResponse<GetBanks>
 
@@ -362,6 +366,106 @@ export interface PaystackTransferData {
   }
   created_at: string
   updated_at: string
+}
+
+export type SubscriptionNotRenewData = {
+  id: number
+  domain: string
+  status: "non-renewing"
+  subscription_code: string
+  email_token: string
+  amount: number
+  cron_expression: string
+  next_payment_date: string | null
+  open_invoice: string | null
+  integration: number
+  plan: {
+    id: number
+    name: string
+    plan_code: string
+    description: string
+    amount: number
+    interval: "annually" | "monthly" | "weekly"
+    send_invoices: boolean
+    send_sms: boolean
+    currency: string
+  }
+  authorization: {
+    authorization_code: string
+    bin: string
+    last4: string
+    exp_month: string
+    exp_year: string
+    channel: string
+    card_type: string
+    bank: string
+    country_code: string
+    brand: string
+    reusable: boolean
+    signature: string
+    account_name: string | null
+  }
+  customer: {
+    id: number
+    first_name: string | null
+    last_name: string | null
+    email: string
+    customer_code: string
+    phone: string | null
+    metadata: unknown | null
+    risk_action: string
+    international_format_phone: string | null
+  }
+  invoices: unknown[]
+  invoices_history: unknown[]
+  invoice_limit: number
+  split_code: string | null
+  most_recent_invoice: unknown | null
+  created_at: string
+}
+
+export type SubscriptionDisableData = {
+  domain: string
+  status: "complete"
+  subscription_code: string
+  email_token: string
+  amount: number
+  cron_expression: string
+  next_payment_date: string | null
+  open_invoice: string | null
+  plan: {
+    id: number
+    name: string
+    plan_code: string
+    description: string | null
+    amount: number
+    interval: "monthly" | "annually" | "weekly"
+    send_invoices: boolean
+    send_sms: boolean
+    currency: string
+  }
+  authorization: {
+    authorization_code: string
+    bin: string
+    last4: string
+    exp_month: string
+    exp_year: string
+    card_type: string
+    bank: string
+    country_code: string
+    brand: string
+    account_name: string | null
+  }
+  customer: {
+    first_name: string
+    last_name: string
+    email: string
+    customer_code: string
+    phone: string
+    metadata: Record<string, unknown>
+    risk_action: string
+  }
+  created_at: string
 }
 
 // {
