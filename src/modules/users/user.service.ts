@@ -6,6 +6,7 @@ import { UpdateUserDto } from "./dto/update-user-dto"
 import { User, UserRoleEnum } from "./entity/user.entity"
 import { IUserQuery } from "./interfaces/users-query.interface"
 import { HeadersRecordsInterface } from "./interfaces/user-headers-records"
+import { faker } from "@faker-js/faker"
 
 @Injectable()
 export class UserService implements IService<User> {
@@ -78,9 +79,24 @@ export class UserService implements IService<User> {
   }
 
   async remove(filter: FindOptionsWhere<User>): Promise<number> {
-    const result = await this.userRepository.delete(filter)
+    const user = await this.userRepository.findOne({ where: filter })
 
-    return result.affected
+    if (!user) return 0
+
+    await this.userRepository.update(
+      { id: user.id },
+      {
+        firstName: faker.person.firstName(),
+        lastName: faker.person.lastName(),
+        email: faker.internet.email(),
+        phoneNumber: faker.phone.number(),
+        isEmailVerified: false,
+        isPhoneNumberVerified: false,
+        address: ""
+      }
+    )
+
+    return 1
   }
 
   async headersRecords(query: IUserQuery, users: User[]): Promise<HeadersRecordsInterface> {
