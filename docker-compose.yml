@@ -6,7 +6,9 @@ services:
     env_file:
       - .env
     volumes:
-      - ./firebase-admin.json:/app/firebase-admin.json:ro
+      - ./firebase-admin-customer.json:/app/firebase-admin-customer.json:ro
+      - ./firebase-admin-vendor.json:/app/firebase-admin-vendor.json:ro
+      - ./firebase-admin-web.json:/app/firebase-admin-web.json:ro
     ports:
       - "${HOST_PORT}:${PORT}"
     depends_on:
@@ -18,21 +20,23 @@ services:
     env_file:
       - .env
     volumes:
-      - ./firebase-admin.json:/app/firebase-admin.json:ro
+      - ./firebase-admin-customer.json:/app/firebase-admin-customer.json:ro
+      - ./firebase-admin-vendor.json:/app/firebase-admin-vendor.json:ro
+      - ./firebase-admin-web.json:/app/firebase-admin-web.json:ro
     depends_on:
       - postgres
     command: >
-        sh -c "
-        echo 'Running migrations...' &&
-        if [ \"$NODE_ENV\" = \"development\" ]; then
-          npx typeorm schema:drop -d ./dist/db/typeorm.config.js &&
-          npx typeorm migration:run -d ./dist/db/typeorm.config.js &&
-          echo 'Seeding database...' &&
-          node dist/src/seeder;
-        else
-          npx typeorm migration:run -d ./dist/db/typeorm.config.js;
-        fi
-        "
+      sh -c "
+      echo 'Running migrations...' &&
+      if [ \"$NODE_ENV\" = \"development\" ]; then
+        npx typeorm schema:drop -d ./dist/db/typeorm.config.js &&
+        npx typeorm migration:run -d ./dist/db/typeorm.config.js &&
+        echo 'Seeding database...' &&
+        node dist/src/seeder;
+      else
+        npx typeorm migration:run -d ./dist/db/typeorm.config.js;
+      fi
+      "
 
   postgres:
     image: postgres:16-alpine

@@ -138,6 +138,16 @@ export class AuthController {
   @UseGuards(JwtShortTimeGuard)
   async verifyPhoneNumber(@Req() req: Request, @Body(new JoiValidationPipe(verifyCodeSchema)) verifyPhoneNumberDto: VerifyCodeDto) {
     try {
+      // Update firebase credentials to that of customer firebase project
+      if (req.client === "customer-mobile") {
+        this.configService.set("GOOGLE_APPLICATION_CREDENTIALS", this.configService.get("GOOGLE_APPLICATION_CREDIENTIALS_CUSTOMER"))
+      }
+
+      // Update firebase credentials to that of customer firebase project
+      if (req.client === "vendor-mobile") {
+        this.configService.set("GOOGLE_APPLICATION_CREDENTIALS", this.configService.get("GOOGLE_APPLICATION_CREDIENTIALS_VENDOR"))
+      }
+
       const firebaseUser = await this.firebaseService.verifyIdToken(verifyPhoneNumberDto.code)
 
       // No associated phone number and email with idToken
