@@ -43,7 +43,7 @@ export const registerSchema = joi.object({
       return value.toLowerCase()
     }, "Convert email to lowercase")
     .required(),
-  role: joi.string().valid("customer", "vendor", "admin").required(),
+  role: joi.string().valid("customer", "vendor").required(),
   password: joi.string().required(),
   confirmPassword: joi.string().valid(joi.ref("password")).required().messages({
     "any.only": "Passwords do not match"

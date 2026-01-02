@@ -107,8 +107,14 @@ jobs:
             EOF
 
             echo "🔥 Writing Firebase credentials"
-            cat <<'EOF' > firebase-admin.json
-            ${{ secrets.FIREBASE_STAGING }}
+            cat <<'EOF' > firebase-admin-customer.json
+            ${{ secrets.FIREBASE_ADMIN_CUSTOMER }}
+            EOF
+            cat <<'EOF' > firebase-admin-vendor.json
+            ${{ secrets.FIREBASE_ADMIN_VENDOR }}
+            EOF
+            cat <<'EOF' > firebase-admin-web.json
+            ${{ secrets.FIREBASE_ADMIN_WEB }}
             EOF
 
             echo "🚀 Restarting containers"
@@ -147,8 +153,14 @@ jobs:
             EOF
 
             echo "🔥 Writing Firebase credentials"
-            cat <<'EOF' > firebase-admin.json
-            ${{ secrets.FIREBASE_PROD }}
+            cat <<'EOF' > firebase-admin-customer.json
+            ${{ secrets.FIREBASE_ADMIN_CUSTOMER }}
+            EOF
+            cat <<'EOF' > firebase-admin-vendor.json
+            ${{ secrets.FIREBASE_ADMIN_VENDOR }}
+            EOF
+            cat <<'EOF' > firebase-admin-web.json
+            ${{ secrets.FIREBASE_ADMIN_WEB }}
             EOF
 
             echo "🚀 Restarting containers"
