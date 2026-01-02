@@ -46,6 +46,8 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "127.0.0.1:${DB_PORT}:5432"
     volumes:
       - postgres_data_${NODE_ENV}:/var/lib/postgresql/data
 
