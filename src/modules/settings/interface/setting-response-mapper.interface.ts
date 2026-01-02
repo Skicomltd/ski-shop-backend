@@ -4,9 +4,9 @@ import { ISettingResponse } from "./settings-response.interface"
 export abstract class SettingResponseMapper implements IInterceptor {
   transform(data: Setting): ISettingResponse {
     return {
-      id: data.id,
+      id: data?.id,
       generalSettings: {
-        id: data.generalSetting.id,
+        id: data?.generalSetting?.id,
         purchaseEmailNotification: data.generalSetting.purchaseEmailNotification,
         newsAndUpdateEmailNotification: data.generalSetting.newsAndUpdateEmailNotification,
         productCreationEmailNotification: data.generalSetting.productCreationEmailNotification,
