@@ -2,6 +2,7 @@ import * as joi from "joi"
 
 import { PartialType } from "@nestjs/mapped-types"
 import { CreateProductDto } from "./create-product.dto"
+import { CategoriesArray } from "@/modules/common/types"
 
 export class UpdateProductDto extends PartialType(CreateProductDto) {}
 
@@ -10,12 +11,7 @@ export const updateProductSchema = joi.object({
   price: joi.number().optional(),
   weight: joi.number().optional(),
   fragile: joi.boolean().optional(),
-  categories: joi
-    .array()
-    .items(
-      joi.string().valid("clothings", "gadgets", "groceries", "women", "bodyCreamAndOil", "furniture", "tvAndHomeAppliances", "watchesAndAccessories")
-    )
-    .optional(),
+  categories: joi.array().items(joi.string().valid(CategoriesArray)).optional(),
   description: joi.string().optional(),
   discountPrice: joi
     .number()

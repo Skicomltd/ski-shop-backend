@@ -1,7 +1,7 @@
 import { Store } from "@/modules/stores/entities/store.entity"
 import * as joi from "joi"
 import { User } from "@/modules/users/entity/user.entity"
-import { ProductCategoriesEnum, ProductStatusEnum } from "@/modules/common/types"
+import { CategoriesArray, ProductCategoriesEnum, ProductStatusEnum } from "@/modules/common/types"
 
 export class CreateProductDto {
   name: string
@@ -29,10 +29,7 @@ export const createProductSchema = joi.object({
   price: joi.number().required(),
   weight: joi.number().required(),
   fragile: joi.boolean().required(),
-  category: joi
-    .string()
-    .valid("clothings", "gadgets", "groceries", "women", "bodyCreamAndOil", "furniture", "tvAndHomeAppliances", "watchesAndAccessories")
-    .required(),
+  category: joi.string().valid(CategoriesArray).required(),
   description: joi.string().required(),
   discountPrice: joi
     .number()
