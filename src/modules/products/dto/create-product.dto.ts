@@ -29,7 +29,10 @@ export const createProductSchema = joi.object({
   price: joi.number().required(),
   weight: joi.number().required(),
   fragile: joi.boolean().required(),
-  category: joi.string().valid(CategoriesArray).required(),
+  category: joi
+    .string()
+    .valid(...CategoriesArray)
+    .required(),
   description: joi.string().required(),
   discountPrice: joi
     .number()

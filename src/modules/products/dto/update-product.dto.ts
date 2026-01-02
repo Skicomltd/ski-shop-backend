@@ -11,7 +11,10 @@ export const updateProductSchema = joi.object({
   price: joi.number().optional(),
   weight: joi.number().optional(),
   fragile: joi.boolean().optional(),
-  categories: joi.array().items(joi.string().valid(CategoriesArray)).optional(),
+  categories: joi
+    .array()
+    .items(joi.string().valid(...CategoriesArray))
+    .optional(),
   description: joi.string().optional(),
   discountPrice: joi
     .number()
