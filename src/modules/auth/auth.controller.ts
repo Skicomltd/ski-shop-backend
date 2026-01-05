@@ -148,6 +148,9 @@ export class AuthController {
         this.configService.set("GOOGLE_APPLICATION_CREDENTIALS", this.configService.get("GOOGLE_APPLICATION_CREDIENTIALS_VENDOR"))
       }
 
+      // eslint-disable-next-line no-console
+      console.log("credentials: ", this.configService.get("GOOGLE_APPLICATION_CREDENTIALS"))
+
       const firebaseUser = await this.firebaseService.verifyIdToken(verifyPhoneNumberDto.code)
 
       // No associated phone number and email with idToken
