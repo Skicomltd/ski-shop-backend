@@ -22,7 +22,7 @@ function isVideoFile(extname: string) {
 export function imageFilter(_req: Request, file: CustomFile, callback: any) {
   const ext = path.extname(file.originalname).replace(".", "")
 
-  if (ext !== "png" && ext !== "jpg" && ext !== "gif" && ext !== "jpeg") {
+  if (!file.mimetype.startsWith("image/")) {
     return callback(new ApiException("Only images are allowed", HttpStatus.UNSUPPORTED_MEDIA_TYPE), false)
   }
 
