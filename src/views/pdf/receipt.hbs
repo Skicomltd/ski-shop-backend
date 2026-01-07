@@ -1,0 +1,94 @@
+<html lang='en'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Payslip</title>
+    <style>
+      body, table, td, p, a, li, blockquote { -webkit-text-size-adjust: 100%; -ms-text-size-adjust: 100%; }
+      body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background-color: #ffffff;
+        font-family: work-sans, sans-serif;
+      }
+      .container {
+         max-width: 600px;
+         margin: 0 auto;
+         background-color: #F7F9FC;
+         overflow: hidden;
+         padding: 30px;
+      }
+
+      .header {
+         text-align: center;
+      }
+
+      .logo {
+        font-size: 20px;
+        font-weight: bold;
+        color: #000000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .logo-icon {
+        display: inline-block;
+        vertical-align: middle;
+      }
+
+      .month {
+         color: #232323;
+         font-weight: 600;
+         font-size: 16px;
+         text-align: center;
+      }
+
+      .content {
+         width: auto;
+      }
+
+      .details {
+         background-color: #ffffff;
+         padding: 16px 20px;
+         border-radius: 8px;
+         margin-top: 24px;
+      }
+
+
+      @media only screen and (max-width: 600px) {
+         .container {
+            margin: 0 10px;
+            padding: 10px;
+         }
+      }
+    </style>
+  </head>
+  <body>
+    <div class='container'>
+      {{!-- Header --}}
+      <header class='header'>
+
+         {{!-- Header Logo --}}
+        <div class='logo'>
+          <span class='logo-icon'>
+            <img src='https://res.cloudinary.com/dizf5i5qm/image/upload/v1757934010/samples/logo.png' alt='tsa-logo' />
+          </span>
+
+          <p>TechStudio HR</p>
+        </div>
+
+        {{!-- Payslip Month --}}
+        <small class="month">July 2025 Payslip</small>
+      </header>
+
+
+      <main class='content'>
+         <div class="details">
+               
+         </div>
+      </main>
+      <footer class='footer'></footer>
+    </div>
+  </body>
+</html>
