@@ -140,11 +140,15 @@ export class AuthController {
     try {
       // Update firebase credentials to that of customer firebase project
       if (req.client === "customer-mobile") {
+        // eslint-disable-next-line no-console
+        console.log("client: ", req.client, "i should only be here from customer mobile")
         this.configService.set("GOOGLE_APPLICATION_CREDENTIALS", this.configService.get("GOOGLE_APPLICATION_CREDIENTIALS_CUSTOMER"))
       }
 
       // Update firebase credentials to that of customer firebase project
       if (req.client === "vendor-mobile") {
+        // eslint-disable-next-line no-console
+        console.log("client: ", req.client, "i should only be here from vendor mobile")
         this.configService.set("GOOGLE_APPLICATION_CREDENTIALS", this.configService.get("GOOGLE_APPLICATION_CREDIENTIALS_VENDOR"))
       }
 
