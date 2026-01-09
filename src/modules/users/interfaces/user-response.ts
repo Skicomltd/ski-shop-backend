@@ -9,6 +9,7 @@ export interface IUserResponse {
   role: UserRoleEnum
   subscriptionStatus: SubscriptionEnum
   profifleImage: string
+  businessId: string
   email: string
   kycStatus: KYC_ENUM_STATUS
   itemsCount: number
