@@ -29,20 +29,23 @@
         <div style="padding:0 40px 50px; text-align:center;">
 
           <h1 style="font-size:28px; color:#000; margin:0 0 16px; font-weight:400;">
-            Hi {{firstName}}, Welcome To Ski-Shop. Verify Your Email.
+            Hi {{firstName}}, How Did We Do? Rate Your Product ⭐
           </h1>
 
+
           <p style="font-size:18px; line-height:1.7; color:#000; max-width:520px; margin:24px auto 40px;">
-                Welcome to Ski-Shop, the ultimate digital marketplace for creators like you! We're thrilled to have you join our vibrant community and showcase your digital creations to the world.
+           Your order {{orderId}} has been delivered — we hope you love it! Please take a moment to rate the product and share your experience. Your feedback helps vendors improve and helps other customers shop with confidence
           </p>
 
-          {{> big-code text="Email Verification" code=verificationCode}}
+
+          {{> button text="Rate Product" url=productUrl}}
 
           <p style="font-size:16px; color:#000; line-height:1.7; margin-top:50px;">
-            Thank you for choosing Ski-Shop to share your products. We can't wait to see what you have in store for the world!
+          Thank you for choosing Ski-Shop to share your products. We can't wait to see what you have in store for the world!
+          Stay secure,
           </p>
+            <p style="text-align: center;">The Ski-Shop Team</p>
 
-          {{> button text="Explore" url=exploreUrl}}
         </div>
       </div>
 

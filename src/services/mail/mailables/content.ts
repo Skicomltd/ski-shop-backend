@@ -1,6 +1,6 @@
 import { join } from "path"
 import handlebars from "handlebars"
-import { existsSync, readFileSync } from "fs"
+import { existsSync, readFileSync, readdirSync } from "fs"
 
 /**
  * Shape of content that can be provided for an email
@@ -45,6 +45,8 @@ export class Content {
    * - If neither is found, it returns an empty object.
    */
   public build(): { html?: string; text?: string } {
+    this.registerPartials()
+
     if (this.html) {
       const templatePath = this.resolveViewPath(this.html)
       const fileContent = readFileSync(templatePath, "utf8")
@@ -61,25 +63,39 @@ export class Content {
   }
 
   /**
-   * Resolve a template name into a file path.
-   *
-   * Example:
-   *  - "mail.test" → "src/views/mail/test.html" (or .hbs / .handlebars)
-   *
-   * Tries extensions in order: `.html`, `.hbs`, `.handlebars`.
-   * Throws an error if the template file does not exist.
+   * Resolve the view path by checking for .html, .hbs, or .handlebars extensions.
    */
-  private resolveViewPath(view: string): string {
-    const relativePath = view.replace(/\./g, "/")
+  private resolveViewPath(viewName: string): string {
+    const extensions = [".html", ".hbs", ".handlebars"]
+    const basePath = join(this.viewsPath, "mail", viewName)
 
-    if (existsSync(join(this.viewsPath, relativePath + ".html"))) {
-      return join(this.viewsPath, relativePath + ".html")
-    } else if (existsSync(join(this.viewsPath, relativePath + ".hbs"))) {
-      return join(this.viewsPath, relativePath + ".hbs")
-    } else if (existsSync(join(this.viewsPath, relativePath + ".handlebars"))) {
-      return join(this.viewsPath, relativePath + ".handlebars")
+    for (const ext of extensions) {
+      const filePath = basePath + ext
+      if (existsSync(filePath)) {
+        return filePath
+      }
     }
 
-    throw new Error("content view not found")
+    throw new Error(`Template not found for view: ${viewName}`)
+  }
+
+  /**
+   * Register Handlebars partials from the mail/partials directory.
+   */
+  private registerPartials(): void {
+    const partialsPath = join(this.viewsPath, "mail", "partials")
+    if (!existsSync(partialsPath)) {
+      return
+    }
+
+    const files = readdirSync(partialsPath)
+    for (const file of files) {
+      if (file.endsWith(".hbs") || file.endsWith(".handlebars")) {
+        const partialName = file.replace(/\.(hbs|handlebars)$/, "")
+        const filePath = join(partialsPath, file)
+        const partialContent = readFileSync(filePath, "utf8")
+        handlebars.registerPartial(partialName, partialContent)
+      }
+    }
   }
 }

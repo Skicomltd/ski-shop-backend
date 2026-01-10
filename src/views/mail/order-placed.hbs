@@ -29,20 +29,22 @@
         <div style="padding:0 40px 50px; text-align:center;">
 
           <h1 style="font-size:28px; color:#000; margin:0 0 16px; font-weight:400;">
-            Hi {{firstName}}, Welcome To Ski-Shop. Verify Your Email.
+            Hi {{firstName}}, Your Order Has Been Placed! Track It Anytime
           </h1>
 
           <p style="font-size:18px; line-height:1.7; color:#000; max-width:520px; margin:24px auto 40px;">
-                Welcome to Ski-Shop, the ultimate digital marketplace for creators like you! We're thrilled to have you join our vibrant community and showcase your digital creations to the world.
+            Great news! Your order {{orderId}} has been successfully placed. You can track your order in real time using the link below. We’ll keep  you updated at every stage — from vendor preparation to rider delivery.
           </p>
 
-          {{> big-code text="Email Verification" code=verificationCode}}
+
+          {{> button text="Track Order" url=orderUrl}}
 
           <p style="font-size:16px; color:#000; line-height:1.7; margin-top:50px;">
-            Thank you for choosing Ski-Shop to share your products. We can't wait to see what you have in store for the world!
+          Thank you for choosing Ski-Shop to share your products. We can't wait to see what you have in store for the world!
+          Stay secure,
           </p>
+            <p style="text-align: center;">The Ski-Shop Team</p>
 
-          {{> button text="Explore" url=exploreUrl}}
         </div>
       </div>
 

@@ -29,17 +29,17 @@
         <div style="padding:0 40px 50px; text-align:center;">
 
           <h1 style="font-size:28px; color:#000; margin:0 0 16px; font-weight:400;">
-            Hi {{firstName}}, Welcome To Ski-Shop. Verify Your Email.
+            Hi {{firstName}}, Your 4-Digit Delivery Code
           </h1>
 
           <p style="font-size:18px; line-height:1.7; color:#000; max-width:520px; margin:24px auto 40px;">
-                Welcome to Ski-Shop, the ultimate digital marketplace for creators like you! We're thrilled to have you join our vibrant community and showcase your digital creations to the world.
+            Your order {{orderId}} is on its way! Please provide the code below to the rider when your item arrives. Keep this code safe — it confirms that you have received your package.
           </p>
 
-          {{> big-code text="Email Verification" code=verificationCode}}
+          {{> big-code text="Delivery Code" code=deliveryCode}}
 
-          <p style="font-size:16px; color:#000; line-height:1.7; margin-top:50px;">
-            Thank you for choosing Ski-Shop to share your products. We can't wait to see what you have in store for the world!
+          <p style="font-size:16px; color:#000; line-height:1.7; margin-top:50px;">Thank you for choosing Ski-Shop to share your products. We can't wait to see what you have in store for the world!
+              Stay secure, The Ski-Shop Team
           </p>
 
           {{> button text="Explore" url=exploreUrl}}
