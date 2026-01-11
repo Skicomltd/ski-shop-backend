@@ -20,7 +20,7 @@ export class ResendOtpMail extends Mailable {
 
   public content(): Content {
     return new Content({
-      html: "resend-otp",
+      html: "mail.resend-otp",
       with: {
         title: "Resend OTP - Ski-Shop",
         firstName: this.firstName,

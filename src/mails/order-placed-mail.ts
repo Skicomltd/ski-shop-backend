@@ -21,7 +21,7 @@ export class OrderPlacedMail extends Mailable {
 
   public content(): Content {
     return new Content({
-      html: "order-placed",
+      html: "mail.order-placed",
       with: {
         title: "Order Placed - Ski-Shop",
         orderId: this.order.id,

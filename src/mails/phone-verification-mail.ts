@@ -19,7 +19,7 @@ export class PhoneVerificationMail extends Mailable {
 
   public content(): Content {
     return new Content({
-      html: "phone-verification",
+      html: "mail.phone-verification",
       with: {
         title: "Phone Verification - Ski-Shop",
         firstName: this.firstName,

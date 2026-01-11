@@ -15,7 +15,7 @@ export class ConfirmPickupMail extends Mailable {
 
   public content(): Content {
     return new Content({
-      html: "confirm-pickup",
+      html: "mail.confirm-pickup",
       with: {
         title: "Confirm Pickup - Ski-Shop",
         orderId: this.order.id,

@@ -1,6 +1,6 @@
 import { join } from "path"
 import handlebars from "handlebars"
-import { existsSync, readFileSync, readdirSync } from "fs"
+import { existsSync, readdirSync, readFileSync } from "fs"
 
 /**
  * Shape of content that can be provided for an email
@@ -45,9 +45,9 @@ export class Content {
    * - If neither is found, it returns an empty object.
    */
   public build(): { html?: string; text?: string } {
-    this.registerPartials()
-
+    
     if (this.html) {
+      this.registerPartials(this.html)
       const templatePath = this.resolveViewPath(this.html)
       const fileContent = readFileSync(templatePath, "utf8")
       const template = handlebars.compile(fileContent)
@@ -63,32 +63,49 @@ export class Content {
   }
 
   /**
-   * Resolve the view path by checking for .html, .hbs, or .handlebars extensions.
+   * Resolve a template name into a file path.
+   *
+   * Example:
+   *  - "mail.test" → "src/views/mail/test.html" (or .hbs / .handlebars)
+   *
+   * Tries extensions in order: `.html`, `.hbs`, `.handlebars`.
+   * Throws an error if the template file does not exist.
    */
-  private resolveViewPath(viewName: string): string {
-    const extensions = [".html", ".hbs", ".handlebars"]
-    const basePath = join(this.viewsPath, "mail", viewName)
+  private resolveViewPath(view: string): string {
+    const relativePath = view.replace(/\./g, "/")
 
-    for (const ext of extensions) {
-      const filePath = basePath + ext
-      if (existsSync(filePath)) {
-        return filePath
-      }
+    if (existsSync(join(this.viewsPath, relativePath + ".html"))) {
+      return join(this.viewsPath, relativePath + ".html")
+    } else if (existsSync(join(this.viewsPath, relativePath + ".hbs"))) {
+      return join(this.viewsPath, relativePath + ".hbs")
+    } else if (existsSync(join(this.viewsPath, relativePath + ".handlebars"))) {
+      return join(this.viewsPath, relativePath + ".handlebars")
     }
 
-    throw new Error(`Template not found for view: ${viewName}`)
+    throw new Error("content view not found")
   }
 
-  /**
-   * Register Handlebars partials from the mail/partials directory.
-   */
-  private registerPartials(): void {
-    const partialsPath = join(this.viewsPath, "mail", "partials")
+ /**
+ * Registers Handlebars partials from the appropriate area-specific or global partials folder.
+ *
+ * - For views like "mail.welcome" → loads from `views/mail/partials/`
+ * - For views like "reports.summary" → loads from `views/reports/partials/`
+ * - For views without area prefix (e.g. "login") → loads from `views/partials/` (global)
+ *
+ * Only registers files with .hbs or .handlebars extensions.
+ * Silently skips if the partials directory doesn't exist.
+ */
+  private registerPartials(viewName: string): void {
+    const relativePath = viewName.replace(/\./g, "/")
+   // Get area prefix (e.g. 'mail' from 'mail/welcome'), or '' for global partials
+    const folder = relativePath.includes("/") ? relativePath.split("/")[0] : ""
+    const partialsPath = join(this.viewsPath, folder, "partials")
     if (!existsSync(partialsPath)) {
       return
     }
 
     const files = readdirSync(partialsPath)
+
     for (const file of files) {
       if (file.endsWith(".hbs") || file.endsWith(".handlebars")) {
         const partialName = file.replace(/\.(hbs|handlebars)$/, "")

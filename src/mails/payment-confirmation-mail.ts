@@ -20,7 +20,7 @@ export class PaymentConfirmationMail extends Mailable {
 
   public content(): Content {
     return new Content({
-      html: "payment-confirmation",
+      html: "mail.payment-confirmation",
       with: {
         title: "Payment Confirmation - Ski-Shop",
         firstName: this.firstName,
