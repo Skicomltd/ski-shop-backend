@@ -82,6 +82,13 @@ export class AuthController {
     private readonly firebaseService: FirebaseService
   ) {}
 
+  /**
+   * Register Vendor workflow:
+   * 1. Register user as vendor
+   * 2. Register vendor's business
+   * 3. Register business' store
+   */
+
   @Public()
   @Post("/register")
   @HttpCode(201)
