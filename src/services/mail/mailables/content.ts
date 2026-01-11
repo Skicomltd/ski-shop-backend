@@ -45,7 +45,6 @@ export class Content {
    * - If neither is found, it returns an empty object.
    */
   public build(): { html?: string; text?: string } {
-    
     if (this.html) {
       this.registerPartials(this.html)
       const templatePath = this.resolveViewPath(this.html)
@@ -72,6 +71,8 @@ export class Content {
    * Throws an error if the template file does not exist.
    */
   private resolveViewPath(view: string): string {
+    // eslint-disable-next-line no-console
+    console.log("view", view)
     const relativePath = view.replace(/\./g, "/")
 
     if (existsSync(join(this.viewsPath, relativePath + ".html"))) {
@@ -85,19 +86,19 @@ export class Content {
     throw new Error("content view not found")
   }
 
- /**
- * Registers Handlebars partials from the appropriate area-specific or global partials folder.
- *
- * - For views like "mail.welcome" → loads from `views/mail/partials/`
- * - For views like "reports.summary" → loads from `views/reports/partials/`
- * - For views without area prefix (e.g. "login") → loads from `views/partials/` (global)
- *
- * Only registers files with .hbs or .handlebars extensions.
- * Silently skips if the partials directory doesn't exist.
- */
+  /**
+   * Registers Handlebars partials from the appropriate area-specific or global partials folder.
+   *
+   * - For views like "mail.welcome" → loads from `views/mail/partials/`
+   * - For views like "reports.summary" → loads from `views/reports/partials/`
+   * - For views without area prefix (e.g. "login") → loads from `views/partials/` (global)
+   *
+   * Only registers files with .hbs or .handlebars extensions.
+   * Silently skips if the partials directory doesn't exist.
+   */
   private registerPartials(viewName: string): void {
     const relativePath = viewName.replace(/\./g, "/")
-   // Get area prefix (e.g. 'mail' from 'mail/welcome'), or '' for global partials
+    // Get area prefix (e.g. 'mail' from 'mail/welcome'), or '' for global partials
     const folder = relativePath.includes("/") ? relativePath.split("/")[0] : ""
     const partialsPath = join(this.viewsPath, folder, "partials")
     if (!existsSync(partialsPath)) {
