@@ -253,17 +253,12 @@ export class ProductsController {
   @Patch(":id")
   @UseGuards(OwnProductGuard)
   @UseGuards(PoliciesGuard)
-  @UseInterceptors(ProductsInterceptor)
+  @UseInterceptors(ProductInterceptor)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Product))
   async update(@Param("id", ParseUUIDPipe) id: string, @Body(new JoiValidationPipe(updateProductSchema)) updateProductDto: UpdateProductDto) {
-    const product = await this.productsService.findOne({ id: id })
-
-    const updateProduct: UpdateProductDto = {
-      ...updateProductDto,
-      userId: product.user.id
-    }
-
-    return await this.productsService.update(product, updateProduct)
+    const product = await this.productsService.findById(id)
+    if (!product) throw new NotFoundException("product not found")
+    return await this.productsService.update(product, updateProductDto)
   }
 
   @Patch(":id/images")
