@@ -71,12 +71,7 @@ export class Content {
    * Throws an error if the template file does not exist.
    */
   private resolveViewPath(view: string): string {
-    // eslint-disable-next-line no-console
-    console.log("view", view)
     const relativePath = view.replace(/\./g, "/")
-
-    // eslint-disable-next-line no-console
-    console.log("path: ", join(this.viewsPath, relativePath + ".html"))
 
     if (existsSync(join(this.viewsPath, relativePath + ".html"))) {
       return join(this.viewsPath, relativePath + ".html")
