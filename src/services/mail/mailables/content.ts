@@ -85,9 +85,16 @@ export class Content {
     throw new Error("content view not found")
   }
 
-  /**
-   * Register Handlebars partials from the mail/partials directory.
-   */
+ /**
+ * Registers Handlebars partials from the appropriate area-specific or global partials folder.
+ *
+ * - For views like "mail.welcome" → loads from `views/mail/partials/`
+ * - For views like "reports.summary" → loads from `views/reports/partials/`
+ * - For views without area prefix (e.g. "login") → loads from `views/partials/` (global)
+ *
+ * Only registers files with .hbs or .handlebars extensions.
+ * Silently skips if the partials directory doesn't exist.
+ */
   private registerPartials(viewName: string): void {
     const relativePath = viewName.replace(/\./g, "/")
    // Get area prefix (e.g. 'mail' from 'mail/welcome'), or '' for global partials
