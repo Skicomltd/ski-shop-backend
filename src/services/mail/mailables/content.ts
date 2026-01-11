@@ -93,7 +93,6 @@ export class Content {
    // Get area prefix (e.g. 'mail' from 'mail/welcome'), or '' for global partials
     const folder = relativePath.includes("/") ? relativePath.split("/")[0] : ""
     const partialsPath = join(this.viewsPath, folder, "partials")
-    console.log(partialsPath)
     if (!existsSync(partialsPath)) {
       return
     }
