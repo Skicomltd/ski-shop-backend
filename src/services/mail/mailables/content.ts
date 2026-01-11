@@ -1,6 +1,6 @@
 import { join } from "path"
 import handlebars from "handlebars"
-import { existsSync, readdirSync, readFileSync } from "fs"
+import { existsSync, readFileSync } from "fs"
 
 /**
  * Shape of content that can be provided for an email
@@ -46,7 +46,6 @@ export class Content {
    */
   public build(): { html?: string; text?: string } {
     if (this.html) {
-      this.registerPartials(this.html)
       const templatePath = this.resolveViewPath(this.html)
       const fileContent = readFileSync(templatePath, "utf8")
       const template = handlebars.compile(fileContent)
@@ -71,8 +70,6 @@ export class Content {
    * Throws an error if the template file does not exist.
    */
   private resolveViewPath(view: string): string {
-    // eslint-disable-next-line no-console
-    console.log("view", view)
     const relativePath = view.replace(/\./g, "/")
 
     if (existsSync(join(this.viewsPath, relativePath + ".html"))) {
@@ -84,36 +81,5 @@ export class Content {
     }
 
     throw new Error("content view not found")
-  }
-
-  /**
-   * Registers Handlebars partials from the appropriate area-specific or global partials folder.
-   *
-   * - For views like "mail.welcome" → loads from `views/mail/partials/`
-   * - For views like "reports.summary" → loads from `views/reports/partials/`
-   * - For views without area prefix (e.g. "login") → loads from `views/partials/` (global)
-   *
-   * Only registers files with .hbs or .handlebars extensions.
-   * Silently skips if the partials directory doesn't exist.
-   */
-  private registerPartials(viewName: string): void {
-    const relativePath = viewName.replace(/\./g, "/")
-    // Get area prefix (e.g. 'mail' from 'mail/welcome'), or '' for global partials
-    const folder = relativePath.includes("/") ? relativePath.split("/")[0] : ""
-    const partialsPath = join(this.viewsPath, folder, "partials")
-    if (!existsSync(partialsPath)) {
-      return
-    }
-
-    const files = readdirSync(partialsPath)
-
-    for (const file of files) {
-      if (file.endsWith(".hbs") || file.endsWith(".handlebars")) {
-        const partialName = file.replace(/\.(hbs|handlebars)$/, "")
-        const filePath = join(partialsPath, file)
-        const partialContent = readFileSync(filePath, "utf8")
-        handlebars.registerPartial(partialName, partialContent)
-      }
-    }
   }
 }
