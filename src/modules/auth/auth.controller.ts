@@ -55,7 +55,7 @@ import { bankSchema } from "../banks/dto/create-bank.dto"
 import { UserRoleEnum } from "../users/entity/user.entity"
 import { ForbiddenException } from "@/exceptions/forbidden.exception"
 import { ApiException } from "@/exceptions/api.exception"
-import { EmailValidationMail, PasswordRestMail } from "@/mails"
+import { PasswordRestMail, WelcomeMail, ResendOtpMail } from "@/mails"
 import { HelpersService, TransactionHelper } from "@/services/utils"
 import { MailService } from "@/services/mail"
 import { PaymentsService } from "@/services/payments"
@@ -104,7 +104,7 @@ export class AuthController {
 
       const otp = await this.authService.saveOtp({ code, email: user.email }, manager)
 
-      this.mailService.queue(new EmailValidationMail(otp))
+      this.mailService.queue(new WelcomeMail(user, otp, `${this.configService.get<IApp>("app").clientUrl}/explore`))
 
       const shortTimeToken = await this.helperService.generateToken(
         { email: user.email, id: user.id },
@@ -262,7 +262,7 @@ export class AuthController {
     const code = this.helperService.generateOtp(6)
     const otp = await this.authService.saveOtp({ code, email })
 
-    await this.mailService.send(new EmailValidationMail(otp))
+    await this.mailService.send(new ResendOtpMail(otp, user.firstName, `${this.configService.get<IApp>("app").clientUrl}/verify-email`))
 
     const shortTimeToken = await this.helperService.generateToken(
       { email, id: user.id },
