@@ -56,6 +56,27 @@ export class VendorController {
     return vendor
   }
 
+  @UseGuards(PolicyVendorGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, "VENDOR"))
+  @Get("/:id/subscription")
+  async subscriptionStats(@Param("id", new ParseUUIDPipe()) id: string) {
+    const vendor = await this.userService.findById(id)
+
+    if (!vendor) {
+      throw new NotFoundException("Vendor not found")
+    }
+
+   const latestSubscription = await this.subscriptionService.findLatestByUserId(vendor.id)
+   
+   return {
+        status: latestSubscription?.status || "inactive",
+        planType: latestSubscription?.planType || "N/A",
+        paymentStatus: latestSubscription?.isPaid ? "paid" : "unpaid",
+        startDate: latestSubscription?.startDate || null,
+        endDate: latestSubscription?.endDate || null
+      }
+  }
+
   @Get("/:id/performance")
   @UseGuards(PolicyVendorGuard)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Read, "VENDOR"))
