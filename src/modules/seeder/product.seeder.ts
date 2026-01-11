@@ -33,7 +33,7 @@ export class ProductSeeder implements Seeder {
 
     // Generate 1–5 products per store
     const products: CreateProductDto[] = storesWithoutNullUser.flatMap((store) => {
-      const numProducts = faker.number.int({ min: 2, max: 10 })
+      const numProducts = faker.number.int({ min: 7, max: 19 })
       return Array.from({ length: numProducts }, () => ({
         name: faker.commerce.productName(),
         category: randomCategories[0],
