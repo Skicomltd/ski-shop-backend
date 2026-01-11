@@ -1,6 +1,6 @@
 import { join } from "path"
 import handlebars from "handlebars"
-import { existsSync, readFileSync, readdirSync } from "fs"
+import { existsSync, readdirSync, readFileSync } from "fs"
 
 /**
  * Shape of content that can be provided for an email
@@ -71,18 +71,18 @@ export class Content {
    * Tries extensions in order: `.html`, `.hbs`, `.handlebars`.
    * Throws an error if the template file does not exist.
    */
-  private resolveViewPath(viewName: string): string {
-    const extensions = [".html", ".hbs", ".handlebars"]
-    const relativePath = viewName.replace(/\./g, "/");
+  private resolveViewPath(view: string): string {
+    const relativePath = view.replace(/\./g, "/")
 
-    for (const ext of extensions) {
-      const filePath = join(this.viewsPath, relativePath + ext);
-      if (existsSync(filePath)) {
-        return filePath
-      }
+    if (existsSync(join(this.viewsPath, relativePath + ".html"))) {
+      return join(this.viewsPath, relativePath + ".html")
+    } else if (existsSync(join(this.viewsPath, relativePath + ".hbs"))) {
+      return join(this.viewsPath, relativePath + ".hbs")
+    } else if (existsSync(join(this.viewsPath, relativePath + ".handlebars"))) {
+      return join(this.viewsPath, relativePath + ".handlebars")
     }
 
-    throw new Error(`Template not found for view: ${viewName}`)
+    throw new Error("content view not found")
   }
 
   /**
@@ -99,6 +99,7 @@ export class Content {
     }
 
     const files = readdirSync(partialsPath)
+
     for (const file of files) {
       if (file.endsWith(".hbs") || file.endsWith(".handlebars")) {
         const partialName = file.replace(/\.(hbs|handlebars)$/, "")

@@ -12,12 +12,13 @@ import {
   ParseUUIDPipe,
   Query,
   UseGuards,
-  Res
+  Res,
+  UploadedFile
 } from "@nestjs/common"
 import { ProductsService } from "./products.service"
 import { CreateProductDto, createProductSchema } from "./dto/create-product.dto"
 import { UpdateProductDto, updateProductSchema } from "./dto/update-product.dto"
-import { FilesInterceptor } from "@nestjs/platform-express"
+import { FileInterceptor, FilesInterceptor } from "@nestjs/platform-express"
 import { imageFilter, memoryUpload } from "@/config/multer.config"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import { Request } from "express"
@@ -46,6 +47,7 @@ import { EventRegistry } from "@/events/events.registry"
 import { Order } from "../orders/entities/order.entity"
 import { OrderItem } from "../orders/entities/order-item.entity"
 import { OrdersService } from "../orders/orders.service"
+import { ReplaceImageDto, replaceImageSchema } from "./dto/replace-image.dto"
 @Controller("products")
 export class ProductsController {
   constructor(
@@ -251,28 +253,49 @@ export class ProductsController {
   @Patch(":id")
   @UseGuards(OwnProductGuard)
   @UseGuards(PoliciesGuard)
+  @UseInterceptors(ProductInterceptor)
   @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Product))
-  @UseInterceptors(FilesInterceptor("images", 5, { ...memoryUpload, fileFilter: imageFilter }), ProductInterceptor)
-  async update(
+  async update(@Param("id", ParseUUIDPipe) id: string, @Body(new JoiValidationPipe(updateProductSchema)) updateProductDto: UpdateProductDto) {
+    const product = await this.productsService.findById(id)
+    if (!product) throw new NotFoundException("product not found")
+    return await this.productsService.update(product, updateProductDto)
+  }
+
+  @Patch(":id/images")
+  @UseGuards(OwnProductGuard)
+  @UseGuards(PoliciesGuard)
+  @UseInterceptors(FileInterceptor("image", { ...memoryUpload, fileFilter: imageFilter }))
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Update, Product))
+  async replaceImage(
     @Param("id", ParseUUIDPipe) id: string,
-    @Body(new JoiValidationPipe(updateProductSchema)) updateProductDto: UpdateProductDto,
-    @UploadedFiles() uploadedFiles: Array<CustomFile>,
-    @Req() req: Request
+    @UploadedFile() image: CustomFile,
+    @Body(new JoiValidationPipe(replaceImageSchema)) replaceImageDto: ReplaceImageDto
   ) {
-    console.error("request: ", req)
-    const product = await this.productsService.findOne({ id: id })
+    const product = await this.productsService.findById(id)
+    if (!product) throw new NotFoundException("product not found")
 
-    const images = await this.productsService.handleImageUploads(uploadedFiles, product.images, updateProductDto.images || [])
+    const foundImage = product.images.find((image) => image === replaceImageDto.url)
+    if (!foundImage) throw new NotFoundException("image not found")
 
-    const updateProduct: UpdateProductDto = {
-      ...updateProductDto,
-      userId: product.user.id
+    const fileDto: FileUploadDto = {
+      destination: `images/products/${image.originalname}.${image.extension}`,
+      mimetype: image.mimetype,
+      buffer: image.buffer,
+      filePath: image.path
     }
 
-    // prepare to update product
-    const data = this.dtoMapper.prepareUpdateProductDto(updateProduct, product, images)
+    const newUrl = await this.fileSystem.update(foundImage, fileDto)
 
-    return await this.productsService.update(product, data)
+    const updatedImages = product.images.map((im) => {
+      if (im === replaceImageDto.url) {
+        return newUrl
+      }
+
+      return im
+    })
+
+    await this.productsService.update(product, { images: updatedImages })
+    return updatedImages
   }
 
   @Delete(":id")
@@ -289,6 +312,18 @@ export class ProductsController {
     )
 
     return await this.productsService.remove({ id })
+  }
+
+  @Delete(":id/images")
+  @UseGuards(PoliciesGuard)
+  @CheckPolicies((ability: AppAbility) => ability.can(Action.Delete, Product))
+  async removeImage(@Param("id", ParseUUIDPipe) id: string, @Body(new JoiValidationPipe(replaceImageSchema)) replaceImageDto: ReplaceImageDto) {
+    const product = await this.productsService.findById(id)
+    if (!product) throw new NotFoundException("Product does not exist")
+    const images = product.images.filter((image) => image !== replaceImageDto.url)
+    await this.productsService.update(product, { images })
+    await this.fileSystem.delete(replaceImageDto.url)
+    return images
   }
 
   @OnEvent(EventRegistry.ORDER_PLACED_PAID)

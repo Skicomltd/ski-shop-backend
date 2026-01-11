@@ -23,16 +23,16 @@ export class BusinessSeeder implements Seeder {
     })
 
     // Filter out users who already have a business
-    const usersWithoutBusiness = vendorUsers.filter((user) => !user.business)
+    const vendorsWithoutBusiness = vendorUsers.filter((user) => !user.business)
 
-    if (usersWithoutBusiness.length === 0) {
+    if (vendorsWithoutBusiness.length === 0) {
       // eslint-disable-next-line no-console
       console.warn("No vendor users without a business found. Please seed users with Vendor role or check existing businesses.")
       return
     }
 
     // Generate business data for each vendor user without a business
-    const businesses = usersWithoutBusiness.map((user) => ({
+    const businesses = vendorsWithoutBusiness.map((user) => ({
       type: faker.company.buzzVerb(),
       businessRegNumber: faker.string.alphanumeric(10),
       contactNumber: faker.phone.number(),

@@ -8,6 +8,7 @@ import { v2 as cloudinary, UploadApiResponse, UploadApiErrorResponse } from "clo
 
 import { CloudinaryStorageOptions } from "../../interfaces/config.interface"
 import { FileMetada, FilesystemStrategy, FileUploadDto, IFileSystemService } from "../../interfaces/filesystem.interface"
+const streamifier = require('streamifier')
 
 export type CloudinaryType = UploadApiErrorResponse | UploadApiResponse
 
@@ -16,7 +17,29 @@ export class CloudinaryStrategy implements FilesystemStrategy {
   async upload(file: FileUploadDto): Promise<string> {
     try {
       if (!fs.existsSync(file.filePath)) {
-        throw new Error(`File does not exist ${file.filePath}`)
+        // throw new Error(`File does not exist ${file.filePath}`)
+        if (file.buffer) {
+          const uploadFromBuffer = (file: FileUploadDto): Promise<string> => {
+            return new Promise((resolve, reject) => {
+              const uploadStream = cloudinary.uploader.upload_stream(
+                { resource_type: file.mimetype.startsWith("video") ? "video" : file.mimetype.startsWith("image") ? "image" : "raw" },
+                (error, result) => {
+                  if (error) {
+                    reject(error)
+                  } else {
+                    resolve(result?.secure_url)
+                  }
+                }
+              )
+              streamifier.createReadStream(file.buffer).pipe(uploadStream)
+            })
+
+          }
+
+          return await uploadFromBuffer(file)
+        } else {
+          throw new Error(`File does not exist ${file.filePath} and no buffer provided`)
+        }
       }
 
       const result = await cloudinary.uploader.upload(file.filePath, {
