@@ -20,7 +20,7 @@ export class WelcomeMail extends Mailable {
 
   public content(): Content {
     return new Content({
-      html: "welcome-email",
+      html: "mail.welcome-email",
       with: {
         title: "Welcome to Ski-Shop",
         firstName: this.user.firstName,

@@ -45,9 +45,9 @@ export class Content {
    * - If neither is found, it returns an empty object.
    */
   public build(): { html?: string; text?: string } {
-    this.registerPartials()
-
+    
     if (this.html) {
+      this.registerPartials(this.html)
       const templatePath = this.resolveViewPath(this.html)
       const fileContent = readFileSync(templatePath, "utf8")
       const template = handlebars.compile(fileContent)
@@ -63,14 +63,20 @@ export class Content {
   }
 
   /**
-   * Resolve the view path by checking for .html, .hbs, or .handlebars extensions.
+   * Resolve a template name into a file path.
+   *
+   * Example:
+   *  - "mail.test" → "src/views/mail/test.html" (or .hbs / .handlebars)
+   *
+   * Tries extensions in order: `.html`, `.hbs`, `.handlebars`.
+   * Throws an error if the template file does not exist.
    */
   private resolveViewPath(viewName: string): string {
     const extensions = [".html", ".hbs", ".handlebars"]
-    const basePath = join(this.viewsPath, "mail", viewName)
+    const relativePath = viewName.replace(/\./g, "/");
 
     for (const ext of extensions) {
-      const filePath = basePath + ext
+      const filePath = join(this.viewsPath, relativePath + ext);
       if (existsSync(filePath)) {
         return filePath
       }
@@ -82,8 +88,12 @@ export class Content {
   /**
    * Register Handlebars partials from the mail/partials directory.
    */
-  private registerPartials(): void {
-    const partialsPath = join(this.viewsPath, "mail", "partials")
+  private registerPartials(viewName: string): void {
+    const relativePath = viewName.replace(/\./g, "/")
+   // Get area prefix (e.g. 'mail' from 'mail/welcome'), or '' for global partials
+    const folder = relativePath.includes("/") ? relativePath.split("/")[0] : ""
+    const partialsPath = join(this.viewsPath, folder, "partials")
+    console.log(partialsPath)
     if (!existsSync(partialsPath)) {
       return
     }

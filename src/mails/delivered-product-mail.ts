@@ -21,7 +21,7 @@ export class DeliveredProductMail extends Mailable {
 
   public content(): Content {
     return new Content({
-      html: "delivered-product",
+      html: "mail.delivered-product",
       with: {
         title: "Product Delivery - Ski-Shop",
         orderId: this.order.id,
