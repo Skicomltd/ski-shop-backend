@@ -28,7 +28,7 @@ export class Content {
    * Default base directory for view templates.
    * Templates are expected to be in `src/views`.
    */
-  private readonly viewsPath = join(process.cwd(), "src", "views")
+  private readonly viewsPath = join(__dirname, "..", "..", "..", "views")
 
   constructor(data: ContentType) {
     this.html = data.html
