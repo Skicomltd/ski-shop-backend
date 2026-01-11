@@ -28,7 +28,7 @@ export class Content {
    * Default base directory for view templates.
    * Templates are expected to be in `src/views`.
    */
-  private readonly viewsPath = join(__dirname, "..", "..", "..", "views")
+  private readonly viewsPath = join(process.cwd(), "src", "views")
 
   constructor(data: ContentType) {
     this.html = data.html
@@ -77,6 +77,7 @@ export class Content {
 
     // eslint-disable-next-line no-console
     console.log("path: ", join(this.viewsPath, relativePath + ".html"))
+
     if (existsSync(join(this.viewsPath, relativePath + ".html"))) {
       return join(this.viewsPath, relativePath + ".html")
     } else if (existsSync(join(this.viewsPath, relativePath + ".hbs"))) {
