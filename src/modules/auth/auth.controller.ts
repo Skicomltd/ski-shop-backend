@@ -191,6 +191,24 @@ export class AuthController {
     const business = await this.businessService.findOne({ user: { id: user.id } })
     if (business) throw new ConflictException("User already created a business")
 
+    if (userBusinessDto.businessRegNumber) {
+      const existing = await this.businessService.findOne({
+        businessRegNumber: userBusinessDto.businessRegNumber
+      })
+
+      if (existing) {
+        throw new ConflictException("This business registration number is already in use.")
+      }
+    }
+
+    const existingById = await this.businessService.findOne({
+      identificationNumber: userBusinessDto.identificationNumber
+    })
+
+    if (existingById) {
+      throw new ConflictException("This identification number is already associated with another business.")
+    }
+
     await this.businessService.create({ ...userBusinessDto, user })
 
     const payload = { email: user.email, id: user.id }

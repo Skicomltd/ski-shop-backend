@@ -13,6 +13,7 @@ import Business from "./entities/business.entity"
 import { BusinessInterceptor } from "./interceptor/business.interceptor"
 import { BusinessesInterceptor } from "./interceptor/businesses.interceptor"
 import { PoliciesGuard } from "../auth/guard/policies-handler.guard"
+import { ConflictException } from "@/exceptions/conflict.exception"
 
 @Controller("business")
 export class BusinessController {
@@ -26,6 +27,24 @@ export class BusinessController {
     const user = req.user
 
     createBusiness.user = user
+
+    if (createBusiness.businessRegNumber) {
+      const existing = await this.businessService.findOne({
+        businessRegNumber: createBusiness.businessRegNumber
+      })
+
+      if (existing) {
+        throw new ConflictException("This business registration number is already in use.")
+      }
+    }
+
+    const existingById = await this.businessService.findOne({
+      identificationNumber: createBusiness.identificationNumber
+    })
+
+    if (existingById) {
+      throw new ConflictException("This identification number is already associated with another business.")
+    }
 
     return await this.businessService.create(createBusiness)
   }
