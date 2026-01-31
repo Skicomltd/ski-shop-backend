@@ -101,7 +101,7 @@ export const diskUpload: MulterOptions = {
 export const memoryUpload: MulterOptions = {
   storage: myMemoryStorage,
   limits: {
-    fileSize: 2000000
+    fileSize: 5242880
   }
 }
 
