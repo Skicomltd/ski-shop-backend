@@ -7,6 +7,7 @@ export default registerAs(
     refreshSecret: process.env.REFRESH_TOKEN_SECRET,
     resetSecret: process.env.RESET_TOKEN_SECRET,
     shortTimeJwtSecret: process.env.SHORT_TIME_SECRET,
+    inviteUserSecret: process.env.INVITE_USER_SECRET,
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
@@ -20,6 +21,7 @@ export interface IAuth {
   resetSecret: string
   refreshSecret: string
   shortTimeJwtSecret: string
+  inviteUserSecret: string
   google: {
     clientId: string
     clientSecret: string

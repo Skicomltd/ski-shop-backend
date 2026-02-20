@@ -21,10 +21,10 @@ export abstract class BusinessResponseMapper implements IInterceptor {
         name: data.store?.name
       },
       user: {
-        id: data.user?.id,
-        email: data.user?.email,
-        firstName: data.user?.firstName,
-        lastName: data.user?.lastName
+        id: data.owner?.id,
+        email: data.owner?.email,
+        firstName: data.owner?.firstName,
+        lastName: data.owner?.lastName
       }
     }
   }

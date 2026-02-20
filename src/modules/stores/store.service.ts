@@ -13,7 +13,7 @@ export class StoreService implements IService<Store> {
     private storeRepository: Repository<Store>
   ) {}
 
-  readonly relations = ["business", "business.user"]
+  readonly relations = ["business", "business.owner"]
 
   async create(createStoreDto: CreateStoreDto, manager?: EntityManager) {
     const repo = manager ? manager.getRepository<Store>(Store) : this.storeRepository
@@ -27,7 +27,7 @@ export class StoreService implements IService<Store> {
     const query = this.storeRepository
       .createQueryBuilder("store")
       .leftJoinAndSelect("store.business", "business")
-      .leftJoinAndSelect("business.user", "user")
+      .leftJoinAndSelect("business.owner", "user")
 
     if (type === vendonEnumType.PREMIUM) {
       query.andWhere("store.type = :type", { type })

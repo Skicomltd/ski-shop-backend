@@ -30,12 +30,12 @@ export class BusinessService implements IService<Business> {
   }
 
   async findById(id: string): Promise<Business> {
-    const entity = await this.businessRepository.findOne({ where: { id }, relations: ["user", "store"] })
+    const entity = await this.businessRepository.findOne({ where: { id }, relations: ["owner", "store"] })
     return entity
   }
 
   async findOne(filter: FindOptionsWhere<Business>): Promise<Business> {
-    const entity = await this.businessRepository.findOne({ where: filter, relations: ["user", "store"] })
+    const entity = await this.businessRepository.findOne({ where: filter, relations: ["owner", "store"] })
     return entity
   }
 

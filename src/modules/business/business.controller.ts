@@ -25,7 +25,7 @@ export class BusinessController {
   async create(@Body(new JoiValidationPipe(createBusinessSchema)) createBusiness: CreateBusinessDto, @Req() req: Request) {
     const user = req.user
 
-    createBusiness.user = user
+    createBusiness.owner = user
 
     return await this.businessService.create(createBusiness)
   }
@@ -45,7 +45,7 @@ export class BusinessController {
   async findUserBusiness(@Req() req: Request) {
     const user = req.user
 
-    const business = await this.businessService.findOne({ user: { id: user.id } })
+    const business = await this.businessService.findOne({ owner: { id: user.id } })
 
     return business
   }

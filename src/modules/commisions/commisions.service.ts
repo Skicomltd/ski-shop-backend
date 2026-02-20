@@ -17,7 +17,7 @@ export class CommisionsService implements IService<Commision> {
     private readonly settingsService: SettingsService
   ) {}
 
-  private relations = ["store", "store.business", "store.business.user"]
+  private relations = ["store", "store.business", "store.business.owner"]
 
   async create(createCommisionDto: CreateCommisionDto, manager?: EntityManager): Promise<Commision> {
     const repo = manager ? manager.getRepository<Commision>(Commision) : this.commisionRepository

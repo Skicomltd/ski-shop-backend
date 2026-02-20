@@ -23,6 +23,13 @@ export class UserService implements IService<User> {
     return await repo.save(createUser)
   }
 
+  async findOrCreate(data: CreateUserDto, manager?: EntityManager): Promise<User> {
+    const foundUser = await this.findOne({ email: data.email })
+    if (foundUser) return foundUser
+
+    return this.create(data, manager)
+  }
+
   async find({ limit, page, role, search, status }: IUserQuery): Promise<[User[], number]> {
     const query = this.userRepository
       .createQueryBuilder("user")
@@ -59,9 +66,21 @@ export class UserService implements IService<User> {
     })
   }
 
+  private normalizeEmailFilter(filter: FindOptionsWhere<User>): FindOptionsWhere<User> {
+    const normalizedFilter = { ...filter }
+
+    if (typeof normalizedFilter.email === "string") {
+      normalizedFilter.email = normalizedFilter.email.trim().toLowerCase()
+    }
+
+    return normalizedFilter
+  }
+
   async findOne(filter: FindOptionsWhere<User>): Promise<User> {
+    const normalizedFilter = this.normalizeEmailFilter(filter)
+
     const user = await this.userRepository.findOne({
-      where: filter,
+      where: normalizedFilter,
       relations: this.relations
     })
 
@@ -69,7 +88,8 @@ export class UserService implements IService<User> {
   }
 
   exists(filter: FindOptionsWhere<User>): Promise<boolean> {
-    return this.userRepository.exists({ where: filter })
+    const normalizedFilter = this.normalizeEmailFilter(filter)
+    return this.userRepository.exists({ where: normalizedFilter })
   }
 
   async update(entity: User, data: UpdateUserDto, manager?: EntityManager): Promise<User> {

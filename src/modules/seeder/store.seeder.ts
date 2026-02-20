@@ -21,7 +21,7 @@ export class StoreSeeder implements Seeder {
     // Fetch all businesses without an associated store
     const businesses = await this.businessRepository.find({
       relations: ["store"],
-      where: { user: { role: Not(UserRoleEnum.Admin) } }
+      where: { owner: { role: Not(UserRoleEnum.Admin) } }
     })
 
     if (businesses.length === 0) {
@@ -44,7 +44,7 @@ export class StoreSeeder implements Seeder {
       updateAt: faker.date.recent()
     }))
 
-    const adminBusiness = await this.businessRepository.findOne({ where: { user: { role: UserRoleEnum.Admin } } })
+    const adminBusiness = await this.businessRepository.findOne({ where: { owner: { role: UserRoleEnum.Admin } } })
 
     if (adminBusiness) {
       stores.push({

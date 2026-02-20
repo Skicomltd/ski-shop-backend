@@ -129,7 +129,7 @@ export class RevenuesController {
         description: "",
         amount: commision.amount,
         user: commision.store.name,
-        role: commision.store.business.user.getFullName,
+        role: commision.store.business.owner.getFullName,
         date: commision.createdAt
       }
     })
@@ -176,7 +176,7 @@ export class RevenuesController {
         revenueSource: "Ads",
         description: ad.promotion.name,
         amount: ad.amount,
-        user: ad.product.store.business.user.getFullName(),
+        user: ad.product.store.business.owner.getFullName(),
         date: ad.createdAt.toISOString()
       }
     })

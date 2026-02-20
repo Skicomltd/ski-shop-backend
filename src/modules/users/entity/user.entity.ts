@@ -23,6 +23,7 @@ import { userStatus } from "../interfaces/user.status.interface"
 import { USER_STATUS } from "../enum/user-status"
 import { Voucher } from "@/modules/vouchers/entities/voucher.entity"
 import { Address } from "@/modules/addresses/entities/address.entity"
+import { StoreUser } from "@/modules/stores/entities/store-user.entity"
 
 export enum UserRoleEnum {
   "Customer" = "customer",
@@ -48,7 +49,7 @@ export class User {
   @Column({ type: "enum", enum: UserRoleEnum, default: UserRoleEnum.Customer })
   role: UserRoleEnum
 
-  @Column()
+  @Column({})
   email: string
 
   @Column({ type: "text", default: "" })
@@ -84,7 +85,7 @@ export class User {
   @Column("text", { array: true, default: "{}" })
   fcmTokens: string[]
 
-  @OneToOne(() => Business, (business) => business.user, { eager: true })
+  @OneToOne(() => Business, (business) => business.owner)
   business: Business
 
   @OneToMany(() => Bank, (bank) => bank.user)
@@ -114,6 +115,9 @@ export class User {
   @OneToMany(() => Address, (address) => address.user, { cascade: true })
   addressBook: Address[]
 
+  @OneToMany(() => StoreUser, (su) => su.user)
+  storeUsers: StoreUser[]
+
   private _previousPassword?: string
 
   @AfterLoad()
@@ -133,7 +137,7 @@ export class User {
   @BeforeInsert()
   @BeforeUpdate()
   updateStatusBasedOnVerification() {
-    const isActive = this.isEmailVerified && this.isPhoneNumberVerified
+    const isActive = this.isEmailVerified
     this.status = isActive ? "active" : "inactive"
   }
 

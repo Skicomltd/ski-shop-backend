@@ -19,7 +19,7 @@ export class ProductSeeder implements Seeder {
 
   async seed(): Promise<any> {
     const stores = await this.storeRepository.find({
-      relations: ["business", "business.user"]
+      relations: ["business", "business.owner"]
     })
 
     if (stores.length === 0) {
@@ -28,7 +28,7 @@ export class ProductSeeder implements Seeder {
       return
     }
 
-    const storesWithoutNullUser = stores.filter((store) => store.business.user !== null)
+    const storesWithoutNullUser = stores.filter((store) => store.business.owner !== null)
     const randomCategories = await this.getArrayOfCategories()
 
     // Generate 1–5 products per store
@@ -47,9 +47,9 @@ export class ProductSeeder implements Seeder {
         weight: 1,
         fragile: false,
         storeId: store.id,
-        userId: store.business.user.id, // User from store's business
+        userId: store.business.owner.id, // User from store's business
         store, // ManyToOne relationship
-        user: store.business.user, // ManyToOne relationship
+        user: store.business.owner, // ManyToOne relationship
         createdAt: faker.date.past(),
         updatedAt: faker.date.recent()
       }))

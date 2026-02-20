@@ -13,7 +13,9 @@ import {
   ConflictException,
   UploadedFile,
   Get,
-  HttpStatus
+  HttpStatus,
+  Param,
+  ParseUUIDPipe
 } from "@nestjs/common"
 import { JoiValidationPipe } from "@/validations/joi.validation"
 import {
@@ -55,7 +57,7 @@ import { bankSchema } from "../banks/dto/create-bank.dto"
 import { UserRoleEnum } from "../users/entity/user.entity"
 import { ForbiddenException } from "@/exceptions/forbidden.exception"
 import { ApiException } from "@/exceptions/api.exception"
-import { PasswordRestMail, WelcomeMail, ResendOtpMail } from "@/mails"
+import { PasswordRestMail, WelcomeMail, ResendOtpMail, StoreInviteMail } from "@/mails"
 import { HelpersService, TransactionHelper } from "@/services/utils"
 import { MailService } from "@/services/mail"
 import { PaymentsService } from "@/services/payments"
@@ -64,6 +66,10 @@ import { FileUploadDto } from "@/services/filesystem/interfaces/filesystem.inter
 import { FirebaseService } from "@/services/firebase"
 import { UnAuthorizedException } from "@/exceptions/unAuthorized.exception"
 import { Webhook } from "./decorators/webhook.decorator"
+import { StoreUserService } from "../stores/store-user.service"
+import { StoreRole } from "../stores/entities/store-user.entity"
+import { InviteStoreDto, inviteStoreSchema } from "./dto/invite-store.dto"
+import { StoreManagerGuard } from "./guard/store-manager.guard"
 
 @Controller("auth")
 export class AuthController {
@@ -79,7 +85,8 @@ export class AuthController {
     private readonly storeService: StoreService,
     private readonly bankService: BankService,
     private readonly paymentsService: PaymentsService,
-    private readonly firebaseService: FirebaseService
+    private readonly firebaseService: FirebaseService,
+    private readonly storeUserService: StoreUserService
   ) {}
 
   /**
@@ -95,7 +102,7 @@ export class AuthController {
   async register(@Body(new JoiValidationPipe(registerSchema)) registerDto: AuthDto) {
     return this.transactionHelper.runInTransaction(async (manager) => {
       // Find the duplicate user
-      let user = await this.userService.findOne({ email: registerDto.email.toLowerCase() })
+      let user = await this.userService.findOne({ email: registerDto.email })
 
       // If user with email is found and status is active (email and phone number are verified), throw an error.
       if (user && user.status === "active") throw new ConflictException("user exists")
@@ -147,20 +154,13 @@ export class AuthController {
     try {
       // Update firebase credentials to that of customer firebase project
       if (req.client === "customer-mobile") {
-        // eslint-disable-next-line no-console
-        console.log("client: ", req.client, "i should only be here from customer mobile")
         this.configService.set("GOOGLE_APPLICATION_CREDENTIALS", this.configService.get("GOOGLE_APPLICATION_CREDIENTIALS_CUSTOMER"))
       }
 
       // Update firebase credentials to that of customer firebase project
       if (req.client === "vendor-mobile") {
-        // eslint-disable-next-line no-console
-        console.log("client: ", req.client, "i should only be here from vendor mobile")
         this.configService.set("GOOGLE_APPLICATION_CREDENTIALS", this.configService.get("GOOGLE_APPLICATION_CREDIENTIALS_VENDOR"))
       }
-
-      // eslint-disable-next-line no-console
-      console.log("credentials: ", this.configService.get("GOOGLE_APPLICATION_CREDENTIALS"))
 
       const firebaseUser = await this.firebaseService.verifyIdToken(verifyPhoneNumberDto.code)
 
@@ -188,10 +188,10 @@ export class AuthController {
   async onboardBusiness(@Body(new JoiValidationPipe(onboardBusinessSchema)) userBusinessDto: OnboardBusinessDto, @Req() req: Request) {
     const user = req.user
 
-    const business = await this.businessService.findOne({ user: { id: user.id } })
+    const business = await this.businessService.findOne({ owner: { id: user.id } })
     if (business) throw new ConflictException("User already created a business")
 
-    await this.businessService.create({ ...userBusinessDto, user })
+    await this.businessService.create({ ...userBusinessDto, owner: user })
 
     const payload = { email: user.email, id: user.id }
 
@@ -209,10 +209,8 @@ export class AuthController {
     @UploadedFile() fileUploaded: CustomFile,
     @User("id") userId: string
   ) {
-    const business = await this.businessService.findOne({ user: { id: userId } })
+    const business = await this.businessService.findOne({ owner: { id: userId } })
     if (!business) throw new NotFoundException("Business does not exist")
-
-    if (await this.storeService.exists({ name: onboardStoreDto.name })) throw new ConflictException("Store name already exist")
 
     const fileDto: FileUploadDto = {
       destination: `images/${fileUploaded.originalname}-storelogo.${fileUploaded.extension}`,
@@ -221,16 +219,47 @@ export class AuthController {
       filePath: fileUploaded.path
     }
 
-    const url = await this.fileSystemService.upload(fileDto)
+    this.transactionHelper.runInTransaction(async (manager) => {
+      const url = await this.fileSystemService.upload(fileDto)
 
-    onboardStoreDto = { ...onboardStoreDto, logo: url, business: business }
+      onboardStoreDto = { ...onboardStoreDto, logo: url, business: business }
 
-    await this.storeService.create(onboardStoreDto)
+      const store = await this.storeService.create(onboardStoreDto, manager)
+      await this.storeUserService.create({
+        store,
+        user: business.owner,
+        role: StoreRole.MANAGER
+      })
+    })
 
-    const payload = { email: business.user.email, id: business.user.id }
+    const payload = { email: business.owner.email, id: business.owner.id }
     const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
 
     return { token }
+  }
+
+  @UseGuards(StoreManagerGuard)
+  @Post("/store/:storeId/invite")
+  async storeInvite(
+    @Param("storeId", ParseUUIDPipe) storeId: string,
+    @Body(new JoiValidationPipe(inviteStoreSchema)) inviteStoreDto: InviteStoreDto,
+    @Req() req: Request
+  ) {
+    const invitee = await this.userService.findOrCreate({
+      email: inviteStoreDto.email,
+      firstName: "",
+      lastName: "",
+      password: "",
+      role: UserRoleEnum.Customer
+    })
+
+    const payload = { email: invitee.email, id: invitee.id, metadata: { storeId } }
+    const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").inviteUserSecret, "1d")
+    const inviteUrl = `${this.configService.get<IApp>("app").clientUrl}/store-invite?token=${token}`
+
+    await this.mailService.queue(new StoreInviteMail(invitee.email, req.user.getFullName(), inviteUrl))
+
+    return { message: "Invitation sent successfully" }
   }
 
   @ShortTime()

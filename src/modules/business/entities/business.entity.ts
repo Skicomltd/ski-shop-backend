@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn } from "typeorm"
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToOne, JoinColumn, OneToMany } from "typeorm"
 import { Store } from "@/modules/stores/entities/store.entity"
 import { User } from "@/modules/users/entity/user.entity"
 import { KYC_ENUM_STATUS } from "../enum/kyc-status-enum"
@@ -44,10 +44,13 @@ export default class Business {
   @UpdateDateColumn()
   updatedAt: Date
 
-  @OneToOne(() => User, (user) => user.business)
-  @JoinColumn()
-  user: User
-
   @OneToOne(() => Store, (store) => store.business, { eager: true })
   store: Store
+
+  @OneToOne(() => User, { nullable: false })
+  @JoinColumn()
+  owner: User
+
+  @OneToMany(() => Store, (store) => store.business)
+  stores: Store[]
 }
