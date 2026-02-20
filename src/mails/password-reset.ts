@@ -17,7 +17,11 @@ export class PasswordRestMail extends Mailable {
 
   public content(): Content {
     return new Content({
-      text: `see attached ${this.link} and it expires in 1 hour`
+      html: "mail.password-reset",
+      with: {
+        title: "Reset Your Password - Ski-Shop",
+        resetUrl: this.link
+      }
     })
   }
 

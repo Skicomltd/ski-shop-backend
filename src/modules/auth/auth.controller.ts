@@ -219,18 +219,25 @@ export class AuthController {
       filePath: fileUploaded.path
     }
 
-    this.transactionHelper.runInTransaction(async (manager) => {
-      const url = await this.fileSystemService.upload(fileDto)
+    try {
+      await this.transactionHelper.runInTransaction(async (manager) => {
+        const url = await this.fileSystemService.upload(fileDto)
 
-      onboardStoreDto = { ...onboardStoreDto, logo: url, business: business }
+        onboardStoreDto = { ...onboardStoreDto, logo: url, business: business }
 
-      const store = await this.storeService.create(onboardStoreDto, manager)
-      await this.storeUserService.create({
-        store,
-        user: business.owner,
-        role: StoreRole.MANAGER
+        const store = await this.storeService.create(onboardStoreDto, manager)
+        await this.storeUserService.create(
+          {
+            store,
+            user: business.owner,
+            role: StoreRole.MANAGER
+          },
+          manager
+        )
       })
-    })
+    } catch (error) {
+      throw new ApiException("Failed to create store", 500)
+    }
 
     const payload = { email: business.owner.email, id: business.owner.id }
     const token = await this.helperService.generateToken(payload, this.configService.get<IAuth>("auth").shortTimeJwtSecret, "1h")
@@ -298,15 +305,19 @@ export class AuthController {
     const code = this.helperService.generateOtp(6)
     const otp = await this.authService.saveOtp({ code, email })
 
-    await this.mailService.send(new ResendOtpMail(otp, user.firstName, `${this.configService.get<IApp>("app").clientUrl}/verify-email`))
+    try {
+      await this.mailService.send(new ResendOtpMail(otp, user.firstName, `${this.configService.get<IApp>("app").clientUrl}/verify-email`))
 
-    const shortTimeToken = await this.helperService.generateToken(
-      { email, id: user.id },
-      this.configService.get<IAuth>("auth").shortTimeJwtSecret,
-      "1h"
-    )
+      const shortTimeToken = await this.helperService.generateToken(
+        { email, id: user.id },
+        this.configService.get<IAuth>("auth").shortTimeJwtSecret,
+        "1h"
+      )
 
-    return { token: shortTimeToken }
+      return { token: shortTimeToken }
+    } catch (error) {
+      throw new ApiException("Failed to send otp", 500)
+    }
   }
 
   @Public()
