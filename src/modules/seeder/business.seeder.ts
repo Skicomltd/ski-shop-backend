@@ -43,7 +43,7 @@ export class BusinessSeeder implements Seeder {
       identificationNumber: faker.string.uuid(), // Unique identifier
       createdAt: faker.date.past(),
       updatedAt: faker.date.recent(),
-      user // Link to the vendor user
+      owner: user // Link to the vendor user
     }))
 
     const admin = await this.userRepository.findOne({ where: { role: UserRoleEnum.Admin } })
@@ -61,7 +61,7 @@ export class BusinessSeeder implements Seeder {
         identificationNumber: faker.string.uuid(), // Unique identifier
         createdAt: faker.date.past(),
         updatedAt: faker.date.recent(),
-        user: admin
+        owner: admin
       })
     }
 
