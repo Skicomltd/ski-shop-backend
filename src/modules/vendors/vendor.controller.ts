@@ -66,15 +66,15 @@ export class VendorController {
       throw new NotFoundException("Vendor not found")
     }
 
-   const latestSubscription = await this.subscriptionService.findLatestByUserId(vendor.id)
-   
-   return {
-        status: latestSubscription?.status || "inactive",
-        planType: latestSubscription?.planType || "N/A",
-        paymentStatus: latestSubscription?.isPaid ? "paid" : "unpaid",
-        startDate: latestSubscription?.startDate || null,
-        endDate: latestSubscription?.endDate || null
-      }
+    const latestSubscription = await this.subscriptionService.findLatestByUserId(vendor.id)
+
+    return {
+      status: latestSubscription?.status || "inactive",
+      planType: latestSubscription?.planType || "N/A",
+      paymentStatus: latestSubscription?.isPaid ? "paid" : "unpaid",
+      startDate: latestSubscription?.startDate || null,
+      endDate: latestSubscription?.endDate || null
+    }
   }
 
   @Get("/:id/performance")
@@ -83,7 +83,7 @@ export class VendorController {
   async vendorsPerformance(@Param("id", new ParseUUIDPipe()) id: string) {
     // 1. First: Get the store (required for storeId)
     const store = await this.storeService.findOne({
-      business: { user: { id } }
+      business: { owner: { id } }
     })
 
     if (!store) {
@@ -218,7 +218,7 @@ export class VendorController {
   ) {
     const user = req.user
 
-    const business = await this.bussinessService.findOne({ user: { id: user.id } })
+    const business = await this.bussinessService.findOne({ owner: { id: user.id } })
 
     if (!business) throw new BadReqException("User currently has no business account")
 

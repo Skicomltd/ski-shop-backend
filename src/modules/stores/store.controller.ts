@@ -1,4 +1,18 @@
-import { Controller, Get, Body, Patch, Param, Delete, UseGuards, UseInterceptors, Post, UploadedFile, Req, Query } from "@nestjs/common"
+import {
+  Controller,
+  Get,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  UseInterceptors,
+  Post,
+  UploadedFile,
+  Req,
+  Query,
+  ParseUUIDPipe
+} from "@nestjs/common"
 import { StoreService } from "./store.service"
 import { UpdateStoreDto, updateStoreSchema } from "./dto/update-store.dto"
 import { PoliciesGuard } from "../auth/guard/policies-handler.guard"
@@ -42,7 +56,7 @@ export class StoreController {
     @UploadedFile() fileUploaded: CustomFile,
     @User("id") userId: string
   ) {
-    const business = await this.businessService.findOne({ user: { id: userId } })
+    const business = await this.businessService.findOne({ owner: { id: userId } })
     if (!business) throw new NotFoundException("Business does not exist")
 
     if (await this.storeService.exists({ name: createStoreDto.name })) throw new ConflictException("Store name already exist")
@@ -76,7 +90,7 @@ export class StoreController {
 
   @Get(":id")
   @UseInterceptors(StoreInterceptor)
-  async findOne(@Param("id") id: string) {
+  async findOne(@Param("id", ParseUUIDPipe) id: string) {
     const store = await this.storeService.findOne({ id: id })
 
     if (!store) throw new NotFoundException("Store does not exist")

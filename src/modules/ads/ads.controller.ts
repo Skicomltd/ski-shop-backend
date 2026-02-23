@@ -102,7 +102,7 @@ export class AdsController {
 
     const records = ads.map((ad) => {
       return {
-        vendorName: ad.product.store.business.user.getFullName(),
+        vendorName: ad.product.store.business.owner.getFullName(),
         products: ad.product.name,
         duration: ad.duration,
         amount: ad.amount,

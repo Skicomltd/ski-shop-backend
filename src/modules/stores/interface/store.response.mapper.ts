@@ -22,8 +22,8 @@ export abstract class StoreResponseMapper implements IInterceptor {
         kycStatus: data.business.kycStatus
       },
       vendor: {
-        id: data.business?.user.id,
-        name: data.business?.user.getFullName()
+        id: data.business?.owner.id,
+        name: data.business?.owner.getFullName()
       },
       rating: data?.totalStoreRatingSum / data?.totalStoreRatingCount || 0,
       createdAt: data.createdAt,

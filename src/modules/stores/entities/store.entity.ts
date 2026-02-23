@@ -1,11 +1,10 @@
 import Business from "@/modules/business/entities/business.entity"
 import { Payout } from "@/modules/payouts/entities/payout.entity"
 import { Product } from "@/modules/products/entities/product.entity"
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, OneToMany, JoinColumn } from "typeorm"
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToOne, OneToMany, JoinColumn, ManyToOne } from "typeorm"
 import { IStoreShortResponse } from "../interface/short-format-response.interface"
 import { Commision } from "@/modules/commisions/entities/commision.entity"
-
-// TODO: ENDPOINT TO RETURN AN ARRAY OF STORE CATEGORIES ENUM
+import { StoreUser } from "./store-user.entity"
 
 export enum vendonEnumType {
   "PREMIUM" = "premium",
@@ -38,8 +37,8 @@ export class Store {
   @Column({ type: "int", default: 0 })
   totalStoreRatingCount: number
 
-  @OneToOne(() => Business, (business) => business.store)
-  @JoinColumn()
+  @ManyToOne(() => Business, (business) => business.stores)
+  @JoinColumn({ name: "businessId" })
   business: Business
 
   @OneToOne(() => Payout, (payout) => payout.store)
@@ -54,6 +53,9 @@ export class Store {
 
   @Column({ type: "enum", enum: vendonEnumType, default: vendonEnumType.BASIC })
   type: vendonEnumType
+
+  @OneToMany(() => StoreUser, (su) => su.store)
+  storeUsers: StoreUser[]
 
   @CreateDateColumn()
   createdAt: Date

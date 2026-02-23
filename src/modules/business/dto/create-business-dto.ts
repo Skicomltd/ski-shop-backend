@@ -11,7 +11,7 @@ export class CreateBusinessDto {
   state: string
   kycVerificationType: string
   identificationNumber: string
-  user: User
+  owner: User
   kycStatus?: KYC_ENUM_STATUS
 }
 

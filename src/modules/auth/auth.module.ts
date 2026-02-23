@@ -11,10 +11,11 @@ import { StoreModule } from "../stores/store.module"
 import { GoogleStrategy } from "./strategies/google.strategy"
 import { BusinessModule } from "../business/business.module"
 import { BankModule } from "../banks/bank.module"
+import { StoreManagerGuard } from "./guard/store-manager.guard"
 
 @Module({
   imports: [UserModule, StoreModule, TypeOrmModule.forFeature([Otp]), BusinessModule, BankModule],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, PasswordStrategy, GoogleStrategy, JwtService]
+  providers: [AuthService, JwtStrategy, PasswordStrategy, GoogleStrategy, JwtService, StoreManagerGuard]
 })
 export class AuthModule {}

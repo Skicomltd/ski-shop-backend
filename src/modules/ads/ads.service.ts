@@ -18,7 +18,7 @@ export class AdsService implements IService<Ad>, UseQueue<string, Ad> {
     @InjectQueue(AppQueues.END_ADS) private queue: Queue
   ) {}
 
-  private readonly relations = ["promotion", "product", "product.store", "product.store.business", "product.store.business.user"]
+  private readonly relations = ["promotion", "product", "product.store", "product.store.business", "product.store.business.owner"]
 
   async create(data: CreateAdDto, manager?: EntityManager): Promise<Ad> {
     const repo = manager ? manager.getRepository(Ad) : this.adRepository

@@ -21,7 +21,7 @@ export class HelpersService {
     return capitalizedWords.join(" ")
   }
 
-  async generateToken(payload: { email: string; id: string }, secret: string, expiresIn: string) {
+  async generateToken(payload: { email: string; id: string; metadata?: Record<string, string> }, secret: string, expiresIn: string) {
     const token = await this.jwtService.signAsync(payload, { secret, expiresIn: expiresIn })
     return token
   }
