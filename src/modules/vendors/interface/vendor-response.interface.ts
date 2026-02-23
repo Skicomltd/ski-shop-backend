@@ -26,4 +26,5 @@ export interface IVendorResponse {
     logo: string
     isStarSeller: boolean
   }
+  stores: string[]
 }
