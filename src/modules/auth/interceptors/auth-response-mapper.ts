@@ -19,7 +19,8 @@ export abstract class AuthResponseMapper implements IInterceptor {
       tokens: {
         accessToken: data.tokens.accessToken,
         refreshToken: data.tokens.refreshToken
-      }
+      },
+      lastActiveStoreId: data.user.lastActiveStoreId
     }
   }
 }

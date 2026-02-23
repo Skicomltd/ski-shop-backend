@@ -19,6 +19,7 @@ export interface IAuthResponse {
     accessToken: string
     refreshToken: string
   }
+  lastActiveStoreId: string | null
 }
 
 export interface AuthUserBusiness {

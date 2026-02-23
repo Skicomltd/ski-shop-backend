@@ -26,7 +26,6 @@ import { StoreService } from "../stores/store.service"
 import { NotFoundException } from "@/exceptions/notfound.exception"
 import { FileSystemService } from "@services/filesystem/filesystem.service"
 import { FileUploadDto } from "@services/filesystem/interfaces/filesystem.interface"
-import { DtoMapper } from "./interfaces/update-product-mapper.interface"
 import { ProductsInterceptor } from "./interceptors/products.interceptor"
 import { ProductInterceptor } from "./interceptors/product.interceptor"
 import { IProductsQuery } from "./interfaces/query-filter.interface"
@@ -48,13 +47,14 @@ import { Order } from "../orders/entities/order.entity"
 import { OrderItem } from "../orders/entities/order-item.entity"
 import { OrdersService } from "../orders/orders.service"
 import { ReplaceImageDto, replaceImageSchema } from "./dto/replace-image.dto"
+import { v4 as uuidv4 } from "uuid"
+
 @Controller("products")
 export class ProductsController {
   constructor(
     private readonly productsService: ProductsService,
     private storeService: StoreService,
     private fileSystem: FileSystemService,
-    private dtoMapper: DtoMapper,
     private readonly csvService: CsvService,
     private readonly ordersService: OrdersService
   ) {}
@@ -75,8 +75,9 @@ export class ProductsController {
     // handle multiple image upload
     const handleImageUploaded = await Promise.all(
       filesUploaded.map(async (image) => {
+        const name = image.originalname + uuidv4()
         const fileDto: FileUploadDto = {
-          destination: `images/products/${image.originalname}.${image.extension}`,
+          destination: `images/products/${name}.${image.extension}`,
           mimetype: image.mimetype,
           buffer: image.buffer,
           filePath: image.path
@@ -277,8 +278,9 @@ export class ProductsController {
     const foundImage = product.images.find((image) => image === replaceImageDto.url)
     if (!foundImage) throw new NotFoundException("image not found")
 
+    const name = image.originalname + uuidv4()
     const fileDto: FileUploadDto = {
-      destination: `images/products/${image.originalname}.${image.extension}`,
+      destination: `images/products/${name}.${image.extension}`,
       mimetype: image.mimetype,
       buffer: image.buffer,
       filePath: image.path

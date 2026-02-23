@@ -118,6 +118,9 @@ export class User {
   @OneToMany(() => StoreUser, (su) => su.user)
   storeUsers: StoreUser[]
 
+  @Column({ nullable: true })
+  lastActiveStoreId?: string
+
   private _previousPassword?: string
 
   @AfterLoad()

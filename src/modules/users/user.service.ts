@@ -15,7 +15,7 @@ export class UserService implements IService<User> {
     private userRepository: Repository<User>
   ) {}
 
-  private readonly relations = ["business", "business.store"]
+  private readonly relations = ["business", "business.store", "storeUsers"]
 
   async create(data: CreateUserDto, manager?: EntityManager): Promise<User> {
     const repo = manager ? manager.getRepository<User>(User) : this.userRepository

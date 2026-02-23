@@ -14,9 +14,15 @@ export class StoreUser {
   @PrimaryGeneratedColumn("uuid")
   id: string
 
+  @Column("uuid")
+  userId: string
+
   @ManyToOne(() => User, (user) => user.storeUsers, { onDelete: "CASCADE" })
   @JoinColumn({ name: "userId" })
   user: User
+
+  @Column("uuid")
+  storeId: string
 
   @ManyToOne(() => Store, (store) => store.storeUsers, { onDelete: "CASCADE" })
   @JoinColumn({ name: "storeId" })
