@@ -142,7 +142,7 @@ export class OrdersController {
   async findOne(@Param("id", ParseUUIDPipe) id: string, @Req() req: Request) {
     const filter: FindOptionsWhere<Order> & { storeId?: string } = { id }
 
-    if (req.user.role !== UserRoleEnum.Customer) {
+    if (req.user.role !== UserRoleEnum.Customer && req.user.role !== UserRoleEnum.Admin) {
       filter.storeId = req.user.business.store.id
     }
 
